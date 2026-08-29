@@ -1,5 +1,5 @@
 ---
-tags: [homelab, project, hardware]
+tags: [homelab, note, project, hardware]
 ---
 
 # Hardware Selection
@@ -46,7 +46,7 @@ tags: [homelab, project, hardware]
 
 - **1U/2U rack servers** — too loud for apartment use (40-60+ dB fans), high idle power draw (150-300W vs 10-20W for mini PCs).
 - **Thin clients** (e.g. Dell OptiPlex 3000 Thin Client) — explicitly avoided; these ship with tiny storage (32GB) and are designed as terminals for VDI, not as standalone compute nodes.
-- **Dedicated NAS (Ugreen NASync DH2300)** — evaluated but rejected for this budget round. It's storage-only (ARM CPU, 4GB fixed RAM, no meaningful compute capability) and would have consumed budget without adding compute power. See [NAS vs Server](https://github.com/MrSandwick/homelab-guides/blob/main/Guide-NAS-vs-Server.md).
+- **Dedicated NAS (Ugreen NASync DH2300)** — evaluated but rejected for this budget round. It's storage-only (ARM CPU, 4GB fixed RAM, no meaningful compute capability) and would have consumed budget without adding compute power. See [NAS vs Server](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/Guide-NAS-vs-Server.md).
 
 ## Networking note
 

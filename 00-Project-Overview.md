@@ -1,5 +1,5 @@
 ---
-tags: [homelab, project, overview]
+tags: [homelab, note, overview, project]
 ---
 
 # Project Overview
@@ -20,10 +20,10 @@ Build a home lab server to develop and demonstrate practical DevOps / infrastruc
 
 | Decision | Choice | Rationale |
 |---|---|---|
-| Orchestration | Kubernetes (kubeadm), not k3s | Wanted the closer-to-production experience despite the extra setup complexity. See [Kubernetes vs k3s](https://github.com/MrSandwick/homelab-guides/blob/main/Guide-Kubernetes-vs-k3s.md) |
-| Container runtime | containerd (not Docker Engine directly) | Kubernetes dropped native Docker support (dockershim) since v1.24. See [Docker vs Containerd](https://github.com/MrSandwick/homelab-guides/blob/main/Guide-Docker-vs-Containerd.md) |
+| Orchestration | Kubernetes (kubeadm), not k3s | Wanted the closer-to-production experience despite the extra setup complexity. See [Kubernetes vs k3s](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/Guide-Kubernetes-vs-k3s.md) |
+| Container runtime | containerd (not Docker Engine directly) | Kubernetes dropped native Docker support (dockershim) since v1.24. See [Docker vs Containerd](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/Guide-Docker-vs-Containerd.md) |
 | OS | Ubuntu Server 26.04 LTS | Long-term support, huge community, no GUI overhead |
-| Storage strategy | No dedicated NAS for now | Budget prioritized toward stronger compute (GMKtec M8); a NAS (e.g. Ugreen NASync) was evaluated but deferred. See [NAS vs Server](https://github.com/MrSandwick/homelab-guides/blob/main/Guide-NAS-vs-Server.md) |
+| Storage strategy | No dedicated NAS for now | Budget prioritized toward stronger compute (GMKtec M8); a NAS (e.g. Ugreen NASync) was evaluated but deferred. See [NAS vs Server](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/Guide-NAS-vs-Server.md) |
 
 ## Hardware summary
 

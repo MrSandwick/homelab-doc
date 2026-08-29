@@ -1,5 +1,5 @@
 ---
-tags: [homelab, project, os, ubuntu]
+tags: [homelab, note, project, os, ubuntu]
 ---
 
 # OS Installation — Ubuntu Server 26.04 LTS
@@ -43,7 +43,7 @@ Installed on: **GMKtec M8** (primary node)
 
 ## Post-install
 
-First login was performed with a physical monitor + keyboard. All subsequent administration is done remotely — see [SSH Remote Access](https://github.com/MrSandwick/homelab-guides/blob/main/Guide-SSH-Remote-Access.md).
+First login was performed with a physical monitor + keyboard. All subsequent administration is done remotely — see [SSH Remote Access](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/Guide-SSH-Remote-Access.md).
 
 To shut the machine down safely at any point:
 ```
@@ -53,4 +53,4 @@ sudo poweroff
 ## Related
 
 - [Network Configuration](./03-Network-Configuration.md) — static IP setup, done after this install
-- [SSH Remote Access](https://github.com/MrSandwick/homelab-guides/blob/main/Guide-SSH-Remote-Access.md) — companion Guides repository — how remote access was established
+- [SSH Remote Access](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/Guide-SSH-Remote-Access.md) — companion Guides repository — how remote access was established

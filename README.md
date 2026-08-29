@@ -1,3 +1,7 @@
+---
+tags: [homelab, moc]
+---
+
 # Homelab Build Log
 
 A chronological, technical log of building a home Kubernetes lab from scratch: hardware selection, OS install, networking, container runtime, and cluster bootstrap via `kubeadm`.
@@ -26,7 +30,7 @@ Network details (IP addresses, MAC addresses, hostname) are replaced with placeh
 
 ## Companion repository
 
-Conceptual explanations of the technologies used here (Kubernetes vs k3s, Docker vs containerd, Linux fundamentals, network security, etc.) live in a separate, access-controlled repository: [homelab-guides](https://github.com/MrSandwick/homelab-guides). Individual entries above link out to the relevant guide where useful. That repo is shared with trusted collaborators rather than being fully public.
+Conceptual explanations of the technologies used here (Kubernetes vs k3s, Docker vs containerd, Linux fundamentals, network security, etc.) live in a separate, access-controlled notes vault: [homelab-guides](https://github.com/MrSandwick/OVault/tree/main/homelab-docs/homelab-guides). Individual entries above link out to the relevant guide where useful. That vault is private and shared with trusted collaborators rather than being fully public, so those links will not resolve for everyone.
 
 ## Status
 

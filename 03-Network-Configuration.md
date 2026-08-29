@@ -1,5 +1,5 @@
 ---
-tags: [homelab, project, network]
+tags: [homelab, note, project, networking]
 ---
 
 # Network Configuration
@@ -127,5 +127,5 @@ If the two devices report different subnets/gateways, the static IP must be re-i
 
 ## Related
 
-- [SSH Remote Access](https://github.com/MrSandwick/homelab-guides/blob/main/Guide-SSH-Remote-Access.md) — companion Guides repository — how the SSH connection itself works
+- [SSH Remote Access](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/Guide-SSH-Remote-Access.md) — companion Guides repository — how the SSH connection itself works
 - [Kubernetes Installation](./05-Kubernetes-Installation.md) — this static IP is the address used for `kubeadm init` and later `kubeadm join`
