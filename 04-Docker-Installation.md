@@ -1,5 +1,5 @@
 ---
-tags: [homelab, note, docker, project]
+tags: [homelab-project, homelab, note, docker, project]
 ---
 
 # Docker Installation

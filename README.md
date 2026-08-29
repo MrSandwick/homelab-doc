@@ -1,5 +1,5 @@
 ---
-tags: [homelab, moc]
+tags: [homelab-project, homelab, moc]
 ---
 
 # Homelab Build Log

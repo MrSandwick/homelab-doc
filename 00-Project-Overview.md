@@ -1,5 +1,5 @@
 ---
-tags: [homelab, note, overview, project]
+tags: [homelab-project, homelab, note, overview, project]
 ---
 
 # Project Overview

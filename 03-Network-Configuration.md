@@ -1,5 +1,5 @@
 ---
-tags: [homelab, note, project, networking]
+tags: [homelab-project, homelab, note, project, networking]
 ---
 
 # Network Configuration

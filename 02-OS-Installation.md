@@ -1,5 +1,5 @@
 ---
-tags: [homelab, note, project, os, ubuntu]
+tags: [homelab-project, homelab, note, project, os, ubuntu]
 ---
 
 # OS Installation — Ubuntu Server 26.04 LTS

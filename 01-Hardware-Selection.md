@@ -1,5 +1,5 @@
 ---
-tags: [homelab, note, project, hardware]
+tags: [homelab-project, homelab, note, project, hardware]
 ---
 
 # Hardware Selection

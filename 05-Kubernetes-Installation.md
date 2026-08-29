@@ -1,5 +1,5 @@
 ---
-tags: [homelab, note, kubernetes, project]
+tags: [homelab-project, homelab, note, kubernetes, project]
 ---
 
 # Kubernetes Installation (kubeadm)
