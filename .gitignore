@@ -1,0 +1,6 @@
+# Real environment values — never commit this
+.env
+
+# OS/editor cruft
+.DS_Store
+.obsidian/
