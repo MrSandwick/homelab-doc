@@ -1,5 +1,5 @@
 ---
-tags: [homelab-project, homelab, note, project, networking]
+tags: [homelab, project, network]
 ---
 
 # Network Configuration
@@ -122,10 +122,10 @@ If the two devices report different subnets/gateways, the static IP must be re-i
 ## Result
 
 - Server hostname: `<HOSTNAME>`
-- Static IP: `<SERVER_IP>` (confirm this still matches the subnet the server is physically connected to — see troubleshooting note above)
+- Static IP: `<SERVER_IP>` — re-issued in the correct subnet after the mismatch was diagnosed (see troubleshooting note above); confirmed reachable via `ping` and `ssh` from a same-subnet client, and confirmed persistent across reboot during the `kubeadm init` process
 - SSH access: `ssh <USERNAME>@<SERVER_IP>`
 
 ## Related
 
-- [SSH Remote Access](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/Guide-SSH-Remote-Access.md) — companion Guides repository — how the SSH connection itself works
+- [SSH Remote Access](https://github.com/MrSandwick/homelab-guides/blob/main/Guide-SSH-Remote-Access.md) — companion Guides repository — how the SSH connection itself works
 - [Kubernetes Installation](./05-Kubernetes-Installation.md) — this static IP is the address used for `kubeadm init` and later `kubeadm join`

@@ -1,7 +1,3 @@
----
-tags: [homelab-project, homelab, moc]
----
-
 # Homelab Build Log
 
 A chronological, technical log of building a home Kubernetes lab from scratch: hardware selection, OS install, networking, container runtime, and cluster bootstrap via `kubeadm`.
@@ -16,10 +12,11 @@ This repo documents *what was done and why* — decisions made, exact commands r
 4. See [Network Configuration](./03-Network-Configuration.md)
 5. See [Docker Installation](./04-Docker-Installation.md)
 6. See [Kubernetes Installation](./05-Kubernetes-Installation.md)
+7. See [Second Node Setup](./06-Second-Node-Setup.md)
 
 ## Stack
 
-- **Hardware:** GMKtec M8 (Ryzen 7 PRO 6650H, 16GB LPDDR5) as control-plane node; Dell OptiPlex 3050 Micro (i5-7500T) planned as worker node
+- **Hardware:** GMKtec M8 (Ryzen 7 PRO 6650H, 16GB LPDDR5) as control-plane node; Dell OptiPlex 7050 Micro (i7-6700T, 16GB DDR4) as worker node
 - **OS:** Ubuntu Server 26.04 LTS
 - **Container runtime:** containerd (CRI-compliant, used directly by Kubernetes)
 - **Orchestration:** Kubernetes via `kubeadm` (not a lightweight distribution — chosen deliberately for closer-to-production setup experience)
@@ -30,8 +27,8 @@ Network details (IP addresses, MAC addresses, hostname) are replaced with placeh
 
 ## Companion repository
 
-Conceptual explanations of the technologies used here (Kubernetes vs k3s, Docker vs containerd, Linux fundamentals, network security, etc.) live in a separate, access-controlled notes vault: [homelab-guides](https://github.com/MrSandwick/OVault/tree/main/homelab-docs/homelab-guides). Individual entries above link out to the relevant guide where useful. That vault is private and shared with trusted collaborators rather than being fully public, so those links will not resolve for everyone.
+Conceptual explanations of the technologies used here (Kubernetes vs k3s, Docker vs containerd, Linux fundamentals, network security, etc.) live in a separate, access-controlled repository: [homelab-guides](https://github.com/MrSandwick/homelab-guides). Individual entries above link out to the relevant guide where useful. That repo is shared with trusted collaborators rather than being fully public.
 
 ## Status
 
-🟡 In progress — control plane not yet initialized. See [Kubernetes Installation](./05-Kubernetes-Installation.md) for the exact point where work currently stands.
+🟢 Single-node control plane is up and healthy (`kubeadm`, containerd, Flannel CNI). A test workload was deployed and verified reachable over the network. The second (worker) node — a Dell OptiPlex 7050 Micro — has Ubuntu Server installed and is being prepared to join the cluster. See [Second Node Setup](./06-Second-Node-Setup.md) for the exact point where work currently stands.

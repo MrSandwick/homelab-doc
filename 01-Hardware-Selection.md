@@ -1,5 +1,5 @@
 ---
-tags: [homelab-project, homelab, note, project, hardware]
+tags: [homelab, project, hardware]
 ---
 
 # Hardware Selection
@@ -23,7 +23,8 @@ tags: [homelab-project, homelab, note, project, hardware]
 | BOSGAME E5 | Ryzen 3 5300U | 16GB | Viable, notable for dual LAN |
 | GMKtec G11 | Ryzen Embedded R2514 | 16GB | Good dual 2.5GbE, embedded-grade stability |
 | **GMKtec M8** | **Ryzen 7 PRO 6650H, 6C/12T** | **16GB LPDDR5** | **✅ Purchased** — best CPU/network combo seen, ~$440 |
-| Dell OptiPlex 3050 Micro (used) | i5-7500T | 8GB DDR4 | **Planned second node**, ~$138.50 |
+| Dell OptiPlex 3050 Micro (used) | i5-7500T, 4C/4T | 8GB DDR4 | Considered as second node — passed over in favor of the 7050 below (more threads via Hyper-Threading, similar price bracket) |
+| **Dell OptiPlex 7050 Micro (used)** | **i7-6700T, 4C/8T** | **16GB DDR4** | **✅ Purchased** — second/worker node |
 
 ## Final decision
 
@@ -36,18 +37,24 @@ tags: [homelab-project, homelab, note, project, hardware]
 - Oculink port (future eGPU expansion path)
 - USB4
 
-**Secondary node — Dell OptiPlex 3050 Micro (used, $138.50)**
-- Intel Core i5-7500T (4C/4T, 2.7GHz)
-- 8GB DDR4 (RAM upgrade to 16GB considered, not yet purchased)
-- 256GB SSD
+**Secondary node — Dell OptiPlex 7050 Micro (used)**
+- Intel Core i7-6700T (4 cores / 8 threads via Hyper-Threading, 2.8GHz base, up to 3.6GHz boost)
+- 16GB DDR4 RAM (included — no upgrade needed)
+- 512GB SSD
 - Standard Gigabit Ethernet (not 2.5GbE — will be the network bottleneck between nodes)
+- Purchased used/refurbished from seller **iBankonIT, LLC** via eBay, with a 90-day warranty
+- Shipped with Windows 10/11 Pro preinstalled — wiped and replaced with Ubuntu Server (see [Second Node Setup](./06-Second-Node-Setup.md))
+
+**Passed over — Dell OptiPlex 3050 Micro (used, ~$138.50)**
+- Intel Core i5-7500T (4C/4T, 2.7GHz), 8GB DDR4, 256GB SSD
+- Considered first, but the 7050's i7-6700T offers double the threads (via Hyper-Threading) at a comparable used price — never actually purchased
 
 ## Rejected form factors
 
 - **1U/2U rack servers** — too loud for apartment use (40-60+ dB fans), high idle power draw (150-300W vs 10-20W for mini PCs).
 - **Thin clients** (e.g. Dell OptiPlex 3000 Thin Client) — explicitly avoided; these ship with tiny storage (32GB) and are designed as terminals for VDI, not as standalone compute nodes.
-- **Dedicated NAS (Ugreen NASync DH2300)** — evaluated but rejected for this budget round. It's storage-only (ARM CPU, 4GB fixed RAM, no meaningful compute capability) and would have consumed budget without adding compute power. See [NAS vs Server](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/Guide-NAS-vs-Server.md).
+- **Dedicated NAS (Ugreen NASync DH2300)** — evaluated but rejected for this budget round. It's storage-only (ARM CPU, 4GB fixed RAM, no meaningful compute capability) and would have consumed budget without adding compute power. See [NAS vs Server](https://github.com/MrSandwick/homelab-guides/blob/main/Guide-NAS-vs-Server.md).
 
 ## Networking note
 
-The two nodes have asymmetric network capability: GMKtec M8 has dual 2.5GbE, OptiPlex has standard Gigabit. Cluster inter-node traffic will be capped by the slower link. Acceptable for a home-scale cluster with light-to-moderate workloads.
+The two nodes have asymmetric network capability: GMKtec M8 has dual 2.5GbE, OptiPlex 7050 has standard Gigabit. Cluster inter-node traffic will be capped by the slower link. Acceptable for a home-scale cluster with light-to-moderate workloads.

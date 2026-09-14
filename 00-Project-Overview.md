@@ -1,5 +1,5 @@
 ---
-tags: [homelab-project, homelab, note, overview, project]
+tags: [homelab, project, overview]
 ---
 
 # Project Overview
@@ -20,27 +20,31 @@ Build a home lab server to develop and demonstrate practical DevOps / infrastruc
 
 | Decision | Choice | Rationale |
 |---|---|---|
-| Orchestration | Kubernetes (kubeadm), not k3s | Wanted the closer-to-production experience despite the extra setup complexity. See [Kubernetes vs k3s](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/Guide-Kubernetes-vs-k3s.md) |
-| Container runtime | containerd (not Docker Engine directly) | Kubernetes dropped native Docker support (dockershim) since v1.24. See [Docker vs Containerd](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/Guide-Docker-vs-Containerd.md) |
+| Orchestration | Kubernetes (kubeadm), not k3s | Wanted the closer-to-production experience despite the extra setup complexity. See [Kubernetes vs k3s](https://github.com/MrSandwick/homelab-guides/blob/main/Guide-Kubernetes-vs-k3s.md) |
+| Container runtime | containerd (not Docker Engine directly) | Kubernetes dropped native Docker support (dockershim) since v1.24. See [Docker vs Containerd](https://github.com/MrSandwick/homelab-guides/blob/main/Guide-Docker-vs-Containerd.md) |
 | OS | Ubuntu Server 26.04 LTS | Long-term support, huge community, no GUI overhead |
-| Storage strategy | No dedicated NAS for now | Budget prioritized toward stronger compute (GMKtec M8); a NAS (e.g. Ugreen NASync) was evaluated but deferred. See [NAS vs Server](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/Guide-NAS-vs-Server.md) |
+| Storage strategy | No dedicated NAS for now | Budget prioritized toward stronger compute (GMKtec M8); a NAS (e.g. Ugreen NASync) was evaluated but deferred. See [NAS vs Server](https://github.com/MrSandwick/homelab-guides/blob/main/Guide-NAS-vs-Server.md) |
 
 ## Hardware summary
 
 See [Hardware Selection](./01-Hardware-Selection.md) for the full comparison process.
 
 - **Primary node (control plane):** GMKtec M8 — AMD Ryzen 7 PRO 6650H, 16GB LPDDR5, 512GB SSD, dual 2.5GbE
-- **Secondary node (planned):** Dell OptiPlex 3050 Micro — Intel i5-7500T, 8GB DDR4 (RAM upgrade optional/deferred)
+- **Secondary node (worker):** Dell OptiPlex 7050 Micro — Intel i7-6700T (4C/8T), 16GB DDR4, 512GB SSD
 
 ## Status at time of writing
 
-- ✅ Hardware purchased (GMKtec M8; OptiPlex under consideration)
+- ✅ Hardware purchased — GMKtec M8 (control plane) and Dell OptiPlex 7050 Micro (worker)
 - ✅ Ubuntu Server 26.04 LTS installed on GMKtec M8
-- ✅ Static IP configured via netplan
+- ✅ Static IP configured via netplan (subnet mismatch diagnosed and corrected)
 - ✅ SSH remote access working
 - ✅ Docker installed (for local image builds/testing)
-- 🟡 containerd + kubeadm + kubelet + kubectl installed, cluster **not yet initialized**
-- ⬜ Second node not yet joined
-- ⬜ No workloads deployed yet
+- ✅ containerd + kubeadm + kubelet + kubectl installed
+- ✅ Control plane initialized (`kubeadm init`), node `Ready`, Flannel CNI healthy
+- ✅ First test workload (nginx) deployed, verified reachable over the network, and cleaned up
+- 🟡 Ubuntu Server 26.04 LTS installed on OptiPlex 7050 worker node (`optiplex-worker`) — see [Second Node Setup](./06-Second-Node-Setup.md)
+- ⬜ Known LVM root-partition under-allocation issue on both nodes — fix identified, not yet applied to either
+- ⬜ Second node (OptiPlex) not yet joined — control-plane taint temporarily removed for testing, then restored
+- ⬜ No real workloads deployed yet
 
-Continue at [Kubernetes Installation](./05-Kubernetes-Installation.md) for exact next steps.
+Continue at [Second Node Setup](./06-Second-Node-Setup.md) for exact next steps.
