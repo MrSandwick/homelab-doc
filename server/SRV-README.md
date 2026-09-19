@@ -15,6 +15,7 @@ This section documents *what was done and why* — decisions made, exact command
 7. See [Second Node Setup](./SRV-06-Second-Node-Setup.md)
 8. See [Cluster Verification](./SRV-07-Cluster-Verification.md)
 9. See [Helm, Observability, and Ingress](./SRV-08-Helm-Observability-Ingress.md)
+10. See [Ansible Node Provisioning](./SRV-09-Ansible-Node-Provisioning.md)
 
 ## Stack
 
@@ -25,6 +26,7 @@ This section documents *what was done and why* — decisions made, exact command
 - **Package management:** Helm
 - **Observability:** `kube-prometheus-stack` (Prometheus, Grafana, Alertmanager, node-exporter, kube-state-metrics)
 - **Ingress / bare-metal LoadBalancer:** ingress-nginx + MetalLB
+- **Configuration management:** Ansible (control node on the primary node; provisions base packages, kernel modules/sysctl, and Kubernetes package installation — deliberately scoped to exclude DNS and containerd-config management to avoid conflicting with the live, manually-verified configuration in those areas)
 
 ## A note on placeholders
 

@@ -47,6 +47,7 @@ See [Hardware Selection](./SRV-01-Hardware-Selection.md) for the full comparison
 - ✅ LVM root-partition under-allocation fixed on both nodes (worker resolved first, control-plane resolved in a later verification pass) — both now use the full disk
 - ✅ Helm installed; `kube-prometheus-stack` deployed and collecting metrics from both nodes — see [Helm, Observability, and Ingress](./SRV-08-Helm-Observability-Ingress.md)
 - ✅ ingress-nginx + MetalLB give the cluster a real LAN-reachable entry point (`<INGRESS_IP>`); Grafana reachable through it, replacing the earlier `port-forward`-only access
+- ✅ Ansible introduced for node provisioning — idempotency verified via a learning example, then a trimmed, production-safe `site.yml` applied to both real cluster nodes with a clean dry-run and real run — see [Ansible Node Provisioning](./SRV-09-Ansible-Node-Provisioning.md)
 - ⬜ No real application workloads deployed yet (site, Nextcloud, Minecraft, etc.)
 
-Continue at [Helm, Observability, and Ingress](./SRV-08-Helm-Observability-Ingress.md) for the current state of the platform, or continue with real workload deployment.
+Continue at [Ansible Node Provisioning](./SRV-09-Ansible-Node-Provisioning.md) for the current state of the platform, or continue with real workload deployment.
