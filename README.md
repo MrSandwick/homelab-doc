@@ -48,6 +48,7 @@ The FreeRADIUS server that authenticates Wi-Fi clients in `network/` runs on the
 | [SRV-04 Docker Installation](server/SRV-04-Docker-Installation.md) | Docker for local image builds |
 | [SRV-05 Kubernetes Installation](server/SRV-05-Kubernetes-Installation.md) | containerd, `kubeadm init`, Flannel, first workload |
 | [SRV-06 Second Node Setup](server/SRV-06-Second-Node-Setup.md) | OptiPlex worker node preparation |
+| [SRV-07 Cluster Verification](server/SRV-07-Cluster-Verification.md) | Live-state check against the docs; LVM fixed on the control plane; DNS fix corrected |
 
 ### Network — VLANs and RADIUS
 
@@ -72,7 +73,7 @@ The FreeRADIUS server that authenticates Wi-Fi clients in `network/` runs on the
 
 | Layer | Working | In progress / planned |
 |---|---|---|
-| Server | Two-node cluster, both `Ready` (control plane + worker), Flannel CNI healthy, workload scheduling verified on the worker | LVM root-partition resize on both nodes; real workloads |
+| Server | Two-node cluster, both `Ready` (control plane + worker), Flannel CNI healthy, workload scheduling verified on the worker | Real workloads |
 | Network | Double-NAT uplink, VLANs 10/20, Users/Admin isolation, management ACLs, ntopng traffic monitoring — all verified | WPA2-Enterprise SSID to be recreated after an AP factory reset; login-free MAC-based auth; IDS/IPS |
 
 Each layer's overview ([SRV-00](server/SRV-00-Project-Overview.md), [NET-00](network/NET-00-Project-Overview.md)) has the full status list.

@@ -44,7 +44,7 @@ See [Hardware Selection](./SRV-01-Hardware-Selection.md) for the full comparison
 - ✅ First test workload (nginx) deployed, verified reachable over the network, and cleaned up
 - ✅ Second node (`<WORKER_HOSTNAME>`, Dell OptiPlex 7050 Micro) joined the cluster via `kubeadm join` — see [Second Node Setup](./SRV-06-Second-Node-Setup.md) for the full process, including a real mistake made and recovered from along the way
 - ✅ Cluster is now two nodes, both `Ready`: `<HOSTNAME>` (control-plane) and `<WORKER_HOSTNAME>` (worker)
-- ⬜ Known LVM root-partition under-allocation issue on both nodes — fix identified, not yet applied to either
+- ✅ LVM root-partition under-allocation fixed on both nodes (worker resolved first, control-plane resolved in a later verification pass) — both now use the full disk
 - ⬜ No real workloads deployed yet
 
 Continue at [Second Node Setup](./SRV-06-Second-Node-Setup.md) for how the second node joined, or continue with real workload deployment.

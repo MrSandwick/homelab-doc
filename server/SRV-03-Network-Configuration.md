@@ -144,7 +144,26 @@ ping google.com                     # (from a different device) resolves and rep
 
 **Root cause:** the ISP for this connection is a cellular 5G Home Internet product (see [Internet Uplink](../network/NET-02-Internet-Uplink.md)), and this specific ISP blocks direct connections to well-known public DNS resolvers by IP — a policy some cellular/5G home internet providers use to force traffic through their own DNS. Standard DNS (port 53) and even a plain TLS connection (port 443) to `8.8.8.8`/`1.1.1.1` were both rejected; only the well-known DNS IPs seemed to be targeted, not general internet traffic to those same providers' other services.
 
-**Fix — DNS-over-TLS via `systemd-resolved`:**
+**Fix applied (running on both nodes) — point DNS at the router:**
+
+Instead of asking the ISP-blocked public resolvers directly, each node's netplan `nameservers` block points at the router's own address, which forwards queries upstream on the node's behalf:
+
+```yaml
+      nameservers:
+        addresses:
+          - <GATEWAY_IP>
+```
+
+```
+sudo netplan try
+sudo netplan apply
+```
+
+This is the same `nameservers` block shown under "Correct config" above, with `<GATEWAY_IP>` substituted for the `8.8.8.8` / `1.1.1.1` entries that were being blocked. It needs no extra services or packages, and it is what both the control-plane and worker nodes are running today (confirmed in [Cluster Verification](./SRV-07-Cluster-Verification.md)).
+
+**Alternative investigated but not applied — DNS-over-TLS via `systemd-resolved`:**
+
+DNS-over-TLS (DoT) was worked out as a way to keep using public resolvers despite the block. It was **never configured** on either node: `resolvectl status` reports `-DNSOverTLS` and `/etc/systemd/resolved.conf` is still the default. Once pointing DNS at the router proved sufficient, DoT was not needed. The configuration is kept here as a reference in case the router-DNS approach ever stops being enough (for example, if a specific public resolver is required):
 
 ```
 sudo nano /etc/systemd/resolved.conf
@@ -158,17 +177,18 @@ DNSOverTLS=opportunistic
 
 ```
 sudo systemctl restart systemd-resolved
-resolvectl status   # confirm "+DNSOverTLS" now appears for the active link
+resolvectl status   # would show "+DNSOverTLS" for the active link once applied
 ```
 
-Wrapping the same DNS query inside a TLS connection on port 853 (instead of plaintext on port 53) got past the block — the ISP appears to filter the plaintext DNS protocol to these specific resolvers rather than blocking the IPs or the encrypted-DNS port outright.
+The idea: wrapping the DNS query inside a TLS connection on port 853 (instead of plaintext on port 53) should get past the block, since the ISP appears to filter the plaintext DNS protocol to these specific resolvers rather than blocking the IPs or the encrypted-DNS port outright.
 
-`DNSOverTLS=opportunistic` (rather than the stricter `yes`) was used deliberately: `yes` fails DNS entirely if TLS to every configured server becomes unavailable, with no fallback; `opportunistic` degrades gracefully instead. See [Guide-DNS-over-TLS-and-ISP-DNS-Blocking](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-DNS-over-TLS-and-ISP-DNS-Blocking.md) for the full explanation of DoT and this failure mode.
+If adopted, `DNSOverTLS=opportunistic` (rather than the stricter `yes`) would be the right mode: `yes` fails DNS entirely if TLS to every configured server becomes unavailable, with no fallback; `opportunistic` degrades gracefully instead. See [Guide-DNS-over-TLS-and-ISP-DNS-Blocking](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-DNS-over-TLS-and-ISP-DNS-Blocking.md) for the full explanation of DoT and this failure mode.
 
-**Known caveat:** `systemd-resolved` configured this way is not guaranteed to be reachable from inside Docker/Kubernetes network namespaces — containers and pods may need their own explicit DNS configuration if this same blocking is ever observed *inside* a pod rather than on the host.
+**Known caveat (either fix):** neither the router-DNS setting nor a host-level `systemd-resolved` configuration is guaranteed to carry into Docker/Kubernetes network namespaces — containers and pods get their DNS configuration from their container runtime / CNI, so they may need their own explicit DNS settings if this same blocking is ever observed *inside* a pod rather than on the host.
 
 ## Related
 
 - [SSH Remote Access](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-SSH-Remote-Access.md) — companion Guides repository — how the SSH connection itself works
 - [Kubernetes Installation](./SRV-05-Kubernetes-Installation.md) — this static IP is the address used for `kubeadm init` and later `kubeadm join`
-- [Guide-DNS-over-TLS-and-ISP-DNS-Blocking](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-DNS-over-TLS-and-ISP-DNS-Blocking.md) — companion Guides repository
+- [Guide-DNS-over-TLS-and-ISP-DNS-Blocking](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-DNS-over-TLS-and-ISP-DNS-Blocking.md) — companion Guides repository — covers the ISP DNS blocking pattern, the applied router-DNS fix, and DNS-over-TLS as the investigated alternative
+- [Cluster Verification](./SRV-07-Cluster-Verification.md) — live check that confirmed which DNS fix is actually running

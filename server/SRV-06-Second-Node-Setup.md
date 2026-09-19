@@ -51,11 +51,18 @@ Disk (/): 6.92 GiB / 97.87 GiB (7%)
 ```
 despite the physical drive being 512GB — the guided installer only assigned ~100GB to the root logical volume and left the rest of the disk as unallocated free space in the volume group. This is the installer's default behavior, not something specific to this hardware — see [LVM Partition Sizing](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-LVM-Partition-Sizing.md) for the full explanation and the standard `lvextend` + `resize2fs` fix.
 
-**Status: ⬜ planned, not yet executed on this node.**
+**Status: ✅ fixed.** Applied with the standard procedure:
+
+```
+sudo lvextend -l +100%FREE /dev/ubuntu-vg/ubuntu-lv
+sudo resize2fs /dev/ubuntu-vg/ubuntu-lv
+```
+
+Afterward `df -h /` showed 466G available on the root filesystem and `vgs` showed `VFree 0` — the volume group has no unallocated space left. The primary node had the same problem and was fixed later; see [Cluster Verification](./SRV-07-Cluster-Verification.md).
 
 ## Network configuration
 
-Connected via Ethernet to the switch (Port 5, VLAN 20 — see [VLAN Design and Switch Configuration](../network/NET-03-VLAN-Design-and-Switch-Configuration.md)). Unlike the primary node's static-IP setup ([Network Configuration](./SRV-03-Network-Configuration.md)), this node was left on DHCP — both an interim choice made while diagnosing the issues below, and, since a worker node doesn't need a fixed address for `kubeadm join` to succeed (only the control-plane's address matters for that), never revisited afterward. **Open item:** consider a DHCP reservation for `<WORKER_IP>` for long-term stability, consistent with the fixed-address treatment given to other Admin-VLAN infrastructure.
+Connected via Ethernet to the switch (Port 5, VLAN 20 — see [VLAN Design and Switch Configuration](../network/NET-03-VLAN-Design-and-Switch-Configuration.md)). Unlike the primary node's static-IP setup ([Network Configuration](./SRV-03-Network-Configuration.md)), this node was first brought up on DHCP while diagnosing the issues below, but it is **now running a static IP** (`dhcp4: no`, fixed `<WORKER_IP>` address), matching the primary node's approach — confirmed during [Cluster Verification](./SRV-07-Cluster-Verification.md). The DHCP troubleshooting below is kept as a historical record; see the follow-up note at the end of that section.
 
 ### Real troubleshooting: no IPv4 address despite a healthy link
 
@@ -103,6 +110,29 @@ Connected via Ethernet to the switch (Port 5, VLAN 20 — see [VLAN Design and S
    ```
 
    The node obtained `<WORKER_IP>` immediately afterward.
+
+**Follow-up — later superseded by a static config.** The `dhcp4: true` fix above was valid for the immediate problem (getting any IPv4 address at all), but the node was afterward moved to a static address, the same shape as the primary node's config in [Network Configuration](./SRV-03-Network-Configuration.md):
+
+```yaml
+network:
+  ethernets:
+    enp0s31f6:
+      match:
+        macaddress: <WORKER_MAC>
+      set-name: enp0s31f6
+      dhcp4: no
+      addresses:
+        - <WORKER_IP>/24
+      routes:
+        - to: default
+          via: <GATEWAY_IP>
+      nameservers:
+        addresses:
+          - <GATEWAY_IP>
+  version: 2
+```
+
+The `nameservers` entry pointing at the router is also the DNS fix for the ISP's public-resolver blocking (see [Network Configuration](./SRV-03-Network-Configuration.md#real-troubleshooting-isp-blocking-public-dns-resolvers)).
 
 ## Docker installation
 
@@ -239,6 +269,7 @@ This is expected now without needing to temporarily lift the control-plane's `No
 - [Network Configuration](./SRV-03-Network-Configuration.md) — the primary node's netplan setup, whose missing-`dhcp4` bug recurred here
 - [Kubernetes Installation](./SRV-05-Kubernetes-Installation.md) — control-plane side this node joined
 - [VLAN Design and Switch Configuration](../network/NET-03-VLAN-Design-and-Switch-Configuration.md) — the PVID bug that also affected this node's switch port
-- [LVM Partition Sizing](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-LVM-Partition-Sizing.md) — companion Guides repository — the root-partition issue, still unresolved on this node
+- [LVM Partition Sizing](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-LVM-Partition-Sizing.md) — companion Guides repository — the root-partition issue, fixed on this node
+- [Cluster Verification](./SRV-07-Cluster-Verification.md) — live check of both nodes against these docs
 - [Guide: kubeadm init vs. kubeadm join](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-Kubeadm-Init-vs-Join.md) — companion Guides repository, written directly from the mistake documented above
 - [Kubernetes Taints and Tolerations](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-Kubernetes-Taints-and-Tolerations.md) — companion Guides repository

@@ -13,6 +13,8 @@ This section documents *what was done and why* — decisions made, exact command
 5. See [Docker Installation](./SRV-04-Docker-Installation.md)
 6. See [Kubernetes Installation](./SRV-05-Kubernetes-Installation.md)
 7. See [Second Node Setup](./SRV-06-Second-Node-Setup.md)
+8. See [Cluster Verification](./SRV-07-Cluster-Verification.md)
+8. See [Cluster Verification](./SRV-07-Cluster-Verification.md)
 
 ## Stack
 

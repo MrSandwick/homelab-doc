@@ -38,7 +38,7 @@ Installed on: **GMKtec M8** (primary node)
 
 > ⚠️ **Known issue — LVM under-allocates the root partition.** The guided-LVM installer only assigns ~100GB of the volume group to the root logical volume by default and leaves the rest as unallocated free space — it does not auto-expand to fill the disk. The same behavior showed up again on the second node; see [LVM Partition Sizing](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-LVM-Partition-Sizing.md) for why this happens and the standard `lvextend` + `resize2fs` fix.
 >
-> **Status on this node: ⬜ not yet applied** — the root LV is still ~100GB out of ~473GB available at time of writing.
+> **Status on this node: ✅ fixed** — the root LV was extended to use the full volume group with `lvextend` + `resize2fs` in a later verification pass; see [Cluster Verification](./SRV-07-Cluster-Verification.md). (At install time it was ~100GB out of ~473GB available.)
 
 ## Why LVM without LUKS
 
