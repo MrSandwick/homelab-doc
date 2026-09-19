@@ -6,7 +6,7 @@ tags: [homelab, project, docker]
 
 ## Purpose
 
-Docker is installed for **local image building and testing** (`docker build`, `docker run`, `docker-compose`). It is *not* the runtime used by Kubernetes itself — see [Docker vs Containerd](https://github.com/MrSandwick/homelab-guides/blob/main/Guide-Docker-vs-Containerd.md) for why these are separate concerns.
+Docker is installed for **local image building and testing** (`docker build`, `docker run`, `docker-compose`). It is *not* the runtime used by Kubernetes itself — see [Docker vs Containerd](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-Docker-vs-Containerd.md) for why these are separate concerns.
 
 ## Packages installed
 
@@ -60,5 +60,5 @@ A successful "Hello from Docker!" message confirms the daemon is working correct
 
 ## Related
 
-- [Docker vs Containerd](https://github.com/MrSandwick/homelab-guides/blob/main/Guide-Docker-vs-Containerd.md) — companion Guides repository
+- [Docker vs Containerd](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-Docker-vs-Containerd.md) — companion Guides repository
 - [Kubernetes Installation](./SRV-05-Kubernetes-Installation.md) — where a *separate* containerd instance is configured specifically for Kubernetes

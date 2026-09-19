@@ -49,7 +49,7 @@ The same LVM behavior documented on the primary node (see [OS Installation](./SR
 ```
 Disk (/): 6.92 GiB / 97.87 GiB (7%)
 ```
-despite the physical drive being 512GB — the guided installer only assigned ~100GB to the root logical volume and left the rest of the disk as unallocated free space in the volume group. This is the installer's default behavior, not something specific to this hardware — see [LVM Partition Sizing](https://github.com/MrSandwick/homelab-guides/blob/main/Guide-LVM-Partition-Sizing.md) for the full explanation and the standard `lvextend` + `resize2fs` fix.
+despite the physical drive being 512GB — the guided installer only assigned ~100GB to the root logical volume and left the rest of the disk as unallocated free space in the volume group. This is the installer's default behavior, not something specific to this hardware — see [LVM Partition Sizing](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-LVM-Partition-Sizing.md) for the full explanation and the standard `lvextend` + `resize2fs` fix.
 
 **Status: ⬜ planned, not yet executed on this node.**
 
@@ -171,7 +171,7 @@ sudo kubeadm init --pod-network-cidr=10.244.0.0/16
 
 This is the command for bootstrapping a **new, first** control-plane node — not for joining an existing cluster. It completed "successfully," which was itself misleading: the output was shaped identically to the original control-plane bootstrap in [Kubernetes Installation](./SRV-05-Kubernetes-Installation.md), including its own fresh `kubeadm join ...` line at the end, generated from this node's own new (and unwanted) control plane.
 
-**Root cause:** `kubeadm init` and `kubeadm join` are different operations invoked through the same `sudo kubeadm <verb>` shape, and `kubeadm` has no way to know a given machine was only ever intended to be a worker — "create a new cluster here" is a perfectly valid, well-formed request from its point of view. See [Guide: kubeadm init vs. kubeadm join](https://github.com/MrSandwick/homelab-guides/blob/main/Guide-Kubeadm-Init-vs-Join.md) for the general pattern.
+**Root cause:** `kubeadm init` and `kubeadm join` are different operations invoked through the same `sudo kubeadm <verb>` shape, and `kubeadm` has no way to know a given machine was only ever intended to be a worker — "create a new cluster here" is a perfectly valid, well-formed request from its point of view. See [Guide: kubeadm init vs. kubeadm join](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-Kubeadm-Init-vs-Join.md) for the general pattern.
 
 **Consequence:** this node briefly became the control-plane of its **own, separate, independent** Kubernetes cluster — its own CA, its own etcd, its own API server on `<WORKER_IP>:6443` — entirely disconnected from the real cluster on `<SERVER_IP>`.
 
@@ -239,6 +239,6 @@ This is expected now without needing to temporarily lift the control-plane's `No
 - [Network Configuration](./SRV-03-Network-Configuration.md) — the primary node's netplan setup, whose missing-`dhcp4` bug recurred here
 - [Kubernetes Installation](./SRV-05-Kubernetes-Installation.md) — control-plane side this node joined
 - [VLAN Design and Switch Configuration](../network/NET-03-VLAN-Design-and-Switch-Configuration.md) — the PVID bug that also affected this node's switch port
-- [LVM Partition Sizing](https://github.com/MrSandwick/homelab-guides/blob/main/Guide-LVM-Partition-Sizing.md) — companion Guides repository — the root-partition issue, still unresolved on this node
-- [Guide: kubeadm init vs. kubeadm join](https://github.com/MrSandwick/homelab-guides/blob/main/Guide-Kubeadm-Init-vs-Join.md) — companion Guides repository, written directly from the mistake documented above
-- [Kubernetes Taints and Tolerations](https://github.com/MrSandwick/homelab-guides/blob/main/Guide-Kubernetes-Taints-and-Tolerations.md) — companion Guides repository
+- [LVM Partition Sizing](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-LVM-Partition-Sizing.md) — companion Guides repository — the root-partition issue, still unresolved on this node
+- [Guide: kubeadm init vs. kubeadm join](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-Kubeadm-Init-vs-Join.md) — companion Guides repository, written directly from the mistake documented above
+- [Kubernetes Taints and Tolerations](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-Kubernetes-Taints-and-Tolerations.md) — companion Guides repository

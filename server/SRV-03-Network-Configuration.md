@@ -163,12 +163,12 @@ resolvectl status   # confirm "+DNSOverTLS" now appears for the active link
 
 Wrapping the same DNS query inside a TLS connection on port 853 (instead of plaintext on port 53) got past the block — the ISP appears to filter the plaintext DNS protocol to these specific resolvers rather than blocking the IPs or the encrypted-DNS port outright.
 
-`DNSOverTLS=opportunistic` (rather than the stricter `yes`) was used deliberately: `yes` fails DNS entirely if TLS to every configured server becomes unavailable, with no fallback; `opportunistic` degrades gracefully instead. See [Guide-DNS-over-TLS-and-ISP-DNS-Blocking](https://github.com/MrSandwick/homelab-guides/blob/main/Guide-DNS-over-TLS-and-ISP-DNS-Blocking.md) for the full explanation of DoT and this failure mode.
+`DNSOverTLS=opportunistic` (rather than the stricter `yes`) was used deliberately: `yes` fails DNS entirely if TLS to every configured server becomes unavailable, with no fallback; `opportunistic` degrades gracefully instead. See [Guide-DNS-over-TLS-and-ISP-DNS-Blocking](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-DNS-over-TLS-and-ISP-DNS-Blocking.md) for the full explanation of DoT and this failure mode.
 
 **Known caveat:** `systemd-resolved` configured this way is not guaranteed to be reachable from inside Docker/Kubernetes network namespaces — containers and pods may need their own explicit DNS configuration if this same blocking is ever observed *inside* a pod rather than on the host.
 
 ## Related
 
-- [SSH Remote Access](https://github.com/MrSandwick/homelab-guides/blob/main/Guide-SSH-Remote-Access.md) — companion Guides repository — how the SSH connection itself works
+- [SSH Remote Access](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-SSH-Remote-Access.md) — companion Guides repository — how the SSH connection itself works
 - [Kubernetes Installation](./SRV-05-Kubernetes-Installation.md) — this static IP is the address used for `kubeadm init` and later `kubeadm join`
-- [Guide-DNS-over-TLS-and-ISP-DNS-Blocking](https://github.com/MrSandwick/homelab-guides/blob/main/Guide-DNS-over-TLS-and-ISP-DNS-Blocking.md) — companion Guides repository
+- [Guide-DNS-over-TLS-and-ISP-DNS-Blocking](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-DNS-over-TLS-and-ISP-DNS-Blocking.md) — companion Guides repository

@@ -4,7 +4,7 @@ tags: [homelab-project, homelab, note, project, networking, radius]
 
 # FreeRADIUS Installation
 
-> New to RADIUS/AAA, or the "client" and "shared secret" terminology below? See [Guide-RADIUS-and-AAA](<LINK_TO_NETWORK_GUIDES_REPO>/Guide-RADIUS-and-AAA.md).
+> New to RADIUS/AAA, or the "client" and "shared secret" terminology below? See [Guide-RADIUS-and-AAA](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/network/Guide-RADIUS-and-AAA.md).
 
 Installed on the same server documented in the [server section](../server/SRV-README.md) (Ubuntu Server, systemd). This doc covers only the RADIUS-specific setup — OS and Docker installation live in the [server section](../server/SRV-README.md).
 
@@ -56,7 +56,7 @@ sudo nano /etc/freeradius/3.0/users
 <ADMIN_PHONE_MAC>  Cleartext-Password := "<ADMIN_PHONE_MAC>"
 ```
 
-> Using the MAC address itself as the password is weak by design — MAC addresses are visible in plaintext 802.11 management frames and are trivially spoofable with off-the-shelf tools. It was a deliberate choice for this project's threat model (a home network, where the goal is *filtering by known device* rather than defending against a determined local attacker), not a general security recommendation. See [Guide-MAC-Address-Filtering-and-Spoofing](<LINK_TO_NETWORK_GUIDES_REPO>/Guide-MAC-Address-Filtering-and-Spoofing.md) and "Known limitations" below.
+> Using the MAC address itself as the password is weak by design — MAC addresses are visible in plaintext 802.11 management frames and are trivially spoofable with off-the-shelf tools. It was a deliberate choice for this project's threat model (a home network, where the goal is *filtering by known device* rather than defending against a determined local attacker), not a general security recommendation. See [Guide-MAC-Address-Filtering-and-Spoofing](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/network/Guide-MAC-Address-Filtering-and-Spoofing.md) and "Known limitations" below.
 
 ## Verifying the daemon locally
 
@@ -69,7 +69,7 @@ A successful response includes `Access-Accept`. The `localhost` secret comes fro
 
 ## Real troubleshooting: `default_eap_type = md5`
 
-> Background on what EAP even is, and how PEAP/MSCHAPv2 relate to each other: [Guide-EAP-Methods](<LINK_TO_NETWORK_GUIDES_REPO>/Guide-EAP-Methods.md).
+> Background on what EAP even is, and how PEAP/MSCHAPv2 relate to each other: [Guide-EAP-Methods](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/network/Guide-EAP-Methods.md).
 
 **Symptom:** Windows refused to even prompt for credentials on the WPA2-Enterprise SSID — it failed instantly with *"Can't connect to this network,"* and nothing arrived at the RADIUS server at all (confirmed with `sudo freeradius -X` showing no `RADIUS:`-prefixed lines during a connection attempt, only the generic `AAA/BIND` / `AAA/AUTHEN/LOGIN` lines from method-list selection).
 
@@ -122,4 +122,4 @@ sudo systemctl start freeradius   # return to normal background operation when d
 ## Related
 
 - [Wireless / RADIUS Integration](./NET-06-Wireless-RADIUS-Integration.md)
-- Guides: [RADIUS and AAA](<LINK_TO_NETWORK_GUIDES_REPO>/Guide-RADIUS-and-AAA.md) · [EAP Methods](<LINK_TO_NETWORK_GUIDES_REPO>/Guide-EAP-Methods.md) · [MAC Address Filtering and Spoofing](<LINK_TO_NETWORK_GUIDES_REPO>/Guide-MAC-Address-Filtering-and-Spoofing.md)
+- Guides: [RADIUS and AAA](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/network/Guide-RADIUS-and-AAA.md) · [EAP Methods](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/network/Guide-EAP-Methods.md) · [MAC Address Filtering and Spoofing](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/network/Guide-MAC-Address-Filtering-and-Spoofing.md)

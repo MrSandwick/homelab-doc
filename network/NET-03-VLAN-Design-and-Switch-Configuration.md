@@ -4,7 +4,7 @@ tags: [homelab-project, homelab, note, project, networking, vlan]
 
 # VLAN Design and Switch Configuration
 
-> New to VLANs, trunk vs. access ports, or tagged vs. untagged traffic? See [Guide-VLANs-Trunk-Access-PVID](<LINK_TO_NETWORK_GUIDES_REPO>/Guide-VLANs-Trunk-Access-PVID.md) for the plain-language version before diving into the config below.
+> New to VLANs, trunk vs. access ports, or tagged vs. untagged traffic? See [Guide-VLANs-Trunk-Access-PVID](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/network/Guide-VLANs-Trunk-Access-PVID.md) for the plain-language version before diving into the config below.
 
 ## VLAN plan
 
@@ -81,4 +81,4 @@ The exact same class of bug documented above recurred when connecting the Kubern
 
 - [Hardware Selection](./NET-01-Hardware-Selection.md) — the switch web-UI limitation referenced above
 - [Router Configuration](./NET-04-Router-Configuration.md)
-- Guide: [VLANs, Trunk vs. Access, PVID](<LINK_TO_NETWORK_GUIDES_REPO>/Guide-VLANs-Trunk-Access-PVID.md)
+- Guide: [VLANs, Trunk vs. Access, PVID](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/network/Guide-VLANs-Trunk-Access-PVID.md)

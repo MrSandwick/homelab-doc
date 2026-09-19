@@ -27,7 +27,7 @@ Network details (IP addresses, MAC addresses, hostname) are replaced with placeh
 
 ## Companion repository
 
-Conceptual explanations of the technologies used here (Kubernetes vs k3s, Docker vs containerd, Linux fundamentals, network security, etc.) live in a separate, access-controlled repository: [homelab-guides](https://github.com/MrSandwick/homelab-guides). Individual entries above link out to the relevant guide where useful. That repo is shared with trusted collaborators rather than being fully public.
+Conceptual explanations of the technologies used here (Kubernetes vs k3s, Docker vs containerd, Linux fundamentals, network security, etc.) live in a separate, access-controlled repository: [OVault → homelab-docs/homelab-guides](https://github.com/MrSandwick/OVault/tree/main/homelab-docs/homelab-guides), under `server/`. Individual entries above link out to the relevant guide where useful. That repo is shared with trusted collaborators rather than being fully public.
 
 ## Status
 

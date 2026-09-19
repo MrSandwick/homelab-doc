@@ -27,7 +27,7 @@ These only see traffic that actually traverses the server's own NIC — not gene
 
 ## Network-wide visibility: switch port mirroring
 
-> What port mirroring and promiscuous mode actually mean, and why a network card needs to be told to stop filtering: [Guide-Port-Mirroring-and-Promiscuous-Mode](<LINK_TO_NETWORK_GUIDES_REPO>/Guide-Port-Mirroring-and-Promiscuous-Mode.md).
+> What port mirroring and promiscuous mode actually mean, and why a network card needs to be told to stop filtering: [Guide-Port-Mirroring-and-Promiscuous-Mode](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/network/Guide-Port-Mirroring-and-Promiscuous-Mode.md).
 
 The server has a second, otherwise-unused NIC (`enp2s0`) free for exactly this purpose. Configured via the switch's Easy Smart Utility (see the web-UI limitation noted in [Hardware Selection](./NET-01-Hardware-Selection.md)):
 
@@ -151,4 +151,4 @@ Checking the ID against the real MITRE ATT&CK framework showed it corresponds to
 
 - [Project Overview](./NET-00-Project-Overview.md)
 - Server docs: [Docker Installation](../server/SRV-04-Docker-Installation.md) — Docker installation details
-- Guide: [Port Mirroring and Promiscuous Mode](<LINK_TO_NETWORK_GUIDES_REPO>/Guide-Port-Mirroring-and-Promiscuous-Mode.md)
+- Guide: [Port Mirroring and Promiscuous Mode](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/network/Guide-Port-Mirroring-and-Promiscuous-Mode.md)

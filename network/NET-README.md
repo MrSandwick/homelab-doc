@@ -35,7 +35,7 @@ IP addresses, MAC addresses, hostnames, secrets, and Wi-Fi passwords are replace
 
 ## New to networking terms used here?
 
-A companion notes vault explains the concepts in plain language, for a reader who doesn't already work in networking — VLANs, RADIUS, Wi-Fi security modes, ACLs, and every real bug hit along the way: **[Homelab Network Guides](<LINK_TO_NETWORK_GUIDES_REPO>/00-Home-Homelab-Network-Guides.md)**. Each doc below also links out to the specific guide relevant to it.
+A companion notes vault explains the concepts in plain language, for a reader who doesn't already work in networking — VLANs, RADIUS, Wi-Fi security modes, ACLs, and every real bug hit along the way: **[Homelab Network Guides](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/00-Home-Homelab-Guides.md)**. Each doc below also links out to the specific guide relevant to it.
 
 ## Companion section
 

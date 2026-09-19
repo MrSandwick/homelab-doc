@@ -36,7 +36,7 @@ Installed on: **GMKtec M8** (primary node)
 | SSH | **OpenSSH server installed**, password authentication over SSH allowed |
 | Featured Server Snaps | None selected — all services installed manually afterward for full control |
 
-> ⚠️ **Known issue — LVM under-allocates the root partition.** The guided-LVM installer only assigns ~100GB of the volume group to the root logical volume by default and leaves the rest as unallocated free space — it does not auto-expand to fill the disk. The same behavior showed up again on the second node; see [LVM Partition Sizing](https://github.com/MrSandwick/homelab-guides/blob/main/Guide-LVM-Partition-Sizing.md) for why this happens and the standard `lvextend` + `resize2fs` fix.
+> ⚠️ **Known issue — LVM under-allocates the root partition.** The guided-LVM installer only assigns ~100GB of the volume group to the root logical volume by default and leaves the rest as unallocated free space — it does not auto-expand to fill the disk. The same behavior showed up again on the second node; see [LVM Partition Sizing](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-LVM-Partition-Sizing.md) for why this happens and the standard `lvextend` + `resize2fs` fix.
 >
 > **Status on this node: ⬜ not yet applied** — the root LV is still ~100GB out of ~473GB available at time of writing.
 
@@ -47,7 +47,7 @@ Installed on: **GMKtec M8** (primary node)
 
 ## Post-install
 
-First login was performed with a physical monitor + keyboard. All subsequent administration is done remotely — see [SSH Remote Access](https://github.com/MrSandwick/homelab-guides/blob/main/Guide-SSH-Remote-Access.md).
+First login was performed with a physical monitor + keyboard. All subsequent administration is done remotely — see [SSH Remote Access](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-SSH-Remote-Access.md).
 
 To shut the machine down safely at any point:
 ```
@@ -57,5 +57,5 @@ sudo poweroff
 ## Related
 
 - [Network Configuration](./SRV-03-Network-Configuration.md) — static IP setup, done after this install
-- [SSH Remote Access](https://github.com/MrSandwick/homelab-guides/blob/main/Guide-SSH-Remote-Access.md) — companion Guides repository — how remote access was established
-- [LVM Partition Sizing](https://github.com/MrSandwick/homelab-guides/blob/main/Guide-LVM-Partition-Sizing.md) — companion Guides repository — why the root partition came up short, and how to fix it
+- [SSH Remote Access](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-SSH-Remote-Access.md) — companion Guides repository — how remote access was established
+- [LVM Partition Sizing](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-LVM-Partition-Sizing.md) — companion Guides repository — why the root partition came up short, and how to fix it

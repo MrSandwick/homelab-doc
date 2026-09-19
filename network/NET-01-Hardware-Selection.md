@@ -38,4 +38,4 @@ The RADIUS server and Docker host run on the same machine used for the Kubernete
 
 - [Project Overview](./NET-00-Project-Overview.md)
 - [VLAN Design and Switch Configuration](./NET-03-VLAN-Design-and-Switch-Configuration.md)
-- Guides: [VLANs, Trunk vs. Access, PVID](<LINK_TO_NETWORK_GUIDES_REPO>/Guide-VLANs-Trunk-Access-PVID.md) · [SDN Controller vs. Standalone](<LINK_TO_NETWORK_GUIDES_REPO>/Guide-SDN-Controller-vs-Standalone.md)
+- Guides: [VLANs, Trunk vs. Access, PVID](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/network/Guide-VLANs-Trunk-Access-PVID.md) · [SDN Controller vs. Standalone](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/network/Guide-SDN-Controller-vs-Standalone.md)
