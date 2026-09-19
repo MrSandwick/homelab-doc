@@ -29,7 +29,7 @@ Installed on: **GMKtec M8** (primary node)
 |---|---|
 | Base install | **Ubuntu Server** (not "minimized") |
 | Third-party drivers | Skipped |
-| Network configuration | Skipped at install time ("Continue without network") — configured later, see [Network Configuration](./03-Network-Configuration.md) |
+| Network configuration | Skipped at install time ("Continue without network") — configured later, see [Network Configuration](./SRV-03-Network-Configuration.md) |
 | Storage layout | Guided, entire disk, **LVM enabled**, **no LUKS encryption** |
 | Root partition | 100GB allocated out of ~473GB available in the LVM volume group (remaining space left free, can be extended later with `lvextend`) |
 | Ubuntu Pro | Skipped |
@@ -56,6 +56,6 @@ sudo poweroff
 
 ## Related
 
-- [Network Configuration](./03-Network-Configuration.md) — static IP setup, done after this install
+- [Network Configuration](./SRV-03-Network-Configuration.md) — static IP setup, done after this install
 - [SSH Remote Access](https://github.com/MrSandwick/homelab-guides/blob/main/Guide-SSH-Remote-Access.md) — companion Guides repository — how remote access was established
 - [LVM Partition Sizing](https://github.com/MrSandwick/homelab-guides/blob/main/Guide-LVM-Partition-Sizing.md) — companion Guides repository — why the root partition came up short, and how to fix it

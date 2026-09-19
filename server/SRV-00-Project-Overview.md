@@ -2,7 +2,7 @@
 tags: [homelab, project, overview]
 ---
 
-# Project Overview
+# Server — Project Overview
 
 ## Goal
 
@@ -27,7 +27,7 @@ Build a home lab server to develop and demonstrate practical DevOps / infrastruc
 
 ## Hardware summary
 
-See [Hardware Selection](./01-Hardware-Selection.md) for the full comparison process.
+See [Hardware Selection](./SRV-01-Hardware-Selection.md) for the full comparison process.
 
 - **Primary node (control plane):** GMKtec M8 — AMD Ryzen 7 PRO 6650H, 16GB LPDDR5, 512GB SSD, dual 2.5GbE
 - **Secondary node (worker):** Dell OptiPlex 7050 Micro — Intel i7-6700T (4C/8T), 16GB DDR4, 512GB SSD
@@ -42,9 +42,9 @@ See [Hardware Selection](./01-Hardware-Selection.md) for the full comparison pro
 - ✅ containerd + kubeadm + kubelet + kubectl installed
 - ✅ Control plane initialized (`kubeadm init`), node `Ready`, Flannel CNI healthy
 - ✅ First test workload (nginx) deployed, verified reachable over the network, and cleaned up
-- 🟡 Ubuntu Server 26.04 LTS installed on OptiPlex 7050 worker node (`optiplex-worker`) — see [Second Node Setup](./06-Second-Node-Setup.md)
+- ✅ Second node (`<WORKER_HOSTNAME>`, Dell OptiPlex 7050 Micro) joined the cluster via `kubeadm join` — see [Second Node Setup](./SRV-06-Second-Node-Setup.md) for the full process, including a real mistake made and recovered from along the way
+- ✅ Cluster is now two nodes, both `Ready`: `<HOSTNAME>` (control-plane) and `<WORKER_HOSTNAME>` (worker)
 - ⬜ Known LVM root-partition under-allocation issue on both nodes — fix identified, not yet applied to either
-- ⬜ Second node (OptiPlex) not yet joined — control-plane taint temporarily removed for testing, then restored
 - ⬜ No real workloads deployed yet
 
-Continue at [Second Node Setup](./06-Second-Node-Setup.md) for exact next steps.
+Continue at [Second Node Setup](./SRV-06-Second-Node-Setup.md) for how the second node joined, or continue with real workload deployment.

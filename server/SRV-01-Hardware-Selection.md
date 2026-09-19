@@ -2,7 +2,7 @@
 tags: [homelab, project, hardware]
 ---
 
-# Hardware Selection
+# Server — Hardware Selection
 
 ## Constraints
 
@@ -43,7 +43,7 @@ tags: [homelab, project, hardware]
 - 512GB SSD
 - Standard Gigabit Ethernet (not 2.5GbE — will be the network bottleneck between nodes)
 - Purchased used/refurbished from seller **iBankonIT, LLC** via eBay, with a 90-day warranty
-- Shipped with Windows 10/11 Pro preinstalled — wiped and replaced with Ubuntu Server (see [Second Node Setup](./06-Second-Node-Setup.md))
+- Shipped with Windows 10/11 Pro preinstalled — wiped and replaced with Ubuntu Server (see [Second Node Setup](./SRV-06-Second-Node-Setup.md))
 
 **Passed over — Dell OptiPlex 3050 Micro (used, ~$138.50)**
 - Intel Core i5-7500T (4C/4T, 2.7GHz), 8GB DDR4, 256GB SSD

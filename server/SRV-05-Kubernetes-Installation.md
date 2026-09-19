@@ -4,7 +4,7 @@ tags: [homelab, project, kubernetes]
 
 # Kubernetes Installation (kubeadm)
 
-> Status: 🟢 **Control plane initialized and healthy** (single node, `Ready`). CNI (Flannel) installed. First test workload deployed and verified. Second node not yet joined.
+> Status: 🟢 **Control plane initialized and healthy.** CNI (Flannel) installed. First test workload deployed and verified. Second node has since joined — see [Second Node Setup](./SRV-06-Second-Node-Setup.md).
 
 ## Decision: kubeadm over k3s
 
@@ -216,15 +216,16 @@ kubectl describe node <HOSTNAME> | grep Taints
 # Taints: node-role.kubernetes.io/control-plane:NoSchedule
 ```
 
-This taint will be removed again — this time permanently, not just for a test — once the OptiPlex worker node joins the cluster and can absorb real workloads instead.
+This taint stays on the control-plane permanently from here on: the OptiPlex worker node has since joined the cluster and absorbs ordinary workloads instead, so there's no longer any reason to lift it. See [Second Node Setup](./SRV-06-Second-Node-Setup.md).
 
-## Next planned step
+## Next step — completed
 
-Prepare the second node (Dell OptiPlex 7050 Micro), install the same prerequisites (containerd, kernel modules, kubelet/kubeadm/kubectl), and join it with a freshly generated `kubeadm join` command. See [Second Node Setup](./06-Second-Node-Setup.md) for progress.
+The second node joined successfully, including recovering from a real mistake along the way (`kubeadm init` run instead of `kubeadm join`). Full process in [Second Node Setup](./SRV-06-Second-Node-Setup.md).
 
 ## Related
 
-- [Second Node Setup](./06-Second-Node-Setup.md) — the OptiPlex worker node this cluster is waiting on
+- [Second Node Setup](./SRV-06-Second-Node-Setup.md) — the OptiPlex worker node that has since joined this cluster
+- [Guide: kubeadm init vs. kubeadm join](https://github.com/MrSandwick/homelab-guides/blob/main/Guide-Kubeadm-Init-vs-Join.md) — companion Guides repository
 - [Kubernetes vs k3s](https://github.com/MrSandwick/homelab-guides/blob/main/Guide-Kubernetes-vs-k3s.md) — companion Guides repository
 - [Docker vs Containerd](https://github.com/MrSandwick/homelab-guides/blob/main/Guide-Docker-vs-Containerd.md) — companion Guides repository
 - [Kubernetes Taints and Tolerations](https://github.com/MrSandwick/homelab-guides/blob/main/Guide-Kubernetes-Taints-and-Tolerations.md) — companion Guides repository

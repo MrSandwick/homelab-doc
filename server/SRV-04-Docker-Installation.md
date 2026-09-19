@@ -61,4 +61,4 @@ A successful "Hello from Docker!" message confirms the daemon is working correct
 ## Related
 
 - [Docker vs Containerd](https://github.com/MrSandwick/homelab-guides/blob/main/Guide-Docker-vs-Containerd.md) — companion Guides repository
-- [Kubernetes Installation](./05-Kubernetes-Installation.md) — where a *separate* containerd instance is configured specifically for Kubernetes
+- [Kubernetes Installation](./SRV-05-Kubernetes-Installation.md) — where a *separate* containerd instance is configured specifically for Kubernetes

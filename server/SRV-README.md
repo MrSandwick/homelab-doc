@@ -1,18 +1,18 @@
-# Homelab Build Log
+# Server & Kubernetes Build Log
 
 A chronological, technical log of building a home Kubernetes lab from scratch: hardware selection, OS install, networking, container runtime, and cluster bootstrap via `kubeadm`.
 
-This repo documents *what was done and why* — decisions made, exact commands run, and problems encountered along the way (including real troubleshooting sessions, not just the happy path).
+This section documents *what was done and why* — decisions made, exact commands run, and problems encountered along the way (including real troubleshooting sessions, not just the happy path).
 
 ## Contents
 
-1. See [Project Overview](./00-Project-Overview.md)
-2. See [Hardware Selection](./01-Hardware-Selection.md)
-3. See [OS Installation](./02-OS-Installation.md)
-4. See [Network Configuration](./03-Network-Configuration.md)
-5. See [Docker Installation](./04-Docker-Installation.md)
-6. See [Kubernetes Installation](./05-Kubernetes-Installation.md)
-7. See [Second Node Setup](./06-Second-Node-Setup.md)
+1. See [Project Overview](./SRV-00-Project-Overview.md)
+2. See [Hardware Selection](./SRV-01-Hardware-Selection.md)
+3. See [OS Installation](./SRV-02-OS-Installation.md)
+4. See [Network Configuration](./SRV-03-Network-Configuration.md)
+5. See [Docker Installation](./SRV-04-Docker-Installation.md)
+6. See [Kubernetes Installation](./SRV-05-Kubernetes-Installation.md)
+7. See [Second Node Setup](./SRV-06-Second-Node-Setup.md)
 
 ## Stack
 
@@ -31,4 +31,4 @@ Conceptual explanations of the technologies used here (Kubernetes vs k3s, Docker
 
 ## Status
 
-🟢 Single-node control plane is up and healthy (`kubeadm`, containerd, Flannel CNI). A test workload was deployed and verified reachable over the network. The second (worker) node — a Dell OptiPlex 7050 Micro — has Ubuntu Server installed and is being prepared to join the cluster. See [Second Node Setup](./06-Second-Node-Setup.md) for the exact point where work currently stands.
+🟢 The cluster is now two nodes, both `Ready`: the GMKtec M8 control plane and the Dell OptiPlex 7050 Micro worker (`kubeadm`, containerd, Flannel CNI all healthy on both). A test workload was deployed on the worker node and verified reachable. See [Second Node Setup](./SRV-06-Second-Node-Setup.md) for the full join process, including a real `kubeadm init`-vs-`join` mistake and recovery.
