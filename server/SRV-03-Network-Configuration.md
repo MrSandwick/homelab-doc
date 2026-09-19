@@ -2,7 +2,7 @@
 tags: [homelab, project, network]
 ---
 
-# Network Configuration
+# Server — Network Configuration
 
 ## Initial state
 
@@ -125,7 +125,50 @@ If the two devices report different subnets/gateways, the static IP must be re-i
 - Static IP: `<SERVER_IP>` — re-issued in the correct subnet after the mismatch was diagnosed (see troubleshooting note above); confirmed reachable via `ping` and `ssh` from a same-subnet client, and confirmed persistent across reboot during the `kubeadm init` process
 - SSH access: `ssh <USERNAME>@<SERVER_IP>`
 
+## Real troubleshooting: ISP blocking public DNS resolvers
+
+**Symptom:** name resolution stopped working on this server (`ping google.com` → `Temporary failure in name resolution`), noticed around the time the second node was connected to the network — the timing initially suggested a networking regression from that change.
+
+**Diagnosis, ruling out causes one by one:**
+
+```
+ping 8.8.8.8                        # succeeds — basic connectivity is fine
+nslookup google.com 8.8.8.8         # "communications error ... timed out"
+curl -v https://8.8.8.8 --insecure  # "Connection refused" in ~36ms
+nc -zv -w3 8.8.8.8 53               # Connection refused
+nc -zv -w3 1.1.1.1 53               # Connection refused (same result)
+ping google.com                     # (from a different device) resolves and replies normally via the device's own DNS
+```
+
+`ufw` was inactive, `iptables` rules on this host only targeted internal Kubernetes service IPs, and no Omada ACL was in place — none of the usual local suspects. The decisive clue was the *type* of failure: `Connection refused` arriving in ~36ms is not a lost-packet timeout, it's an active rejection from something close by — and it affected **both** `8.8.8.8` (Google) and `1.1.1.1` (Cloudflare) identically, while an ordinary Google server IP (`142.250.217.110`) pinged normally.
+
+**Root cause:** the ISP for this connection is a cellular 5G Home Internet product (see [Internet Uplink](../network/NET-02-Internet-Uplink.md)), and this specific ISP blocks direct connections to well-known public DNS resolvers by IP — a policy some cellular/5G home internet providers use to force traffic through their own DNS. Standard DNS (port 53) and even a plain TLS connection (port 443) to `8.8.8.8`/`1.1.1.1` were both rejected; only the well-known DNS IPs seemed to be targeted, not general internet traffic to those same providers' other services.
+
+**Fix — DNS-over-TLS via `systemd-resolved`:**
+
+```
+sudo nano /etc/systemd/resolved.conf
+```
+
+```ini
+[Resolve]
+DNS=9.9.9.9#dns.quad9.net 1.1.1.1#cloudflare-dns.com
+DNSOverTLS=opportunistic
+```
+
+```
+sudo systemctl restart systemd-resolved
+resolvectl status   # confirm "+DNSOverTLS" now appears for the active link
+```
+
+Wrapping the same DNS query inside a TLS connection on port 853 (instead of plaintext on port 53) got past the block — the ISP appears to filter the plaintext DNS protocol to these specific resolvers rather than blocking the IPs or the encrypted-DNS port outright.
+
+`DNSOverTLS=opportunistic` (rather than the stricter `yes`) was used deliberately: `yes` fails DNS entirely if TLS to every configured server becomes unavailable, with no fallback; `opportunistic` degrades gracefully instead. See [Guide-DNS-over-TLS-and-ISP-DNS-Blocking](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-DNS-over-TLS-and-ISP-DNS-Blocking.md) for the full explanation of DoT and this failure mode.
+
+**Known caveat:** `systemd-resolved` configured this way is not guaranteed to be reachable from inside Docker/Kubernetes network namespaces — containers and pods may need their own explicit DNS configuration if this same blocking is ever observed *inside* a pod rather than on the host.
+
 ## Related
 
-- [SSH Remote Access](https://github.com/MrSandwick/homelab-guides/blob/main/Guide-SSH-Remote-Access.md) — companion Guides repository — how the SSH connection itself works
-- [Kubernetes Installation](./05-Kubernetes-Installation.md) — this static IP is the address used for `kubeadm init` and later `kubeadm join`
+- [SSH Remote Access](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-SSH-Remote-Access.md) — companion Guides repository — how the SSH connection itself works
+- [Kubernetes Installation](./SRV-05-Kubernetes-Installation.md) — this static IP is the address used for `kubeadm init` and later `kubeadm join`
+- [Guide-DNS-over-TLS-and-ISP-DNS-Blocking](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-DNS-over-TLS-and-ISP-DNS-Blocking.md) — companion Guides repository

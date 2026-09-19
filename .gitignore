@@ -1,6 +1,12 @@
-# Real environment values — never commit this
+# Real, non-placeholder values — never commit
 .env
 
-# OS/editor cruft
+# OS / editor noise
 .DS_Store
+Thumbs.db
+*.swp
 .obsidian/
+
+# Screenshots / photos used while drafting docs, not meant for the repo
+/drafts/
+/scratch/
