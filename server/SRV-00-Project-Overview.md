@@ -45,6 +45,8 @@ See [Hardware Selection](./SRV-01-Hardware-Selection.md) for the full comparison
 - ✅ Second node (`<WORKER_HOSTNAME>`, Dell OptiPlex 7050 Micro) joined the cluster via `kubeadm join` — see [Second Node Setup](./SRV-06-Second-Node-Setup.md) for the full process, including a real mistake made and recovered from along the way
 - ✅ Cluster is now two nodes, both `Ready`: `<HOSTNAME>` (control-plane) and `<WORKER_HOSTNAME>` (worker)
 - ✅ LVM root-partition under-allocation fixed on both nodes (worker resolved first, control-plane resolved in a later verification pass) — both now use the full disk
-- ⬜ No real workloads deployed yet
+- ✅ Helm installed; `kube-prometheus-stack` deployed and collecting metrics from both nodes — see [Helm, Observability, and Ingress](./SRV-08-Helm-Observability-Ingress.md)
+- ✅ ingress-nginx + MetalLB give the cluster a real LAN-reachable entry point (`<INGRESS_IP>`); Grafana reachable through it, replacing the earlier `port-forward`-only access
+- ⬜ No real application workloads deployed yet (site, Nextcloud, Minecraft, etc.)
 
-Continue at [Second Node Setup](./SRV-06-Second-Node-Setup.md) for how the second node joined, or continue with real workload deployment.
+Continue at [Helm, Observability, and Ingress](./SRV-08-Helm-Observability-Ingress.md) for the current state of the platform, or continue with real workload deployment.

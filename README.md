@@ -33,6 +33,12 @@ TP-Link TL-SG108E switch  (802.1Q trunk)         network/
                      \-- Dell OptiPlex 7050 (Kubernetes worker)             server/
 ```
 
+```
+LAN traffic into the cluster:
+<INGRESS_IP> (MetalLB) -> ingress-nginx -> Grafana (path: /)
+                                        -> [future services]
+```
+
 The FreeRADIUS server that authenticates Wi-Fi clients in `network/` runs on the same physical machine as the Kubernetes control plane in `server/`.
 
 ## Documentation
@@ -49,6 +55,7 @@ The FreeRADIUS server that authenticates Wi-Fi clients in `network/` runs on the
 | [SRV-05 Kubernetes Installation](server/SRV-05-Kubernetes-Installation.md) | containerd, `kubeadm init`, Flannel, first workload |
 | [SRV-06 Second Node Setup](server/SRV-06-Second-Node-Setup.md) | OptiPlex worker node preparation |
 | [SRV-07 Cluster Verification](server/SRV-07-Cluster-Verification.md) | Live-state check against the docs; LVM fixed on the control plane; DNS fix corrected |
+| [SRV-08 Helm, Observability, and Ingress](server/SRV-08-Helm-Observability-Ingress.md) | Helm, kube-prometheus-stack, ingress-nginx + MetalLB |
 
 ### Network — VLANs and RADIUS
 
@@ -66,14 +73,14 @@ The FreeRADIUS server that authenticates Wi-Fi clients in `network/` runs on the
 
 ## Stack
 
-- **Server:** GMKtec M8 (Ryzen 7 PRO 6650H, 16 GB) control plane; Dell OptiPlex 7050 Micro (i7-6700T, 16 GB) worker; Ubuntu Server 26.04 LTS; containerd; Kubernetes via `kubeadm` with Flannel
+- **Server:** GMKtec M8 (Ryzen 7 PRO 6650H, 16 GB) control plane; Dell OptiPlex 7050 Micro (i7-6700T, 16 GB) worker; Ubuntu Server 26.04 LTS; containerd; Kubernetes via `kubeadm` with Flannel; Helm; `kube-prometheus-stack` (Prometheus, Grafana, Alertmanager, node-exporter); ingress-nginx + MetalLB
 - **Network:** 5G Home Internet gateway (double NAT); TP-Link Omada ER605 router, TL-SG108E switch, EAP610 Wi-Fi 6 access point; FreeRADIUS on the server
 
 ## Status
 
 | Layer | Working | In progress / planned |
 |---|---|---|
-| Server | Two-node cluster, both `Ready` (control plane + worker), Flannel CNI healthy, workload scheduling verified on the worker | Real workloads |
+| Server | Two-node cluster, both `Ready` (control plane + worker), Flannel CNI healthy, workload scheduling verified on the worker, Helm, `kube-prometheus-stack` monitoring both nodes, Grafana reachable on the LAN via ingress-nginx + MetalLB | Real application workloads (site, Nextcloud, Minecraft, etc.) |
 | Network | Double-NAT uplink, VLANs 10/20, Users/Admin isolation, management ACLs, ntopng traffic monitoring — all verified | WPA2-Enterprise SSID to be recreated after an AP factory reset; login-free MAC-based auth; IDS/IPS |
 
 Each layer's overview ([SRV-00](server/SRV-00-Project-Overview.md), [NET-00](network/NET-00-Project-Overview.md)) has the full status list.

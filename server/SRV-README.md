@@ -14,7 +14,7 @@ This section documents *what was done and why* — decisions made, exact command
 6. See [Kubernetes Installation](./SRV-05-Kubernetes-Installation.md)
 7. See [Second Node Setup](./SRV-06-Second-Node-Setup.md)
 8. See [Cluster Verification](./SRV-07-Cluster-Verification.md)
-8. See [Cluster Verification](./SRV-07-Cluster-Verification.md)
+9. See [Helm, Observability, and Ingress](./SRV-08-Helm-Observability-Ingress.md)
 
 ## Stack
 
@@ -22,6 +22,9 @@ This section documents *what was done and why* — decisions made, exact command
 - **OS:** Ubuntu Server 26.04 LTS
 - **Container runtime:** containerd (CRI-compliant, used directly by Kubernetes)
 - **Orchestration:** Kubernetes via `kubeadm` (not a lightweight distribution — chosen deliberately for closer-to-production setup experience)
+- **Package management:** Helm
+- **Observability:** `kube-prometheus-stack` (Prometheus, Grafana, Alertmanager, node-exporter, kube-state-metrics)
+- **Ingress / bare-metal LoadBalancer:** ingress-nginx + MetalLB
 
 ## A note on placeholders
 
