@@ -36,6 +36,7 @@ TP-Link TL-SG108E switch  (802.1Q trunk)         network/
 ```
 LAN traffic into the cluster:
 <INGRESS_IP> (MetalLB) -> ingress-nginx -> Grafana (path: /)
+                                        -> my-site (path: /site, on the worker)
                                         -> [future services]
 ```
 
@@ -57,6 +58,7 @@ The FreeRADIUS server that authenticates Wi-Fi clients in `network/` runs on the
 | [SRV-07 Cluster Verification](server/SRV-07-Cluster-Verification.md) | Live-state check against the docs; LVM fixed on the control plane; DNS fix corrected |
 | [SRV-08 Helm, Observability, and Ingress](server/SRV-08-Helm-Observability-Ingress.md) | Helm, kube-prometheus-stack, ingress-nginx + MetalLB |
 | [SRV-09 Ansible Node Provisioning](server/SRV-09-Ansible-Node-Provisioning.md) | Ansible control node, idempotency demo, sudo-rs incompatibility fix, trimmed production-safe playbook |
+| [SRV-10 First Real Workload](server/SRV-10-First-Real-Workload.md) | First application workload (static site) deployed via Ingress, scheduled onto the worker node |
 
 ### Network — VLANs and RADIUS
 
@@ -81,7 +83,7 @@ The FreeRADIUS server that authenticates Wi-Fi clients in `network/` runs on the
 
 | Layer | Working | In progress / planned |
 |---|---|---|
-| Server | Two-node cluster, both `Ready` (control plane + worker), Flannel CNI healthy, workload scheduling verified on the worker, Helm, `kube-prometheus-stack` monitoring both nodes, Grafana reachable on the LAN via ingress-nginx + MetalLB, Ansible-based node provisioning verified idempotent on both nodes | Real application workloads (site, Nextcloud, Minecraft, etc.) |
+| Server | Two-node cluster, both `Ready` (control plane + worker), Flannel CNI healthy, workload scheduling verified on the worker, Helm, `kube-prometheus-stack` monitoring both nodes, Grafana reachable on the LAN via ingress-nginx + MetalLB, Ansible-based node provisioning verified idempotent on both nodes, first application workload (static site at `/site`) running on the worker | Additional workloads (Nextcloud, Minecraft, etc.); GitOps (ArgoCD) for the workloads already deployed |
 | Network | Double-NAT uplink, VLANs 10/20, Users/Admin isolation, management ACLs, ntopng traffic monitoring — all verified | WPA2-Enterprise SSID to be recreated after an AP factory reset; login-free MAC-based auth; IDS/IPS |
 
 Each layer's overview ([SRV-00](server/SRV-00-Project-Overview.md), [NET-00](network/NET-00-Project-Overview.md)) has the full status list.

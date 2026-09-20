@@ -48,6 +48,6 @@ See [Hardware Selection](./SRV-01-Hardware-Selection.md) for the full comparison
 - ✅ Helm installed; `kube-prometheus-stack` deployed and collecting metrics from both nodes — see [Helm, Observability, and Ingress](./SRV-08-Helm-Observability-Ingress.md)
 - ✅ ingress-nginx + MetalLB give the cluster a real LAN-reachable entry point (`<INGRESS_IP>`); Grafana reachable through it, replacing the earlier `port-forward`-only access
 - ✅ Ansible introduced for node provisioning — idempotency verified via a learning example, then a trimmed, production-safe `site.yml` applied to both real cluster nodes with a clean dry-run and real run — see [Ansible Node Provisioning](./SRV-09-Ansible-Node-Provisioning.md)
-- ⬜ No real application workloads deployed yet (site, Nextcloud, Minecraft, etc.)
+- ✅ First real application workload deployed: a static site, served via the existing ingress-nginx + MetalLB entry point on a new `/site` path, scheduled onto the worker node — see [First Real Workload](./SRV-10-First-Real-Workload.md)
 
-Continue at [Ansible Node Provisioning](./SRV-09-Ansible-Node-Provisioning.md) for the current state of the platform, or continue with real workload deployment.
+Continue at [First Real Workload](./SRV-10-First-Real-Workload.md) for the current state of the cluster, or continue with further workloads.

@@ -16,6 +16,7 @@ This section documents *what was done and why* — decisions made, exact command
 8. See [Cluster Verification](./SRV-07-Cluster-Verification.md)
 9. See [Helm, Observability, and Ingress](./SRV-08-Helm-Observability-Ingress.md)
 10. See [Ansible Node Provisioning](./SRV-09-Ansible-Node-Provisioning.md)
+11. See [First Real Workload](./SRV-10-First-Real-Workload.md)
 
 ## Stack
 
