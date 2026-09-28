@@ -4,29 +4,54 @@ tags: [homelab, project, kubernetes, helm, observability, ingress]
 
 # Helm, Observability, and Ingress
 
-> Status: 🟢 **Working.** Helm is installed, `kube-prometheus-stack` is collecting metrics from both nodes, and Grafana is reachable from the LAN through ingress-nginx at a MetalLB-assigned address (`<INGRESS_IP>`). No application workloads yet — this is the platform they will run on.
+> Status: 🟢 **Working.** Helm installed; `kube-prometheus-stack` collecting metrics from both nodes; Grafana reachable from the LAN through ingress-nginx at a MetalLB-assigned address (`<INGRESS_IP>`).
 
-Picks up after [Cluster Verification](./SRV-07-Cluster-Verification.md). All commands below were run from the control-plane node (`<HOSTNAME>`) unless noted.
+Picks up after [Cluster Verification](./SRV-07-Cluster-Verification.md). Commands run on the control-plane node (`<HOSTNAME>`) unless noted.
 
-## Why Helm
+## Contents
 
-Helm is Kubernetes' package manager. A real component like Prometheus is dozens of manifests — Deployments, Services, ConfigMaps, RBAC, CRDs — that have to be applied together and kept consistent. Helm bundles them into a **chart**, lets you install it with one command and override settings, and tracks the result as a **release** you can list, upgrade, or remove as a unit. The analogy is `apt`: the chart is the package, the repo is the archive it comes from, and the release is what's installed on this machine. See [Guide: Helm Basics](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-Helm-Basics.md).
+1. [Components installed](#components-installed)
+2. [End state](#end-state)
+3. [Step 1 — Helm](#step-1--helm)
+4. [Step 2 — Monitoring: kube-prometheus-stack](#step-2--monitoring-kube-prometheus-stack)
+5. [Step 3 — Ingress controller: ingress-nginx](#step-3--ingress-controller-ingress-nginx)
+6. [Step 4 — Load balancer: MetalLB](#step-4--load-balancer-metallb)
+7. [Step 5 — Grafana through the Ingress](#step-5--grafana-through-the-ingress)
+8. [Files created](#files-created)
+9. [Related](#related)
 
-## Installing Helm
+## Components installed
+
+| Component | Installed as | Namespace | Role |
+|---|---|---|---|
+| Helm 3 | Binary on the control plane | — | Installs and tracks the three charts below |
+| kube-prometheus-stack | Helm release `prometheus` | `monitoring` | Prometheus, Grafana, Alertmanager, node-exporter, kube-state-metrics |
+| ingress-nginx | Helm release `ingress-nginx` | `ingress-nginx` | HTTP routing by path/host to Services |
+| MetalLB | Helm release `metallb` | `metallb-system` | LAN IP for `LoadBalancer` Services (L2 mode) |
+
+Overview of each component: [Guide: The Stack](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-Stack.md).
+
+## End state
+
+```
+Browser (LAN) → <INGRESS_IP> (MetalLB) → ingress-nginx → Grafana (path: /)
+                                          ↳ Prometheus + Alertmanager + node-exporter (×2) feeding it
+```
+
+`/` is claimed by Grafana; further services require distinct paths or hostnames.
+
+## Step 1 — Helm
+
+### Install
 
 ```
 curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
-```
-
-**Issue encountered — the ISP DNS block again.** The install script failed because `raw.githubusercontent.com` would not resolve. This is the same ISP DNS blocking documented in [Network Configuration](./SRV-03-Network-Configuration.md#real-troubleshooting-isp-blocking-public-dns-resolvers). Re-applying the router-DNS fix from that page (netplan `nameservers` pointing at `<GATEWAY_IP>`) restored resolution, and the install script then ran normally.
-
-Verify:
-
-```
 helm version
 ```
 
-## Adding chart repos and a disposable smoke test
+**Issue encountered:** the script failed — `raw.githubusercontent.com` did not resolve. Same ISP DNS blocking as in [Network Configuration](./SRV-03-Network-Configuration.md#real-troubleshooting-isp-blocking-public-dns-resolvers). Re-applying the router-DNS fix (netplan `nameservers` → `<GATEWAY_IP>`) restored resolution and the script completed.
+
+### Chart repositories
 
 ```
 helm repo add bitnami https://charts.bitnami.com/bitnami
@@ -35,7 +60,9 @@ helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
 helm repo update
 ```
 
-Before installing anything real, a throwaway release confirmed the whole path works — repo fetch, image pull, scheduling, and cleanup:
+### Smoke test
+
+Disposable release before installing anything real:
 
 ```
 helm install nginx-test bitnami/nginx
@@ -44,65 +71,55 @@ kubectl get svc
 helm uninstall nginx-test
 ```
 
-The pod came up, the Service was created, and `helm uninstall` removed both.
+Pod and Service came up; `helm uninstall` removed both.
 
-## Prometheus, Grafana, and Alertmanager: `kube-prometheus-stack`
+## Step 2 — Monitoring: kube-prometheus-stack
+
+### Install
 
 ```
 helm install prometheus prometheus-community/kube-prometheus-stack \
   --namespace monitoring --create-namespace
 ```
 
-One chart deploys the whole monitoring stack into a new `monitoring` namespace:
+### node-exporter on both nodes
 
-- **Prometheus** — scrapes and stores metrics
-- **Grafana** — dashboards
-- **Alertmanager** — alert routing
-- **node-exporter** — per-node host metrics
-- **kube-state-metrics** — Kubernetes object state
+node-exporter (DaemonSet) came up on both nodes with the control-plane `NoSchedule` taint left in place — the chart's DaemonSet carries the toleration. See [Guide: Kubernetes Taints and Tolerations](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-Kubernetes-Taints-and-Tolerations.md).
 
-### node-exporter and the control-plane taint
+### Initial access
 
-node-exporter runs as a **DaemonSet** (one pod per node), and it came up on **both** nodes without any change to the control-plane's `NoSchedule` taint. DaemonSet pods for system-level agents carry a toleration for that taint, so the control plane stays protected from ordinary workloads while still being monitored. This is the "add a toleration to the workload instead of removing the taint" approach described in [Guide: Kubernetes Taints and Tolerations](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-Kubernetes-Taints-and-Tolerations.md).
-
-### First access: `port-forward`
-
-Before any ingress existed, Grafana was reached with a port-forward:
+Before the ingress existed, Grafana was reached via port-forward (`--address 0.0.0.0` required for LAN access, as in [Kubernetes Installation, Step 10](./SRV-05-Kubernetes-Installation.md#step-10--first-test-workload-and-the-control-plane-taint)):
 
 ```
 kubectl port-forward -n monitoring svc/prometheus-grafana 3000:80 --address 0.0.0.0
 ```
 
-The `--address 0.0.0.0` flag was necessary to reach it from another machine on the LAN. Without it, `port-forward` binds to `localhost` only — the same gotcha hit during the original nginx test in [Kubernetes Installation](./SRV-05-Kubernetes-Installation.md#step-10--first-test-workload-and-the-control-plane-taint).
-
-The Grafana admin password is generated by the chart and stored in a Secret:
+Admin password (chart-generated Secret):
 
 ```
 kubectl get secret -n monitoring prometheus-grafana -o jsonpath="{.data.admin-password}" | base64 -d
 ```
 
-## ingress-nginx
+## Step 3 — Ingress controller: ingress-nginx
+
+### Install
 
 ```
 helm install ingress-nginx ingress-nginx/ingress-nginx \
   --namespace ingress-nginx --create-namespace
 ```
 
-An **Ingress controller** routes HTTP traffic arriving at one address to different Services by path or hostname. It is what will let several services share one entry point instead of each needing its own `port-forward`.
-
 ### ⚠️ Real mistake made here: interrupting `helm install`
 
-**What happened:** the first `helm install` was still running when a follow-up command (`kubectl get pods`) was typed into the same session, and the install was interrupted with `Ctrl+C` before it finished.
-
-**Consequence:** the release was left in a `failed` state, and retrying the same install was refused:
+**What happened:** the install was interrupted with `Ctrl+C` before completion (a follow-up `kubectl get pods` was typed into the same session). Retrying failed:
 
 ```
 Error: INSTALLATION FAILED: cannot re-use a name that is still in use
 ```
 
-**Root cause:** Helm had already recorded a release named `ingress-nginx` before the interruption. A half-finished release still owns its name, so a new `install` under that name collides with it.
+**Root cause:** the release had already been recorded before the interruption and was left in `failed` state, still owning the name `ingress-nginx`.
 
-**Fix — remove the failed release, confirm it is gone, reinstall:**
+**Fix:**
 
 ```
 helm uninstall ingress-nginx -n ingress-nginx
@@ -111,11 +128,13 @@ helm install ingress-nginx ingress-nginx/ingress-nginx \
   --namespace ingress-nginx --create-namespace
 ```
 
-**Lesson:** `helm install` returns control to the shell on its own when it is done. Let it finish before running anything else in that session.
+The reinstall was allowed to complete before any further commands were run. See [Guide: Helm Basics](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-Helm-Basics.md).
 
-## MetalLB
+## Step 4 — Load balancer: MetalLB
 
-The ingress controller is exposed as a Service of type `LoadBalancer`. On AWS, GCP or Azure a cloud provider fulfils that by provisioning a load balancer with a public address. A bare-metal cluster has no cloud provider, so the Service's `EXTERNAL-IP` would sit at `<pending>` forever. **MetalLB** fills that role: it hands out addresses from a pool you define and announces them on the LAN. See [Guide: Ingress and MetalLB](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-Ingress-and-MetalLB.md).
+Required for the ingress controller's `LoadBalancer` Service to receive an external IP on bare metal. See [Guide: Ingress and MetalLB](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-Ingress-and-MetalLB.md).
+
+### Install
 
 ```
 helm repo add metallb https://metallb.github.io/metallb
@@ -123,9 +142,9 @@ helm install metallb metallb/metallb \
   --namespace metallb-system --create-namespace
 ```
 
-### Choosing the address pool
+### Address pool
 
-The pool is `<METALLB_POOL_START>`–`<METALLB_POOL_END>` — eleven addresses at the top of the Admin VLAN subnet (`<ADMIN_SUBNET>.240`–`.250`). The router's DHCP pool for that VLAN is `.100`–`.200` (see [Router Configuration](../network/NET-04-Router-Configuration.md)), so the range is outside it. The router's admin credentials weren't available to double-check the DHCP settings directly, so the range was also verified empirically — a ping sweep looking for any device already answering in it:
+Pool: `<METALLB_POOL_START>`–`<METALLB_POOL_END>` (`<ADMIN_SUBNET>.240`–`.250`), outside the Admin VLAN DHCP range `.100`–`.200` ([Router Configuration](../network/NET-04-Router-Configuration.md)). Router admin access was unavailable to confirm the DHCP settings directly, so the range was verified with a ping sweep:
 
 ```
 for i in {240..250}; do
@@ -134,11 +153,11 @@ for i in {240..250}; do
 done
 ```
 
-Silent output — no replies, no `IN USE` lines — confirmed the whole range was free. (A quiet ping sweep is good evidence, not proof: a device that ignores ICMP would look free. It is combined here with the DHCP pool being documented as ending at `.200`.)
+No replies — range free.
 
-### Applying the pool
+### Pool configuration
 
-Manifests live in `~/k8s-manifests/` on the control-plane node — a new convention for this project, so ad-hoc manifests have one known home. This one is `metallb-config.yaml`:
+Manifests are kept in `~/k8s-manifests/` on the control-plane node (convention adopted from this point). `metallb-config.yaml` — L2 mode:
 
 ```yaml
 apiVersion: metallb.io/v1beta1
@@ -164,20 +183,17 @@ spec:
 kubectl apply -f ~/k8s-manifests/metallb-config.yaml
 ```
 
-- **`IPAddressPool`** defines *which* addresses MetalLB may hand out.
-- **`L2Advertisement`** defines *how* they are announced. **L2 (ARP) mode** is the right fit for a flat, single-segment home LAN: one node answers ARP for the address and traffic follows. BGP mode would need a router that speaks BGP and buys nothing here.
-
-Verified:
+### Verification
 
 ```
 kubectl get svc -n ingress-nginx
 ```
 
-`EXTERNAL-IP` for the `ingress-nginx-controller` Service moved from `<pending>` to `<INGRESS_IP>` — the first address in the pool — immediately after the manifest was applied.
+`ingress-nginx-controller` `EXTERNAL-IP`: `<pending>` → `<INGRESS_IP>` (first address in the pool) immediately after apply.
 
-## Routing Grafana through the Ingress
+## Step 5 — Grafana through the Ingress
 
-`grafana-ingress.yaml`, also in `~/k8s-manifests/`:
+`~/k8s-manifests/grafana-ingress.yaml`:
 
 ```yaml
 apiVersion: networking.k8s.io/v1
@@ -203,16 +219,14 @@ spec:
 kubectl apply -f ~/k8s-manifests/grafana-ingress.yaml
 ```
 
-Verified end to end: `http://<INGRESS_IP>` from a browser on another LAN machine reaches Grafana directly, no `port-forward` needed. After logging in, the built-in dashboards **Node Exporter / Nodes** and **Kubernetes / Compute Resources / Cluster** show live data for both nodes.
+Verified from another LAN machine: `http://<INGRESS_IP>` serves Grafana without port-forward. Dashboards **Node Exporter / Nodes** and **Kubernetes / Compute Resources / Cluster** show live data for both nodes.
 
-## Current traffic path
+## Files created
 
-```
-Browser (LAN) → <INGRESS_IP> (MetalLB) → ingress-nginx → Grafana (path: /)
-                                          ↳ Prometheus + Alertmanager + node-exporter (×2) feeding it
-```
-
-**Note:** path `/` is currently fully claimed by Grafana. Any future service routed through the same ingress will need its own path or hostname rule.
+| File (on `<HOSTNAME>`) | Contents |
+|---|---|
+| `~/k8s-manifests/metallb-config.yaml` | `IPAddressPool` + `L2Advertisement` |
+| `~/k8s-manifests/grafana-ingress.yaml` | Ingress: `/` → `prometheus-grafana:80` |
 
 ## Related
 
@@ -220,6 +234,8 @@ Browser (LAN) → <INGRESS_IP> (MetalLB) → ingress-nginx → Grafana (path: /)
 - [Network Configuration](./SRV-03-Network-Configuration.md) — the ISP DNS-blocking fix that had to be re-applied before Helm would install
 - [Kubernetes Installation](./SRV-05-Kubernetes-Installation.md) — the original `port-forward` gotcha
 - [Router Configuration](../network/NET-04-Router-Configuration.md) — the Admin VLAN DHCP pool the MetalLB range sits outside of
+- [First Real Workload](./SRV-10-First-Real-Workload.md) — the second route added to this ingress
+- [Guide: The Stack](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-Stack.md) — companion Guides repository
 - [Guide: Helm Basics](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-Helm-Basics.md) — companion Guides repository
 - [Guide: Ingress and MetalLB](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-Ingress-and-MetalLB.md) — companion Guides repository
 - [Guide: Kubernetes Taints and Tolerations](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-Kubernetes-Taints-and-Tolerations.md) — companion Guides repository

@@ -29,6 +29,8 @@ This section documents *what was done and why* — decisions made, exact command
 - **Ingress / bare-metal LoadBalancer:** ingress-nginx + MetalLB
 - **Configuration management:** Ansible (control node on the primary node; provisions base packages, kernel modules/sysctl, and Kubernetes package installation — deliberately scoped to exclude DNS and containerd-config management to avoid conflicting with the live, manually-verified configuration in those areas)
 
+Layer-by-layer overview of the stack: [Guide: The Stack](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-Stack.md) (companion Guides repository).
+
 ## A note on placeholders
 
 Network details (IP addresses, MAC addresses, hostname) are replaced with placeholder tokens like `<SERVER_IP>` throughout these docs. See `.env.example` for the full list of placeholders used. Real values are kept locally in a gitignored `.env` file and are never committed.

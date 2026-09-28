@@ -6,6 +6,33 @@ tags: [homelab, project, kubernetes]
 
 > Status: 🟢 **Control plane initialized and healthy.** CNI (Flannel) installed. First test workload deployed and verified. Second node has since joined — see [Second Node Setup](./SRV-06-Second-Node-Setup.md).
 
+## Contents
+
+1. [Components installed](#components-installed)
+2. [Decision: kubeadm over k3s](#decision-kubeadm-over-k3s)
+3. [Step 1 — Disable swap](#step-1--disable-swap)
+4. [Step 2 — Install and configure containerd](#step-2--install-and-configure-containerd)
+5. [Step 3 — Kernel modules and sysctl settings](#step-3--kernel-modules-and-sysctl-settings)
+6. [Step 4 — Install kubeadm, kubelet, kubectl](#step-4--install-kubeadm-kubelet-kubectl)
+7. [Step 5 — Missing preflight dependency: `conntrack`](#step-5--missing-preflight-dependency-conntrack)
+8. [Step 6 — `kubeadm init`](#step-6--kubeadm-init)
+9. [Step 7 — kubectl access](#step-7--kubectl-access)
+10. [Step 8 — Installing Flannel (CNI)](#step-8--installing-flannel-cni)
+11. [Step 9 — Node reaches `Ready`](#step-9--node-reaches-ready)
+12. [Step 10 — First test workload and the control-plane taint](#step-10--first-test-workload-and-the-control-plane-taint)
+13. [Related](#related)
+
+## Components installed
+
+| Component | Version / source | Role |
+|---|---|---|
+| containerd | Ubuntu `containerd` package | Container runtime used by the kubelet (`SystemdCgroup = true`) |
+| kubelet, kubeadm, kubectl | `pkgs.k8s.io` v1.31, held with `apt-mark hold` | Node agent, cluster bootstrap, CLI |
+| conntrack, ethtool, socat | Ubuntu packages | `kubeadm` preflight dependencies |
+| Flannel | `kube-flannel.yml` (latest release) | CNI — pod network `10.244.0.0/16` |
+
+Overview of each component: [Guide: The Stack](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-Stack.md).
+
 ## Decision: kubeadm over k3s
 
 The project initially considered **k3s** (a lightweight Kubernetes distribution) for its simplicity on constrained hardware. This was reconsidered in favor of full **kubeadm-based Kubernetes**, prioritizing closer-to-production learning value over ease of setup. See [Kubernetes vs k3s](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-Kubernetes-vs-k3s.md) for the full comparison.

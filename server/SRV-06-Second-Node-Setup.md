@@ -8,6 +8,22 @@ tags: [homelab, project, os, second-node]
 
 Installed on: **Dell OptiPlex 7050 Micro** (second/worker node)
 
+## Contents
+
+1. [Hardware recap](#hardware-recap)
+2. [Installation media](#installation-media)
+3. [Dell-specific BIOS keys](#dell-specific-bios-keys)
+4. [Installer walkthrough (key choices made)](#installer-walkthrough-key-choices-made)
+5. [Known recurring issue: LVM under-allocates the root partition](#known-recurring-issue-lvm-under-allocates-the-root-partition)
+6. [Network configuration](#network-configuration)
+7. [Docker installation](#docker-installation)
+8. [Kubernetes prerequisites](#kubernetes-prerequisites)
+9. [Real troubleshooting: `kubeadm init` run by mistake instead of `kubeadm join`](#real-troubleshooting-kubeadm-init-run-by-mistake-instead-of-kubeadm-join)
+10. [Verification](#verification)
+11. [Related](#related)
+
+Components installed on this node match the primary node (Ubuntu Server 26.04, Docker, containerd, kubelet/kubeadm/kubectl v1.31); see [Kubernetes Installation](./SRV-05-Kubernetes-Installation.md#components-installed).
+
 ## Hardware recap
 
 - Intel Core i7-6700T (4 cores / 8 threads via Hyper-Threading, 2.8GHz base, up to 3.6GHz boost)
@@ -24,7 +40,7 @@ Same process as the primary node — see [OS Installation](./SRV-02-OS-Installat
 
 ## Dell-specific BIOS keys
 
-This Dell hardware uses different boot/BIOS keys than the GMKtec M8 primary node (which was never explicitly recorded — worth noting for next time, since it's easy to assume all machines share the same key):
+Differ from the GMKtec M8 (keys for that machine were not recorded):
 
 | Key | Action |
 |---|---|
@@ -45,34 +61,34 @@ This Dell hardware uses different boot/BIOS keys than the GMKtec M8 primary node
 
 ## Known recurring issue: LVM under-allocates the root partition
 
-The same LVM behavior documented on the primary node (see [OS Installation](./SRV-02-OS-Installation.md)) showed up again here. Confirmed via `fastfetch`:
+Same as the primary node ([OS Installation](./SRV-02-OS-Installation.md)). `fastfetch` on a 512GB drive:
 ```
 Disk (/): 6.92 GiB / 97.87 GiB (7%)
 ```
-despite the physical drive being 512GB — the guided installer only assigned ~100GB to the root logical volume and left the rest of the disk as unallocated free space in the volume group. This is the installer's default behavior, not something specific to this hardware — see [LVM Partition Sizing](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-LVM-Partition-Sizing.md) for the full explanation and the standard `lvextend` + `resize2fs` fix.
+Guided installer default — ~100GB root LV, remainder unallocated in the VG. See [LVM Partition Sizing](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-LVM-Partition-Sizing.md).
 
-**Status: ✅ fixed.** Applied with the standard procedure:
+**Status: ✅ fixed.**
 
 ```
 sudo lvextend -l +100%FREE /dev/ubuntu-vg/ubuntu-lv
 sudo resize2fs /dev/ubuntu-vg/ubuntu-lv
 ```
 
-Afterward `df -h /` showed 466G available on the root filesystem and `vgs` showed `VFree 0` — the volume group has no unallocated space left. The primary node had the same problem and was fixed later; see [Cluster Verification](./SRV-07-Cluster-Verification.md).
+Result: `df -h /` 466G available; `vgs` `VFree 0`. Primary node fixed later — see [Cluster Verification](./SRV-07-Cluster-Verification.md).
 
 ## Network configuration
 
-Connected via Ethernet to the switch (Port 5, VLAN 20 — see [VLAN Design and Switch Configuration](../network/NET-03-VLAN-Design-and-Switch-Configuration.md)). Unlike the primary node's static-IP setup ([Network Configuration](./SRV-03-Network-Configuration.md)), this node was first brought up on DHCP while diagnosing the issues below, but it is **now running a static IP** (`dhcp4: no`, fixed `<WORKER_IP>` address), matching the primary node's approach — confirmed during [Cluster Verification](./SRV-07-Cluster-Verification.md). The DHCP troubleshooting below is kept as a historical record; see the follow-up note at the end of that section.
+Ethernet to switch Port 5, VLAN 20 ([VLAN Design and Switch Configuration](../network/NET-03-VLAN-Design-and-Switch-Configuration.md)). Initially brought up on DHCP during the troubleshooting below; now on a static IP (`<WORKER_IP>`, `dhcp4: no`), confirmed in [Cluster Verification](./SRV-07-Cluster-Verification.md).
 
 ### Real troubleshooting: no IPv4 address despite a healthy link
 
-**Symptom:** `ip a` showed the Ethernet interface (`enp0s31f6`) as `UP` with `LOWER_UP` set (confirming a live physical link to the switch) and a normal IPv6 link-local address, but no IPv4 address at all.
+**Symptom:** `ip a` showed `enp0s31f6` `UP` with `LOWER_UP` and an IPv6 link-local address, but no IPv4 address.
 
 **Two separate causes, found in sequence:**
 
-1. **Switch port PVID mismatch** — the same class of bug documented in [VLAN Design and Switch Configuration](../network/NET-03-VLAN-Design-and-Switch-Configuration.md): Port 5's VLAN membership looked correct, but its PVID was still the default `1`. Fixed via the switch's `802.1Q PVID Setting` page (`Port 5 → PVID 20`).
+1. **Switch port PVID mismatch** — Port 5 VLAN membership correct, PVID still `1` (same class of bug as in [VLAN Design and Switch Configuration](../network/NET-03-VLAN-Design-and-Switch-Configuration.md)). Fixed: `802.1Q PVID Setting` → `Port 5 → PVID 20`.
 
-2. **netplan config had no `dhcp4` directive at all.** Even after the PVID fix, no IPv4 address was requested. Inspecting the installer-generated config:
+2. **No `dhcp4` directive in netplan.** Installer-generated config:
 
    ```
    sudo cat /etc/netplan/*.yaml
@@ -88,7 +104,7 @@ Connected via Ethernet to the switch (Port 5, VLAN 20 — see [VLAN Design and S
      version: 2
    ```
 
-   The same root cause already documented on the primary node ([Network Configuration, "Correct config"](./SRV-03-Network-Configuration.md)): the installer's `match`/`set-name` block only renames the interface — it never specifies `dhcp4` or a static address. **Fix:**
+   Same root cause as on the primary node ([Network Configuration](./SRV-03-Network-Configuration.md)): `match`/`set-name` only, no addressing. **Fix:**
 
    ```
    sudo nano /etc/netplan/00-installer-config.yaml
@@ -109,9 +125,9 @@ Connected via Ethernet to the switch (Port 5, VLAN 20 — see [VLAN Design and S
    sudo netplan apply
    ```
 
-   The node obtained `<WORKER_IP>` immediately afterward.
+   IPv4 address obtained immediately.
 
-**Follow-up — later superseded by a static config.** The `dhcp4: true` fix above was valid for the immediate problem (getting any IPv4 address at all), but the node was afterward moved to a static address, the same shape as the primary node's config in [Network Configuration](./SRV-03-Network-Configuration.md):
+**Follow-up — superseded by a static config** (same structure as the primary node):
 
 ```yaml
 network:
@@ -132,11 +148,11 @@ network:
   version: 2
 ```
 
-The `nameservers` entry pointing at the router is also the DNS fix for the ISP's public-resolver blocking (see [Network Configuration](./SRV-03-Network-Configuration.md#real-troubleshooting-isp-blocking-public-dns-resolvers)).
+`nameservers` → router: DNS fix for ISP public-resolver blocking ([Network Configuration](./SRV-03-Network-Configuration.md#real-troubleshooting-isp-blocking-public-dns-resolvers)).
 
 ## Docker installation
 
-Same rationale and packages as the primary node — see [Docker Installation](./SRV-04-Docker-Installation.md) for why Docker is installed alongside (not instead of) containerd:
+Same packages as the primary node ([Docker Installation](./SRV-04-Docker-Installation.md)):
 
 ```
 sudo apt update && sudo apt upgrade -y
@@ -150,7 +166,7 @@ docker run hello-world
 
 ## Kubernetes prerequisites
 
-Identical to the primary node — see [Kubernetes Installation](./SRV-05-Kubernetes-Installation.md) for the full explanation of each step. Commands run on this node:
+Same steps as [Kubernetes Installation](./SRV-05-Kubernetes-Installation.md):
 
 ```
 # Swap
@@ -189,23 +205,21 @@ sudo apt-mark hold kubelet kubeadm kubectl
 sudo apt install -y conntrack ethtool socat
 ```
 
-**Note on `br_netfilter`:** registering it in `/etc/modules-load.d/k8s.conf` immediately, rather than only after hitting a failure, was a direct lesson from [Kubernetes Installation, Step 8](./SRV-05-Kubernetes-Installation.md#step-8--installing-flannel-cni), where the same module silently dropped across a reboot and crashed Flannel on the primary node. Applying the fix proactively here meant this node reached `Ready` without repeating that incident.
+`br_netfilter` registered in `/etc/modules-load.d/k8s.conf` up front, avoiding the reboot-persistence failure from [Kubernetes Installation, Step 8](./SRV-05-Kubernetes-Installation.md#step-8--installing-flannel-cni).
 
 ## Real troubleshooting: `kubeadm init` run by mistake instead of `kubeadm join`
 
-**What happened:** the command actually run on this node was:
+**What happened:** ran on this node:
 
 ```
 sudo kubeadm init --pod-network-cidr=10.244.0.0/16
 ```
 
-This is the command for bootstrapping a **new, first** control-plane node — not for joining an existing cluster. It completed "successfully," which was itself misleading: the output was shaped identically to the original control-plane bootstrap in [Kubernetes Installation](./SRV-05-Kubernetes-Installation.md), including its own fresh `kubeadm join ...` line at the end, generated from this node's own new (and unwanted) control plane.
+It completed successfully and printed its own `kubeadm join` line, making the error non-obvious. See [Guide: kubeadm init vs. kubeadm join](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-Kubeadm-Init-vs-Join.md).
 
-**Root cause:** `kubeadm init` and `kubeadm join` are different operations invoked through the same `sudo kubeadm <verb>` shape, and `kubeadm` has no way to know a given machine was only ever intended to be a worker — "create a new cluster here" is a perfectly valid, well-formed request from its point of view. See [Guide: kubeadm init vs. kubeadm join](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-Kubeadm-Init-vs-Join.md) for the general pattern.
+**Consequence:** the node became the control plane of a separate cluster (own CA, etcd, API server on `<WORKER_IP>:6443`), disconnected from the real one on `<SERVER_IP>`.
 
-**Consequence:** this node briefly became the control-plane of its **own, separate, independent** Kubernetes cluster — its own CA, its own etcd, its own API server on `<WORKER_IP>:6443` — entirely disconnected from the real cluster on `<SERVER_IP>`.
-
-**Fix — reset the node to a clean slate:**
+**Fix — reset the node:**
 
 ```
 sudo kubeadm reset -f
@@ -217,26 +231,24 @@ sudo iptables -t mangle -F
 sudo iptables -X
 ```
 
-- `/etc/cni/net.d` — stale Flannel config from the accidental `init`, which could otherwise confuse the real join
-- `$HOME/.kube` — kubeconfig pointing at the now-deleted throwaway cluster; irrelevant for a worker, which never needs its own admin credentials
-- the `iptables` commands flush and remove the custom chains `kube-proxy` had installed for the fake cluster
+- `/etc/cni/net.d` — stale Flannel config from the accidental `init`
+- `$HOME/.kube` — kubeconfig for the discarded cluster
+- `iptables` — `kube-proxy` chains from the discarded cluster
 
-**Generated a fresh join command from the real control plane** (run on `<HOSTNAME>`, not this node):
+**Fresh join command** (on `<HOSTNAME>`; the original token had expired — 24h default):
 
 ```
 kubeadm token create --print-join-command
 ```
 
-The original token from the primary node's `kubeadm init` (see [Kubernetes Installation, Step 6](./SRV-05-Kubernetes-Installation.md#step-6--kubeadm-init)) had already expired — bootstrap tokens default to a 24-hour lifetime.
-
-**Joined correctly** (run on this node, this time with the right verb):
+**Join** (on this node):
 
 ```
 sudo kubeadm join <SERVER_IP>:6443 --token <JOIN_TOKEN> \
         --discovery-token-ca-cert-hash sha256:<CA_CERT_HASH>
 ```
 
-**Note on `kubectl` access:** unlike `kubeadm init`, `kubeadm join` produces no `admin.conf` — a worker has no need for cluster-admin credentials of its own. The `~/.kube/config` copy step from [Kubernetes Installation, Step 7](./SRV-05-Kubernetes-Installation.md#step-7--kubectl-access) is not repeated on this node; all `kubectl` commands continue to run from `<HOSTNAME>`.
+No kubeconfig on the worker (`kubeadm join` produces no `admin.conf`); `kubectl` runs from `<HOSTNAME>`.
 
 ## Verification
 
@@ -252,15 +264,15 @@ NAME                 STATUS   ROLES           AGE   VERSION
 <WORKER_HOSTNAME>    Ready    <none>          14s   v1.31.14
 ```
 
-Confirmed real scheduling works, not just node registration:
+Scheduling test:
 
 ```
 kubectl create deployment nginx-test --image=nginx
-kubectl get pods -o wide     # confirmed the pod landed on <WORKER_HOSTNAME>, not the control-plane node
+kubectl get pods -o wide     # pod on <WORKER_HOSTNAME>
 kubectl delete deployment nginx-test
 ```
 
-This is expected now without needing to temporarily lift the control-plane's `NoSchedule` taint (see [Kubernetes Installation, Step 10](./SRV-05-Kubernetes-Installation.md#step-10--first-test-workload-and-the-control-plane-taint)) — a real worker now exists to absorb ordinary workloads, so the taint stays on the control-plane permanently going forward.
+Scheduled on the worker with the control-plane taint in place; the taint remains permanently.
 
 ## Related
 

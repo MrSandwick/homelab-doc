@@ -4,17 +4,47 @@ tags: [homelab, project, kubernetes, workload, ingress, scheduling]
 
 # First Real Workload
 
-> Status: 🟢 **Complete — first real application workload deployed and verified, closing the last open item from [SRV-00](./SRV-00-Project-Overview.md).** A static site is served through the existing ingress-nginx + MetalLB entry point on a new `/site` path, running on the worker node while the control plane stays free of application load.
+> Status: 🟢 **Complete.** Static site (nginx) served through the existing ingress-nginx + MetalLB entry point at `/site`, scheduled on the worker node. Closes the last open item in [SRV-00](./SRV-00-Project-Overview.md).
 
 Picks up after [Ansible Node Provisioning](./SRV-09-Ansible-Node-Provisioning.md). Commands run on the control-plane node (`<HOSTNAME>`) unless noted.
 
-## Why a static site first
+## Contents
 
-A static site is the simplest workload that still exercises the whole path: build an image, get it onto a node, schedule a pod, put a Service in front of it, and route to it from the LAN. It is **stateless** — no database, no persistent volume — so if something fails, the cause is in the path being tested rather than in storage. Anything with persistent state (Nextcloud, a Minecraft world) comes after this path is proven.
+1. [Components](#components)
+2. [End state](#end-state)
+3. [Step 1 — Build the image](#step-1--build-the-image)
+4. [Step 2 — Import the image into containerd](#step-2--import-the-image-into-containerd)
+5. [Step 3 — First deployment: control plane (reverted)](#step-3--first-deployment-control-plane-reverted)
+6. [Step 4 — Redeployment on the worker](#step-4--redeployment-on-the-worker)
+7. [Step 5 — Route through the Ingress](#step-5--route-through-the-ingress)
+8. [Verification](#verification)
+9. [Files](#files)
+10. [Related](#related)
 
-## Building the image
+## Components
 
-A minimal `index.html` and a `Dockerfile` in `~/my-site`:
+No new cluster software; this entry adds Kubernetes objects on top of [SRV-08](./SRV-08-Helm-Observability-Ingress.md).
+
+| Name | Kind | Namespace | Runs on | Purpose |
+|---|---|---|---|---|
+| `my-site:v1` | Container image (`nginx:alpine` + `index.html`) | — | worker's containerd | The site |
+| `my-site` | Deployment (1 replica) | `default` | worker (pinned) | Runs the pod |
+| `my-site` | Service (port 80) | `default` | — | Stable address for the pod |
+| `my-site-ingress` | Ingress | `default` | — | `/site` → `my-site:80` |
+
+Overview of each layer: [Guide: The Stack](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-Stack.md).
+
+## End state
+
+```
+Browser (LAN) → <INGRESS_IP> (MetalLB) → ingress-nginx → Grafana (path: /)
+                                          ├→ my-site (path: /site, on <WORKER_HOSTNAME>)
+                                          ↳ Prometheus + Alertmanager + node-exporter (×2) feeding Grafana
+```
+
+## Step 1 — Build the image
+
+`~/my-site/Dockerfile`:
 
 ```dockerfile
 FROM nginx:alpine
@@ -26,40 +56,35 @@ cd ~/my-site
 docker build -t my-site:v1 .
 ```
 
-## Getting a local image into containerd (no registry)
+## Step 2 — Import the image into containerd
 
-The image was built locally with Docker and not pushed to any registry (Docker Hub, GHCR…). Docker and the containerd instance Kubernetes uses keep **separate image stores**, so Kubernetes cannot see a Docker-built image on its own (background: [Docker vs Containerd](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-Docker-vs-Containerd.md)). It was imported into containerd's `k8s.io` namespace directly:
+No registry is used; the Docker-built image was imported into containerd's `k8s.io` namespace directly. See [Guide: Local Container Images Without a Registry](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-Local-Container-Images-Without-a-Registry.md).
 
 ```
 docker save my-site:v1 | sudo ctr -n k8s.io images import -
-```
-
-Verified:
-
-```
 sudo ctr -n k8s.io images list | grep my-site
 ```
 
-The entry appeared with the label `io.cri-containerd.image=managed`, confirming Kubernetes' runtime can use it. See [Guide: Local Container Images Without a Registry](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-Local-Container-Images-Without-a-Registry.md).
+Listed with `io.cri-containerd.image=managed`. The image exists only on the node it was imported on, so the Deployment must be pinned to that node.
 
-**Consequence worth stating plainly:** an image imported this way exists **only in containerd on the one machine it was imported on.** A pod using it can be scheduled only onto that node — not the other — until the image is either pushed to a registry both nodes can pull from, or built and imported separately on every node that might run it.
+## Step 3 — First deployment: control plane (reverted)
 
-### ⚠️ Real mistake made here: deployed to the control plane first
+### ⚠️ Real mistake made here
 
-**What happened:** the image had been built and imported on the control-plane node, so the first Deployment pinned itself there:
+**What happened:** the image had been imported on the control-plane node, so the first Deployment was pinned there:
 
 ```yaml
 nodeSelector:
   kubernetes.io/hostname: <HOSTNAME>
 ```
 
-That alone left the pod `Pending`, because the control plane carries the `node-role.kubernetes.io/control-plane:NoSchedule` taint. The scheduler's event said exactly that:
+The pod stayed `Pending`:
 
 ```
 0/2 nodes are available: 1 node(s) didn't match Pod's node affinity/selector, 1 node(s) had untolerated taint {node-role.kubernetes.io/control-plane: }
 ```
 
-(The worker fails the `nodeSelector`; the control plane fails the taint.) A matching toleration got it running:
+A toleration was added and the pod ran:
 
 ```yaml
 tolerations:
@@ -68,37 +93,32 @@ tolerations:
     effect: NoSchedule
 ```
 
-**Why it was wrong anyway:** it worked, but it wasn't the intended end state. The control-plane taint was deliberately restored after the earlier nginx smoke test ([Kubernetes Installation](./SRV-05-Kubernetes-Installation.md#step-10--first-test-workload-and-the-control-plane-taint)) so that node stays reserved for cluster management, and a toleration was quietly undoing that for an ordinary application. Getting the pod to run had satisfied the wrong goal.
+**Root cause:** node placement followed where the image had been imported, not where the workload belonged. The result put an application on the control plane, contrary to the taint restored in [Kubernetes Installation, Step 10](./SRV-05-Kubernetes-Installation.md#step-10--first-test-workload-and-the-control-plane-taint).
 
-**Root cause:** the node was chosen because that's where the image happened to be — a constraint of the local-import approach — rather than because it was where the workload *should* run. The `Pending` event pointed at the taint, and the toleration was the fastest way past it, but the taint was telling the truth about where this workload belonged.
+**Resolution:** everything deployed so far was removed and redone on the worker (Step 4):
 
-**Fix — reverted and redone on the worker:**
+```
+kubectl delete -f deployment.yaml
+kubectl delete -f ingress.yaml
+```
 
-1. Removed what was deployed:
-   ```
-   kubectl delete -f deployment.yaml
-   kubectl delete -f ingress.yaml
-   ```
-   (the Deployment and Service manifest, and the Ingress).
-2. Copied the site source to the worker:
-   ```
-   scp -r ~/my-site <USERNAME>@<WORKER_IP>:~/my-site
-   ```
-3. Rebuilt and imported the image on the **worker** itself — the image doesn't transfer between nodes on its own:
-   ```
-   docker build -t my-site:v1 .
-   docker save my-site:v1 | sudo ctr -n k8s.io images import -
-   ```
-4. Rewrote the manifest with `nodeSelector: kubernetes.io/hostname: <WORKER_HOSTNAME>` and **removed the `tolerations` block entirely** — the worker carries no taint, so none is needed.
-5. Reapplied and checked where it landed:
-   ```
-   kubectl get pods -l app=my-site -o wide
-   ```
-   The `NODE` column showed the worker.
+## Step 4 — Redeployment on the worker
 
-**Lesson:** a workload landing on the right node is not the same as it landing on *a* node. When a taint blocks a pod, ask whether the taint is wrong or whether the *placement* is. Here it was the placement.
+Site source copied to the worker, then the image rebuilt and imported **on the worker**:
 
-## The final manifests (worker-targeted)
+```
+scp -r ~/my-site <USERNAME>@<WORKER_IP>:~/my-site
+```
+
+On `<WORKER_HOSTNAME>`:
+
+```
+cd ~/my-site
+docker build -t my-site:v1 .
+docker save my-site:v1 | sudo ctr -n k8s.io images import -
+```
+
+`deployment.yaml` — `nodeSelector` pointed at the worker, `tolerations` removed:
 
 ```yaml
 apiVersion: apps/v1
@@ -136,13 +156,18 @@ spec:
       targetPort: 80
 ```
 
-- **`nodeSelector`** pins the pod to the worker — the only node that has the image.
-- **`imagePullPolicy: Never`** tells the kubelet to use the locally imported image and never try to pull it. It is the natural pairing with the local-import approach and makes the intent explicit. (With a versioned tag like `:v1` the default policy, `IfNotPresent`, would also have used the local copy; the trap is `:latest` or an untagged image, where the default is `Always` and the kubelet tries — and fails — to pull from a registry that doesn't hold it. `Never` also fails fast with `ErrImageNeverPull` on a node missing the image, instead of attempting a doomed pull.)
-- **`docker.io/library/my-site:v1`** is the fully-qualified name containerd gives a bare `my-site:v1`; using it makes the reference match what was imported exactly.
+`imagePullPolicy: Never` forces use of the locally imported image; the image reference uses the fully-qualified name containerd assigns on import (`docker.io/library/my-site:v1`).
 
-## Exposing it through the existing Ingress
+```
+kubectl apply -f deployment.yaml
+kubectl get pods -l app=my-site -o wide
+```
 
-No new IP and no new ingress controller: the site was added as a second path on the entry point that already serves Grafana ([Helm, Observability, and Ingress](./SRV-08-Helm-Observability-Ingress.md)).
+`NODE`: `<WORKER_HOSTNAME>`.
+
+## Step 5 — Route through the Ingress
+
+Added as a second path on the existing ingress-nginx entry point ([SRV-08](./SRV-08-Helm-Observability-Ingress.md)). `ingress.yaml`:
 
 ```yaml
 apiVersion: networking.k8s.io/v1
@@ -169,25 +194,32 @@ spec:
 kubectl apply -f ingress.yaml
 ```
 
-Two things worth knowing:
+- Separate Ingress object in `default` (Grafana's is in `monitoring`); both are served by the same controller and address.
+- `rewrite-target: /` rewrites all `/site*` requests to `/` — adequate for the current single page; sub-paths or assets would require a capture-group rewrite.
 
-- This is a **second Ingress object** handled by the same controller, in the `default` namespace next to the Service it points at. An Ingress can only reference Services in its own namespace, which is why Grafana's rule (in `monitoring`) and this one (in `default`) are separate objects sharing one controller and one address.
-- **`rewrite-target: /`** strips the `/site` prefix so the backend sees `/`, which is what a static `index.html` at the web root needs. The catch: it rewrites *every* matching path to `/`, so a site with multiple pages or assets under sub-paths would need a capture-group rewrite instead. Fine for a single page.
+## Verification
 
-Verified end to end: `http://<INGRESS_IP>/site` from a browser on the LAN serves the page, and `/` still reaches Grafana — the first time this cluster has routed more than one backend through the ingress.
+| Check | Result |
+|---|---|
+| `kubectl get pods -l app=my-site -o wide` | Pod `Running` on `<WORKER_HOSTNAME>` |
+| `http://<INGRESS_IP>/site` from a LAN browser | Site served |
+| `http://<INGRESS_IP>/` from a LAN browser | Grafana still served |
+| Control-plane taint | Unchanged; no tolerations on `my-site` |
 
-## Current traffic path
+## Files
 
-```
-Browser (LAN) → <INGRESS_IP> (MetalLB) → ingress-nginx → Grafana (path: /)
-                                          ├→ my-site (path: /site, on <WORKER_HOSTNAME>)
-                                          ↳ Prometheus + Alertmanager + node-exporter (×2) feeding Grafana
-```
+| File | Node | Contents |
+|---|---|---|
+| `~/my-site/index.html`, `~/my-site/Dockerfile` | both (source copied to the worker) | Site and image build |
+| `deployment.yaml` | control plane | Deployment + Service |
+| `ingress.yaml` | control plane | Ingress `/site` → `my-site:80` |
 
 ## Related
 
 - [Helm, Observability, and Ingress](./SRV-08-Helm-Observability-Ingress.md) — the ingress and MetalLB entry point this reuses
 - [Kubernetes Installation](./SRV-05-Kubernetes-Installation.md) — the control-plane taint, and why it was restored
 - [Second Node Setup](./SRV-06-Second-Node-Setup.md) — the worker this runs on
+- [Guide: The Stack](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-Stack.md) — companion Guides repository
 - [Guide: Local Container Images Without a Registry](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-Local-Container-Images-Without-a-Registry.md) — companion Guides repository
-- [Guide: Kubernetes Taints and Tolerations](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-Kubernetes-Taints-and-Tolerations.md) — companion Guides repository — the taint/toleration mechanics behind the mistake above
+- [Guide: Kubernetes Taints and Tolerations](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-Kubernetes-Taints-and-Tolerations.md) — companion Guides repository
+- [Guide: What Is a Cluster](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-Homelab-Clusters.md) — companion Guides repository — workload placement and choice of first workload
