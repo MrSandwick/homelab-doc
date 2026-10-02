@@ -14,7 +14,7 @@ Build a home lab server to develop and demonstrate practical DevOps / infrastruc
 - Cloud storage (Nextcloud-style)
 - Minecraft server (small friend group)
 - Media streaming (Plex/Jellyfin, direct play primarily)
-- A self-hosted RAG (Retrieval-Augmented Generation) stack for experimentation — not a hard requirement, deprioritized after initial hardware planning
+- A self-hosted RAG (Retrieval-Augmented Generation) stack for experimentation — deprioritized during initial hardware planning, but newly practical: the GPU-equipped laptop node is now fully usable by pods (driver, container runtime and Device Plugin all verified working, see [GPU Node Setup](./SRV-12-GPU-Node-Setup.md)); the stack itself is not yet built
 
 ## Key architectural decisions
 
@@ -31,6 +31,7 @@ See [Hardware Selection](./SRV-01-Hardware-Selection.md) for the full comparison
 
 - **Primary node (control plane):** GMKtec M8 — AMD Ryzen 7 PRO 6650H, 16GB LPDDR5, 512GB SSD, dual 2.5GbE
 - **Secondary node (worker):** Dell OptiPlex 7050 Micro — Intel i7-6700T (4C/8T), 16GB DDR4, 512GB SSD
+- **Third node (GPU worker):** Acer Nitro AN515-57 laptop — Intel i5-11400H (6C/12T), ~15GB DDR4, NVIDIA RTX 3050 Ti Mobile; repurposed rather than purchased, see [Node Profile](./SRV-11-GPU-Laptop-Node-Profile.md)
 
 ## Status at time of writing
 
@@ -43,7 +44,9 @@ See [Hardware Selection](./SRV-01-Hardware-Selection.md) for the full comparison
 - ✅ Control plane initialized (`kubeadm init`), node `Ready`, Flannel CNI healthy
 - ✅ First test workload (nginx) deployed, verified reachable over the network, and cleaned up
 - ✅ Second node (`<WORKER_HOSTNAME>`, Dell OptiPlex 7050 Micro) joined the cluster via `kubeadm join` — see [Second Node Setup](./SRV-06-Second-Node-Setup.md) for the full process, including a real mistake made and recovered from along the way
-- ✅ Cluster is now two nodes, both `Ready`: `<HOSTNAME>` (control-plane) and `<WORKER_HOSTNAME>` (worker)
+- ✅ Third node (`<GPU_HOSTNAME>`, Acer Nitro laptop with an NVIDIA GPU) joined — see [Node Profile](./SRV-11-GPU-Laptop-Node-Profile.md) for what it is and the daily-driver trade-offs it brings
+- ✅ Cluster is now three nodes, all `Ready`: `<HOSTNAME>` (control-plane), `<WORKER_HOSTNAME>` and `<GPU_HOSTNAME>` (workers)
+- ✅ GPU access verified end-to-end on the laptop worker — a test pod ran `nvidia-smi` inside the cluster, matching the host's own output. See [GPU Node Setup](./SRV-12-GPU-Node-Setup.md)
 - ✅ LVM root-partition under-allocation fixed on both nodes (worker resolved first, control-plane resolved in a later verification pass) — both now use the full disk
 - ✅ Helm installed; `kube-prometheus-stack` deployed and collecting metrics from both nodes — see [Helm, Observability, and Ingress](./SRV-08-Helm-Observability-Ingress.md)
 - ✅ ingress-nginx + MetalLB give the cluster a real LAN-reachable entry point (`<INGRESS_IP>`); Grafana reachable through it, replacing the earlier `port-forward`-only access

@@ -17,11 +17,14 @@ This section documents *what was done and why* — decisions made, exact command
 9. See [Helm, Observability, and Ingress](./SRV-08-Helm-Observability-Ingress.md)
 10. See [Ansible Node Provisioning](./SRV-09-Ansible-Node-Provisioning.md)
 11. See [First Real Workload](./SRV-10-First-Real-Workload.md)
+12. See [Node Profile — GPU Laptop Worker](./SRV-11-GPU-Laptop-Node-Profile.md)
+13. See [GPU Node Setup](./SRV-12-GPU-Node-Setup.md)
 
 ## Stack
 
-- **Hardware:** GMKtec M8 (Ryzen 7 PRO 6650H, 16GB LPDDR5) as control-plane node; Dell OptiPlex 7050 Micro (i7-6700T, 16GB DDR4) as worker node
-- **OS:** Ubuntu Server 26.04 LTS
+- **Hardware:** GMKtec M8 (Ryzen 7 PRO 6650H, 16GB LPDDR5) as control-plane node; Dell OptiPlex 7050 Micro (i7-6700T, 16GB DDR4) and an Acer Nitro AN515-57 laptop (i5-11400H, RTX 3050 Ti Mobile) as worker nodes
+- **OS:** Ubuntu Server 26.04 LTS on the two purchased nodes; Ubuntu 26.04 Desktop on the laptop worker
+- **GPU:** NVIDIA Container Toolkit + Device Plugin on the laptop worker, exposing `nvidia.com/gpu` to pods
 - **Container runtime:** containerd (CRI-compliant, used directly by Kubernetes)
 - **Orchestration:** Kubernetes via `kubeadm` (not a lightweight distribution — chosen deliberately for closer-to-production setup experience)
 - **Package management:** Helm
@@ -41,4 +44,4 @@ Conceptual explanations of the technologies used here (Kubernetes vs k3s, Docker
 
 ## Status
 
-🟢 The cluster is now two nodes, both `Ready`: the GMKtec M8 control plane and the Dell OptiPlex 7050 Micro worker (`kubeadm`, containerd, Flannel CNI all healthy on both). A test workload was deployed on the worker node and verified reachable. See [Second Node Setup](./SRV-06-Second-Node-Setup.md) for the full join process, including a real `kubeadm init`-vs-`join` mistake and recovery.
+🟢 The cluster is now three nodes, all `Ready` (`kubeadm`, containerd, Flannel CNI healthy on each): the GMKtec M8 control plane, the Dell OptiPlex 7050 Micro worker, and a repurposed Acer Nitro laptop worker. A test workload was deployed on a worker node and verified reachable. See [Second Node Setup](./SRV-06-Second-Node-Setup.md) for the full join process, including a real `kubeadm init`-vs-`join` mistake and recovery. The laptop's GPU (NVIDIA RTX 3050 Ti Mobile) is fully usable by pods — see [GPU Node Setup](./SRV-12-GPU-Node-Setup.md).
