@@ -4,7 +4,7 @@ tags: [homelab-project, homelab, note, project, networking, monitoring]
 
 # Traffic Monitoring
 
-> Status: 🟢 verified working — ntopng dashboard showing live traffic across all VLANs.
+> Status: 🟢 verified working end-to-end, including a real physical-layer troubleshooting session.
 
 ## Goal
 
@@ -139,13 +139,61 @@ Dashboard: `http://<SERVER_IP>:3000`, default login `admin` / `admin` — change
 
 **Root cause:** the monitored interface (`enp2s0`) has no IP address of its own (by design — it's a passive mirror), so ntopng has no way to automatically infer which subnets should be considered "local" the way it normally would from an interface's own address. Every subnet it observes traffic from — correctly, since the whole point of mirroring is to see traffic from multiple VLANs at once — gets flagged as unexpected.
 
-**Fix (identified, not yet fully applied at time of writing):** explicitly declare the known local subnets, either via the `-m` startup parameter (e.g. `-m "<MGMT_SUBNET>/24,<USERS_SUBNET>/24,<ADMIN_SUBNET>/24"` added to the `command:` block above) or via `Settings → Networks` in the UI. Tracked as a follow-up; the alerts are cosmetic (they don't block monitoring) but worth clearing for a clean dashboard.
+**Fix:** explicitly declare the known local subnets, either via the `-m` startup parameter or via `Settings → Networks` in the UI. Applied as described under "Open item resolved" below.
 
 ### Using ntopng's flow inspector to evaluate an alert
 
 Worth documenting as a repeatable workflow: ntopng's per-flow detail view (click any flow in `Flows`) is useful for triaging a flagged alert rather than reacting to the score alone. Example encountered: a flow from an Admin-VLAN host to an Akamai CDN IP, classified as `HTTP.Microsoft365` over plain HTTP (port 80), triggered a `Mismatching protocol with IP address` alert at the maximum score (100), tagged with a MITRE ATT&CK ID.
 
 Checking the ID against the real MITRE ATT&CK framework showed it corresponds to an unrelated technique (`Rogue Domain Controller`) that has nothing to do with a plain CDN-hosted HTTP request — a reminder that ntopng Community's automatic MITRE tagging for nDPI risk flags can be a loose, approximate mapping rather than a precise classification, and shouldn't be taken at face value without checking what the underlying nDPI risk actually detected. The likely explanation for the alert itself: Microsoft serves a meaningful share of Microsoft 365 traffic through third-party CDNs like Akamai, so nDPI's classifier (which associates certain protocols with known IP ranges) flagged a mismatch between "looks like Microsoft365" and "IP belongs to Akamai, not Microsoft" — a common false-positive pattern for any vendor that uses a CDN. Treated as benign after confirming no matching suspicious process was running on the source host.
+
+## Real troubleshooting: monitoring interface showed `NO-CARRIER`
+
+**Symptom:** the ntopng dashboard showed no traffic at all (0 bps, empty `Hosts` list), and `ip link show enp2s0` reported:
+
+```
+<NO-CARRIER,BROADCAST,MULTICAST,PROMISC,UP> ... state DOWN
+```
+
+**Root cause:** this was a purely physical-layer issue, unrelated to any ntopng or switch configuration — `NO-CARRIER` means the network interface detects no electrical signal from the switch at all, distinct from any software/logical setting. The monitoring cable had become disconnected (or was never fully seated) at one end, likely disturbed while re-cabling the switch to accommodate the second and third cluster nodes joining around the same time (see [VLAN Design and Switch Configuration](./NET-03-VLAN-Design-and-Switch-Configuration.md) for the port reassignments that happened during that period).
+
+**Fix:** reseated the cable between the server's `enp2s0` NIC and the switch's mirroring port. `PROMISC` and `UP` being already set didn't matter — without `LOWER_UP` (physical link detected), no traffic can arrive regardless of any mirroring or interface configuration.
+
+**Takeaway:** `NO-CARRIER` is a useful first thing to rule out whenever a monitoring/mirrored interface "stops working" after other cabling changes nearby — it's easy to jump straight to suspecting the Port Mirror configuration or ntopng itself when the actual fault is a loose cable.
+
+## Real troubleshooting: forgot to persist a password after a Grafana/ntopng password mix-up
+
+While troubleshooting the above, the ntopng admin password set during initial setup had been forgotten. Resolved by resetting ntopng's local user database (distinct from Grafana, the cluster-monitoring dashboard on the Kubernetes side — the two were briefly confused during troubleshooting since both are web dashboards with an `admin` account):
+
+```
+cd ~/ntopng
+docker compose down
+rm -rf ./data/*
+docker compose up -d
+```
+
+This clears ntopng's accumulated traffic history along with its user database — an acceptable trade-off here since the history itself wasn't load-bearing, but worth noting as a real cost of this particular reset method. Logged back in with the framework default (`admin`/`admin`) and changed the password immediately afterward.
+
+## Open item resolved: Ghost Networks alerts
+
+The `-m` startup parameter (declaring known local subnets to ntopng) was added to `docker-compose.yml`, resolving the `Ghost Networks` alerts and the "No local hosts detected" banner noted as an open item previously:
+
+```yaml
+    command:
+      - --community
+      - -i
+      - enp2s0
+      - -r
+      - 127.0.0.1:6379
+      - -w
+      - "3000"
+      - -m
+      - "<MGMT_SUBNET>/24,<USERS_SUBNET>/24,<ADMIN_SUBNET>/24"
+```
+
+```
+docker compose up -d --force-recreate ntopng
+```
 
 ## Related
 
