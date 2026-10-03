@@ -20,7 +20,7 @@ Picks up after [Helm, Observability, and Ingress](./SRV-08-Helm-Observability-In
 8. [Final verified run](#final-verified-run)
 9. [Related](#related)
 
-Problems hit during this work are recorded separately in [SRV-09-TRBL](./SRV-09-TRBL-Ansible-Node-Provisioning.md).
+Problems hit during this work are recorded separately in [SRV-09-TRBL](../troubleshooting/SRV-09-TRBL-Ansible-Node-Provisioning.md).
 
 ## Components
 
@@ -109,7 +109,7 @@ ssh-copy-id <USERNAME>@<SERVER_IP>     # control node (self)
 ssh-copy-id <USERNAME>@<WORKER_IP>     # worker
 ```
 
-Both steps were initially missed — see [SRV-09-TRBL](./SRV-09-TRBL-Ansible-Node-Provisioning.md#ssh-host-key-and-authentication-failures).
+Both steps were initially missed — see [SRV-09-TRBL](../troubleshooting/SRV-09-TRBL-Ansible-Node-Provisioning.md#ssh-host-key-and-authentication-failures).
 
 ## Privilege escalation: classic `sudo`
 
@@ -126,7 +126,7 @@ sudo update-alternatives --config sudo
 sudo --version    # confirms classic sudo
 ```
 
-Applied on all three machines (test laptop and both cluster nodes). Symptom and diagnosis: [SRV-09-TRBL](./SRV-09-TRBL-Ansible-Node-Provisioning.md#sudo-rs-breaks-privilege-escalation). See also [Guide: sudo-rs and Privilege Escalation](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-Sudo-rs-and-Privilege-Escalation.md).
+Applied on all three machines (test laptop and both cluster nodes). Symptom and diagnosis: [SRV-09-TRBL](../troubleshooting/SRV-09-TRBL-Ansible-Node-Provisioning.md#sudo-rs-breaks-privilege-escalation). See also [Guide: sudo-rs and Privilege Escalation](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-Sudo-rs-and-Privilege-Escalation.md).
 
 ## Inventory and variables
 
@@ -187,7 +187,7 @@ Re-run: idempotent except the Kubernetes apt-key task (`ansible.builtin.get_url`
 
 ## Related
 
-- [SRV-09-TRBL](./SRV-09-TRBL-Ansible-Node-Provisioning.md) — troubleshooting for this doc
+- [SRV-09-TRBL](../troubleshooting/SRV-09-TRBL-Ansible-Node-Provisioning.md) — troubleshooting for this doc
 - [Helm, Observability, and Ingress](./SRV-08-Helm-Observability-Ingress.md) — the platform layer this provisioning sits under
 - [Kubernetes Installation](./SRV-05-Kubernetes-Installation.md) — the manual steps this playbook now codifies
 - [Second Node Setup](./SRV-06-Second-Node-Setup.md) — the worker's manual provisioning

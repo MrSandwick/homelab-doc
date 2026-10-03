@@ -6,7 +6,7 @@ tags: [homelab-project, homelab, note, project, networking, monitoring]
 
 > Status: 🟢 verified working end-to-end.
 
-Problems hit during this work are recorded separately in [NET-08-TRBL](./NET-08-TRBL-Monitoring.md).
+Problems hit during this work are recorded separately in [NET-08-TRBL](../troubleshooting/NET-08-TRBL-Monitoring.md).
 
 ## Goal
 
@@ -59,7 +59,7 @@ Hardware offloading (TSO/GSO/GRO) merges several real packets into one before so
 sudo ethtool -K enp2s0 gro off gso off tso off
 ```
 
-Background: [NET-08-TRBL](./NET-08-TRBL-Monitoring.md#nic-offloading-corrupts-monitored-packet-sizes).
+Background: [NET-08-TRBL](../troubleshooting/NET-08-TRBL-Monitoring.md#nic-offloading-corrupts-monitored-packet-sizes).
 
 **Made persistent** (ethtool settings don't survive a reboot) via a small systemd unit:
 
@@ -125,8 +125,8 @@ docker compose ps
 
 - `network_mode: host` on both containers — required so ntopng can see the physical `enp2s0` interface directly (Docker's default bridge network would hide it), and so it can reach Redis on `127.0.0.1:6379` within the same network namespace.
 - `./data:/var/lib/ntopng` — persists ntopng's host/alert database across container restarts.
-- `-m` — declares the local subnets. The mirror interface has no IP of its own, so ntopng cannot infer them; without it every observed subnet raises a `Ghost Networks` alert ([NET-08-TRBL](./NET-08-TRBL-Monitoring.md#ghost-networks-alerts)).
-- Image tag `:latest` — the official image is not published under `:stable` ([NET-08-TRBL](./NET-08-TRBL-Monitoring.md#ntopntopngstable-tag-does-not-exist)).
+- `-m` — declares the local subnets. The mirror interface has no IP of its own, so ntopng cannot infer them; without it every observed subnet raises a `Ghost Networks` alert ([NET-08-TRBL](../troubleshooting/NET-08-TRBL-Monitoring.md#ghost-networks-alerts)).
+- Image tag `:latest` — the official image is not published under `:stable` ([NET-08-TRBL](../troubleshooting/NET-08-TRBL-Monitoring.md#ntopntopngstable-tag-does-not-exist)).
 
 Dashboard: `http://<SERVER_IP>:3000`, default login `admin` / `admin` — change on first login.
 
@@ -138,7 +138,7 @@ Checking the ID against the real MITRE ATT&CK framework showed it corresponds to
 
 ## Related
 
-- [NET-08-TRBL](./NET-08-TRBL-Monitoring.md) — troubleshooting for this doc
+- [NET-08-TRBL](../troubleshooting/NET-08-TRBL-Monitoring.md) — troubleshooting for this doc
 - [Project Overview](./NET-00-Project-Overview.md)
 - Server docs: [Docker Installation](../server/SRV-04-Docker-Installation.md) — Docker installation details
 - Guide: [Port Mirroring and Promiscuous Mode](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/network/Guide-Port-Mirroring-and-Promiscuous-Mode.md)

@@ -22,7 +22,7 @@ Installed on: **Dell OptiPlex 7050 Micro** (second/worker node)
 10. [Verification](#verification)
 11. [Related](#related)
 
-Problems hit during this work are recorded separately in [SRV-06-TRBL](./SRV-06-TRBL-Second-Node-Setup.md).
+Problems hit during this work are recorded separately in [SRV-06-TRBL](../troubleshooting/SRV-06-TRBL-Second-Node-Setup.md).
 
 Components installed on this node match the primary node (Ubuntu Server 26.04, Docker, containerd, kubelet/kubeadm/kubectl v1.31); see [Kubernetes Installation](./SRV-05-Kubernetes-Installation.md#components-installed).
 
@@ -113,7 +113,7 @@ sudo netplan apply
 
 `nameservers` → router, not public resolvers ([Network Configuration — DNS](./SRV-03-Network-Configuration.md#dns)).
 
-The node first came up with no IPv4 address and ran on DHCP before the static config — see [SRV-06-TRBL](./SRV-06-TRBL-Second-Node-Setup.md#no-ipv4-address-despite-a-healthy-link).
+The node first came up with no IPv4 address and ran on DHCP before the static config — see [SRV-06-TRBL](../troubleshooting/SRV-06-TRBL-Second-Node-Setup.md#no-ipv4-address-despite-a-healthy-link).
 
 ## Docker installation
 
@@ -170,7 +170,7 @@ sudo apt-mark hold kubelet kubeadm kubectl
 sudo apt install -y conntrack ethtool socat
 ```
 
-`br_netfilter` registered in `/etc/modules-load.d/k8s.conf` up front, avoiding the reboot-persistence failure hit on the primary node ([SRV-05-TRBL](./SRV-05-TRBL-Kubernetes-Installation.md#flannel-in-crashloopbackoff-br_netfilter-not-loaded)).
+`br_netfilter` registered in `/etc/modules-load.d/k8s.conf` up front, avoiding the reboot-persistence failure hit on the primary node ([SRV-05-TRBL](../troubleshooting/SRV-05-TRBL-Kubernetes-Installation.md#flannel-in-crashloopbackoff-br_netfilter-not-loaded)).
 
 ## Joining the cluster
 
@@ -189,7 +189,7 @@ sudo kubeadm join <SERVER_IP>:6443 --token <JOIN_TOKEN> \
 
 No kubeconfig on the worker (`kubeadm join` produces no `admin.conf`); `kubectl` runs from `<HOSTNAME>`.
 
-`kubeadm init` was first run on this node by mistake and the node had to be reset before joining — see [SRV-06-TRBL](./SRV-06-TRBL-Second-Node-Setup.md#kubeadm-init-run-instead-of-kubeadm-join).
+`kubeadm init` was first run on this node by mistake and the node had to be reset before joining — see [SRV-06-TRBL](../troubleshooting/SRV-06-TRBL-Second-Node-Setup.md#kubeadm-init-run-instead-of-kubeadm-join).
 
 ## Verification
 
@@ -217,7 +217,7 @@ Scheduled on the worker with the control-plane taint in place; the taint remains
 
 ## Related
 
-- [SRV-06-TRBL](./SRV-06-TRBL-Second-Node-Setup.md) — troubleshooting for this doc
+- [SRV-06-TRBL](../troubleshooting/SRV-06-TRBL-Second-Node-Setup.md) — troubleshooting for this doc
 - [Hardware Selection](./SRV-01-Hardware-Selection.md) — why the OptiPlex 7050 was chosen over the 3050
 - [OS Installation](./SRV-02-OS-Installation.md) — full install-media process, shared with the primary node
 - [Network Configuration](./SRV-03-Network-Configuration.md) — the primary node's netplan setup, whose installer-written netplan file has the same gap

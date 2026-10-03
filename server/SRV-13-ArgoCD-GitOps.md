@@ -23,7 +23,7 @@ Picks up after [First Real Workload](./SRV-10-First-Real-Workload.md). Commands 
 11. [Files](#files)
 12. [Related](#related)
 
-Problems hit during this work are recorded separately in [SRV-13-TRBL](./SRV-13-TRBL-ArgoCD-GitOps.md).
+Problems hit during this work are recorded separately in [SRV-13-TRBL](../troubleshooting/SRV-13-TRBL-ArgoCD-GitOps.md).
 
 ## Components
 
@@ -67,7 +67,7 @@ kubectl get pods -n argocd -o wide
 
 **Decision:** the laptop stays in the cluster, cordoned, running only its node-level DaemonSet pods (CNI, kube-proxy, node-exporter). It is a Wi-Fi, battery-powered machine that sleeps — unsuitable for persistent workloads.
 
-The pods initially landed on the laptop — see [SRV-13-TRBL](./SRV-13-TRBL-ArgoCD-GitOps.md#argocd-pods-scheduled-on-an-unexpected-node).
+The pods initially landed on the laptop — see [SRV-13-TRBL](../troubleshooting/SRV-13-TRBL-ArgoCD-GitOps.md#argocd-pods-scheduled-on-an-unexpected-node).
 
 ## Step 3 — Serve ArgoCD under /argocd
 
@@ -136,7 +136,7 @@ Pushes to `homelab-gitops` go over HTTPS, authenticated with a fine-grained Pers
 
 **Alternative not used:** an SSH deploy key with write access — does not expire, better suited to a headless server.
 
-Two push failures preceded the working setup — see [SRV-13-TRBL](./SRV-13-TRBL-ArgoCD-GitOps.md#github-push-password-authentication-rejected).
+Two push failures preceded the working setup — see [SRV-13-TRBL](../troubleshooting/SRV-13-TRBL-ArgoCD-GitOps.md#github-push-password-authentication-rejected).
 
 ## Step 6 — ArgoCD Application
 
@@ -201,7 +201,7 @@ Not implemented: storing the `Application` manifests in the repository as well (
 
 ## Related
 
-- [SRV-13-TRBL](./SRV-13-TRBL-ArgoCD-GitOps.md) — troubleshooting for this doc
+- [SRV-13-TRBL](../troubleshooting/SRV-13-TRBL-ArgoCD-GitOps.md) — troubleshooting for this doc
 - [First Real Workload](./SRV-10-First-Real-Workload.md) — the workload now managed through git
 - [Helm, Observability, and Ingress](./SRV-08-Helm-Observability-Ingress.md) — the ingress entry point ArgoCD is served through
 - [Node Profile — GPU Laptop Worker](./SRV-11-GPU-Laptop-Node-Profile.md) — the third node the pods first landed on

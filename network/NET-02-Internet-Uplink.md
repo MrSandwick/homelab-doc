@@ -48,11 +48,11 @@ To avoid two parallel Wi-Fi networks broadcasting in the same home, the ISP gate
 
 ## A related ISP behavior discovered later: blocking public DNS resolvers
 
-This ISP also blocks direct connections to well-known public DNS resolvers (`8.8.8.8`, `1.1.1.1`) by IP — discovered and worked around at the server level, not the network level. The fix applied is pointing each node's DNS at the router (`<GATEWAY_IP>`) instead of the blocked resolvers; DNS-over-TLS was investigated as an alternative but not carried through. Full diagnosis and both approaches documented in the [server network configuration](../server/SRV-03-TRBL-Network-Configuration.md#isp-blocking-public-dns-resolvers). Noted here because it's the same ISP, and worth knowing about alongside the IP Passthrough limitation above if this network is ever rebuilt against a different ISP connection type.
+This ISP also blocks direct connections to well-known public DNS resolvers (`8.8.8.8`, `1.1.1.1`) by IP — discovered and worked around at the server level, not the network level. The fix applied is pointing each node's DNS at the router (`<GATEWAY_IP>`) instead of the blocked resolvers; DNS-over-TLS was investigated as an alternative but not carried through. Full diagnosis and both approaches documented in the [server network configuration](../troubleshooting/SRV-03-TRBL-Network-Configuration.md#isp-blocking-public-dns-resolvers). Noted here because it's the same ISP, and worth knowing about alongside the IP Passthrough limitation above if this network is ever rebuilt against a different ISP connection type.
 
 ## Related
 
 - [Project Overview](./NET-00-Project-Overview.md)
 - [VLAN Design and Switch Configuration](./NET-03-VLAN-Design-and-Switch-Configuration.md)
-- Server docs: [SRV-03-TRBL](../server/SRV-03-TRBL-Network-Configuration.md#isp-blocking-public-dns-resolvers) — the DNS-blocking troubleshooting for this ISP
+- Server docs: [SRV-03-TRBL](../troubleshooting/SRV-03-TRBL-Network-Configuration.md#isp-blocking-public-dns-resolvers) — the DNS-blocking troubleshooting for this ISP
 - Guide: [Double NAT and IP Passthrough](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/network/Guide-Double-NAT-and-IP-Passthrough.md)

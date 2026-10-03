@@ -14,7 +14,7 @@ tags: [homelab, project, network]
 6. [DNS](#dns)
 7. [Related](#related)
 
-Problems hit during this work are recorded separately in [SRV-03-TRBL](./SRV-03-TRBL-Network-Configuration.md).
+Problems hit during this work are recorded separately in [SRV-03-TRBL](../troubleshooting/SRV-03-TRBL-Network-Configuration.md).
 
 ## Initial state
 
@@ -69,7 +69,7 @@ network:
   wifis: {}
 ```
 
-The file only matches and renames the interface by MAC address — it specifies neither `dhcp4` nor a static address, so nothing persists across a reboot. See [SRV-03-TRBL](./SRV-03-TRBL-Network-Configuration.md#ip-address-lost-after-every-reboot).
+The file only matches and renames the interface by MAC address — it specifies neither `dhcp4` nor a static address, so nothing persists across a reboot. See [SRV-03-TRBL](../troubleshooting/SRV-03-TRBL-Network-Configuration.md#ip-address-lost-after-every-reboot).
 
 ### Correct config
 
@@ -120,17 +120,17 @@ ssh <USERNAME>@<SERVER_IP>
 ```
 If this connects without needing a manual `sudo dhclient eno1` / `sudo dhcpcd eno1` first, the static config is correctly persisted.
 
-The static IP must be in the subnet the server is physically connected to; an address issued in the wrong subnet was diagnosed and corrected — see [SRV-03-TRBL](./SRV-03-TRBL-Network-Configuration.md#subnet-mismatch-between-server-and-client).
+The static IP must be in the subnet the server is physically connected to; an address issued in the wrong subnet was diagnosed and corrected — see [SRV-03-TRBL](../troubleshooting/SRV-03-TRBL-Network-Configuration.md#subnet-mismatch-between-server-and-client).
 
 ## Result
 
 - Server hostname: `<HOSTNAME>`
-- Static IP: `<SERVER_IP>` — re-issued in the correct subnet after a subnet mismatch was diagnosed ([SRV-03-TRBL](./SRV-03-TRBL-Network-Configuration.md#subnet-mismatch-between-server-and-client)); confirmed reachable via `ping` and `ssh` from a same-subnet client, and confirmed persistent across reboot during the `kubeadm init` process
+- Static IP: `<SERVER_IP>` — re-issued in the correct subnet after a subnet mismatch was diagnosed ([SRV-03-TRBL](../troubleshooting/SRV-03-TRBL-Network-Configuration.md#subnet-mismatch-between-server-and-client)); confirmed reachable via `ping` and `ssh` from a same-subnet client, and confirmed persistent across reboot during the `kubeadm init` process
 - SSH access: `ssh <USERNAME>@<SERVER_IP>`
 
 ## DNS
 
-netplan `nameservers` points at the router (`<GATEWAY_IP>`) on both nodes, not at public resolvers: the ISP blocks direct connections to `8.8.8.8` / `1.1.1.1`. The config originally used those two addresses and was changed after resolution failed — see [SRV-03-TRBL](./SRV-03-TRBL-Network-Configuration.md#isp-blocking-public-dns-resolvers), which also records the DNS-over-TLS alternative that was investigated and not applied.
+netplan `nameservers` points at the router (`<GATEWAY_IP>`) on both nodes, not at public resolvers: the ISP blocks direct connections to `8.8.8.8` / `1.1.1.1`. The config originally used those two addresses and was changed after resolution failed — see [SRV-03-TRBL](../troubleshooting/SRV-03-TRBL-Network-Configuration.md#isp-blocking-public-dns-resolvers), which also records the DNS-over-TLS alternative that was investigated and not applied.
 
 Confirmed running on both nodes in [Cluster Verification](./SRV-07-Cluster-Verification.md).
 
@@ -140,4 +140,4 @@ Confirmed running on both nodes in [Cluster Verification](./SRV-07-Cluster-Verif
 - [Kubernetes Installation](./SRV-05-Kubernetes-Installation.md) — this static IP is the address used for `kubeadm init` and later `kubeadm join`
 - [Guide-DNS-over-TLS-and-ISP-DNS-Blocking](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-DNS-over-TLS-and-ISP-DNS-Blocking.md) — companion Guides repository
 - [Cluster Verification](./SRV-07-Cluster-Verification.md) — confirmed which DNS fix is running
-- [SRV-03-TRBL](./SRV-03-TRBL-Network-Configuration.md) — troubleshooting for this doc
+- [SRV-03-TRBL](../troubleshooting/SRV-03-TRBL-Network-Configuration.md) — troubleshooting for this doc
