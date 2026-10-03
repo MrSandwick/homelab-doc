@@ -38,6 +38,7 @@ TP-Link TL-SG108E switch  (802.1Q trunk)         network/
 LAN traffic into the cluster:
 <INGRESS_IP> (MetalLB) -> ingress-nginx -> Grafana (path: /)
                                         -> my-site (path: /site, on the worker)
+                                        -> ArgoCD (path: /argocd)
                                         -> [future services]
 ```
 
@@ -62,6 +63,7 @@ The FreeRADIUS server that authenticates Wi-Fi clients in `network/` runs on the
 | [SRV-10 First Real Workload](server/SRV-10-First-Real-Workload.md) | First application workload (static site) deployed via Ingress, scheduled onto the worker node |
 | [SRV-11 Node Profile — GPU Laptop Worker](server/SRV-11-GPU-Laptop-Node-Profile.md) | The repurposed laptop node and its daily-driver trade-offs |
 | [SRV-12 GPU Node Setup](server/SRV-12-GPU-Node-Setup.md) | NVIDIA Container Toolkit, containerd runtime, Device Plugin |
+| [SRV-13 ArgoCD and GitOps](server/SRV-13-ArgoCD-GitOps.md) | ArgoCD under `/argocd`, `homelab-gitops` repository, automated sync for `my-site`, unexpected-node incident |
 
 ### Network — VLANs and RADIUS
 
@@ -79,14 +81,14 @@ The FreeRADIUS server that authenticates Wi-Fi clients in `network/` runs on the
 
 ## Stack
 
-- **Server:** GMKtec M8 (Ryzen 7 PRO 6650H, 16 GB) control plane; Dell OptiPlex 7050 Micro (i7-6700T, 16 GB) and an Acer Nitro laptop (i5-11400H, RTX 3050 Ti Mobile) as workers; Ubuntu Server 26.04 LTS; containerd; Kubernetes via `kubeadm` with Flannel; Helm; `kube-prometheus-stack` (Prometheus, Grafana, Alertmanager, node-exporter); ingress-nginx + MetalLB; Ansible for node provisioning
+- **Server:** GMKtec M8 (Ryzen 7 PRO 6650H, 16 GB) control plane; Dell OptiPlex 7050 Micro (i7-6700T, 16 GB) and an Acer Nitro laptop (i5-11400H, RTX 3050 Ti Mobile) as workers; Ubuntu Server 26.04 LTS; containerd; Kubernetes via `kubeadm` with Flannel; Helm; `kube-prometheus-stack` (Prometheus, Grafana, Alertmanager, node-exporter); ingress-nginx + MetalLB; Ansible for node provisioning; ArgoCD (GitOps)
 - **Network:** 5G Home Internet gateway (double NAT); TP-Link Omada ER605 router, TL-SG108E switch, EAP610 Wi-Fi 6 access point; FreeRADIUS on the server
 
 ## Status
 
 | Layer | Working | In progress / planned |
 |---|---|---|
-| Server | Three-node cluster, all `Ready` (control plane + two workers, one with an NVIDIA GPU usable by pods), Flannel CNI healthy, workload scheduling verified on the worker, Helm, `kube-prometheus-stack` monitoring both nodes, Grafana reachable on the LAN via ingress-nginx + MetalLB, Ansible-based node provisioning verified idempotent on both nodes, first application workload (static site at `/site`) running on the worker | Additional workloads (Nextcloud, Minecraft, etc.); GitOps (ArgoCD) for the workloads already deployed |
+| Server | Three-node cluster, all `Ready` (control plane + two workers, one with an NVIDIA GPU usable by pods), Flannel CNI healthy, workload scheduling verified on the worker, Helm, `kube-prometheus-stack` monitoring both nodes, Grafana reachable on the LAN via ingress-nginx + MetalLB, Ansible-based node provisioning verified idempotent on both nodes, first application workload (static site at `/site`) running on the worker, ArgoCD at `/argocd` syncing `my-site` from the `homelab-gitops` repository (automated sync, prune, self-heal verified) | Additional workloads (Nextcloud, Minecraft, etc.); ArgoCD admin password rotation; registry-hosted image for `my-site`; laptop-node scheduling policy and Ansible inventory |
 | Network | Double-NAT uplink, VLANs 10/20, Users/Admin isolation, management ACLs, ntopng traffic monitoring — all verified | WPA2-Enterprise SSID to be recreated after an AP factory reset; login-free MAC-based auth; IDS/IPS |
 
 Each layer's overview ([SRV-00](server/SRV-00-Project-Overview.md), [NET-00](network/NET-00-Project-Overview.md)) has the full status list.

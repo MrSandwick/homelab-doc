@@ -52,5 +52,10 @@ See [Hardware Selection](./SRV-01-Hardware-Selection.md) for the full comparison
 - ✅ ingress-nginx + MetalLB give the cluster a real LAN-reachable entry point (`<INGRESS_IP>`); Grafana reachable through it, replacing the earlier `port-forward`-only access
 - ✅ Ansible introduced for node provisioning — idempotency verified via a learning example, then a trimmed, production-safe `site.yml` applied to both real cluster nodes with a clean dry-run and real run — see [Ansible Node Provisioning](./SRV-09-Ansible-Node-Provisioning.md)
 - ✅ First real application workload deployed: a static site, served via the existing ingress-nginx + MetalLB entry point on a new `/site` path, scheduled onto the worker node — see [First Real Workload](./SRV-10-First-Real-Workload.md)
+- ✅ ArgoCD installed and reachable at `/argocd` through the existing ingress — see [ArgoCD and GitOps](./SRV-13-ArgoCD-GitOps.md)
+- ✅ GitOps loop verified for `my-site`: synced from the public `homelab-gitops` repository with automated sync, prune and self-heal
+- ⬜ ArgoCD admin password not yet rotated; `argocd-initial-admin-secret` not yet deleted
+- ⬜ `my-site` image still imported only into the worker's containerd — to be moved to a registry
+- ⬜ Laptop node (`<GPU_HOSTNAME>`) cordoned during the ArgoCD install and absent from the Ansible inventory — scheduling policy to be reconciled with [Node Profile](./SRV-11-GPU-Laptop-Node-Profile.md)
 
-Continue at [First Real Workload](./SRV-10-First-Real-Workload.md) for the current state of the cluster, or continue with further workloads.
+Continue at [ArgoCD and GitOps](./SRV-13-ArgoCD-GitOps.md) for the current state of the cluster and its open items.
