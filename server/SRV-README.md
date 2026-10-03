@@ -19,6 +19,7 @@ This section documents *what was done and why* — decisions made, exact command
 11. See [First Real Workload](./SRV-10-First-Real-Workload.md)
 12. See [Node Profile — GPU Laptop Worker](./SRV-11-GPU-Laptop-Node-Profile.md)
 13. See [GPU Node Setup](./SRV-12-GPU-Node-Setup.md)
+14. See [ArgoCD and GitOps](./SRV-13-ArgoCD-GitOps.md)
 
 ## Stack
 
@@ -31,6 +32,7 @@ This section documents *what was done and why* — decisions made, exact command
 - **Observability:** `kube-prometheus-stack` (Prometheus, Grafana, Alertmanager, node-exporter, kube-state-metrics)
 - **Ingress / bare-metal LoadBalancer:** ingress-nginx + MetalLB
 - **Configuration management:** Ansible (control node on the primary node; provisions base packages, kernel modules/sysctl, and Kubernetes package installation — deliberately scoped to exclude DNS and containerd-config management to avoid conflicting with the live, manually-verified configuration in those areas)
+- **GitOps:** ArgoCD, syncing from a public `homelab-gitops` repository
 
 Layer-by-layer overview of the stack: [Guide: The Stack](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-Stack.md) (companion Guides repository).
 
