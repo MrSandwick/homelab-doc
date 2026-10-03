@@ -14,13 +14,15 @@ tags: [homelab, project, kubernetes]
 4. [Step 2 — Install and configure containerd](#step-2--install-and-configure-containerd)
 5. [Step 3 — Kernel modules and sysctl settings](#step-3--kernel-modules-and-sysctl-settings)
 6. [Step 4 — Install kubeadm, kubelet, kubectl](#step-4--install-kubeadm-kubelet-kubectl)
-7. [Step 5 — Missing preflight dependency: `conntrack`](#step-5--missing-preflight-dependency-conntrack)
+7. [Step 5 — Preflight dependencies](#step-5--preflight-dependencies)
 8. [Step 6 — `kubeadm init`](#step-6--kubeadm-init)
 9. [Step 7 — kubectl access](#step-7--kubectl-access)
 10. [Step 8 — Installing Flannel (CNI)](#step-8--installing-flannel-cni)
 11. [Step 9 — Node reaches `Ready`](#step-9--node-reaches-ready)
 12. [Step 10 — First test workload and the control-plane taint](#step-10--first-test-workload-and-the-control-plane-taint)
 13. [Related](#related)
+
+Problems hit during this work are recorded separately in [SRV-05-TRBL](./SRV-05-TRBL-Kubernetes-Installation.md).
 
 ## Components installed
 
@@ -80,6 +82,7 @@ sudo systemctl status containerd
 ```
 sudo modprobe overlay
 sudo modprobe br_netfilter
+echo "br_netfilter" | sudo tee /etc/modules-load.d/k8s.conf
 
 cat <<EOF | sudo tee /etc/sysctl.d/k8s.conf
 net.bridge.bridge-nf-call-iptables  = 1
@@ -91,6 +94,7 @@ sudo sysctl --system
 
 - `overlay` — required for the container image layer filesystem
 - `br_netfilter` — lets bridged network traffic between pods be processed by iptables
+- `/etc/modules-load.d/k8s.conf` — registers `br_netfilter` for autoload; `modprobe` alone does not survive a reboot. Added after the module was lost on reboot — see [SRV-05-TRBL](./SRV-05-TRBL-Kubernetes-Installation.md#flannel-in-crashloopbackoff-br_netfilter-not-loaded)
 - `ip_forward = 1` — enables packet forwarding between interfaces; required for pod-to-pod and pod-to-internet traffic. This is a local, internal mechanism, not an externally-facing security hole by itself — see [Homelab Network Security](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-Homelab-Network-Security.md).
 
 ## Step 4 — Install kubeadm, kubelet, kubectl
@@ -116,17 +120,15 @@ kubeadm version
 kubectl version --client
 ```
 
-## Step 5 — Missing preflight dependency: `conntrack`
+## Step 5 — Preflight dependencies
 
-The first `kubeadm init` attempt failed at the preflight stage:
-```
-[ERROR FileExisting-conntrack]: conntrack not found in system path
-```
-`conntrack` is required by `kube-proxy` to track connection state in netfilter. Installed along with two other commonly-required tools:
+`kubeadm init` preflight requires `conntrack` (used by `kube-proxy` to track connection state in netfilter); installed along with two other commonly-required tools:
 ```
 sudo apt update
 sudo apt install -y conntrack ethtool socat
 ```
+
+Found missing on the first `kubeadm init` attempt — see [SRV-05-TRBL](./SRV-05-TRBL-Kubernetes-Installation.md#kubeadm-init-preflight-conntrack-not-found).
 
 ## Step 6 — `kubeadm init`
 
@@ -134,7 +136,7 @@ sudo apt install -y conntrack ethtool socat
 sudo kubeadm init --pod-network-cidr=10.244.0.0/16
 ```
 
-This succeeded on the second attempt. Output confirmed (abridged):
+Output (abridged):
 ```
 Your Kubernetes control-plane has initialized successfully!
 ...
@@ -168,28 +170,7 @@ Result: one node, status `NotReady` (expected — no CNI installed yet).
 kubectl apply -f https://github.com/flannel-io/flannel/releases/latest/download/kube-flannel.yml
 ```
 
-**Issue encountered:** the Flannel pod (in its own `kube-flannel` namespace, not `kube-system`) entered `CrashLoopBackOff`. Logs showed:
-```
-Failed to check br_netfilter: stat /proc/sys/net/bridge/bridge-nf-call-iptables: no such file or directory
-```
-
-**Root cause:** the `br_netfilter` kernel module (loaded manually with `modprobe` back in Step 3) does **not persist across reboots** unless explicitly registered for autoload. The server had rebooted at least once since (during earlier networking troubleshooting), silently dropping the module.
-
-**Fix — reload the module and make it persistent:**
-```
-sudo modprobe br_netfilter
-echo "br_netfilter" | sudo tee /etc/modules-load.d/k8s.conf
-sudo sysctl --system
-```
-Verified the underlying file now exists:
-```
-cat /proc/sys/net/bridge/bridge-nf-call-iptables   # → 1
-```
-Then deleted the crashing pod so its DaemonSet would recreate it:
-```
-kubectl delete pod <kube-flannel-pod-name> -n kube-flannel
-```
-It came up `Running` on the next attempt.
+Flannel runs in its own `kube-flannel` namespace, not `kube-system`. It requires the `br_netfilter` module from Step 3 to be loaded; on the first attempt the pod crash-looped because the module had been lost on reboot — see [SRV-05-TRBL](./SRV-05-TRBL-Kubernetes-Installation.md#flannel-in-crashloopbackoff-br_netfilter-not-loaded).
 
 ## Step 9 — Node reaches `Ready`
 
@@ -200,37 +181,20 @@ Status changed from `NotReady` to **`Ready`** once Flannel was healthy and CoreD
 
 ## Step 10 — First test workload and the control-plane taint
 
-Deployed a throwaway nginx deployment to confirm the cluster works end-to-end:
+A throwaway nginx deployment confirms the cluster works end-to-end. `kubeadm init` taints the control-plane node (`node-role.kubernetes.io/control-plane:NoSchedule`), so on a single-node cluster the taint is removed for the duration of the test (the trailing `-` removes it):
 ```
+kubectl taint nodes <HOSTNAME> node-role.kubernetes.io/control-plane:NoSchedule-
 kubectl create deployment nginx-test --image=nginx
 kubectl get pods
 ```
-
-**Issue encountered:** the pod stayed `Pending` indefinitely.
-```
-kubectl describe pod <pod-name>
-```
-showed:
-```
-0/1 nodes are available: 1 node(s) had untolerated taint
-{node-role.kubernetes.io/control-plane: }
-```
-
-**Root cause:** `kubeadm init` automatically applies a **taint** to the control-plane node (`node-role.kubernetes.io/control-plane:NoSchedule`) so that ordinary workloads are never scheduled onto the machine responsible for cluster management — by design, that role is meant for dedicated worker nodes. With only one node in the cluster so far, there was nowhere else to schedule the pod. See the companion guide on taints and tolerations linked below.
-
-**Temporary fix (single-node homelab only):**
-```
-kubectl taint nodes <HOSTNAME> node-role.kubernetes.io/control-plane:NoSchedule-
-```
-(the trailing `-` removes the taint). The pod then scheduled and ran successfully.
 
 **Verification:**
 ```
 kubectl port-forward --address 0.0.0.0 deployment/nginx-test 8080:80
 ```
-then, from another machine on the LAN, `http://<SERVER_IP>:8080` served the default nginx welcome page — confirming pod scheduling, pod networking (Flannel), and port-forwarding all work correctly.
+then, from another machine on the LAN, `http://<SERVER_IP>:8080` served the default nginx welcome page — confirming pod scheduling, pod networking (Flannel), and port-forwarding all work correctly. `--address 0.0.0.0` is required for LAN access; `port-forward` binds to `localhost` only by default.
 
-*(Troubleshooting note: an earlier `port-forward` process left running in a background terminal held the port on `localhost` only, causing the plain `kubectl port-forward deployment/nginx-test 8080:80` to be unreachable from another machine, and later causing an "address already in use" error on retry. Resolved with `sudo lsof -i :8080` to find the PID, then `kill -9 <PID>` before retrying with the `--address 0.0.0.0` flag.)*
+Incidents in this step (pod `Pending` before the taint was removed; `port-forward` unreachable): [SRV-05-TRBL](./SRV-05-TRBL-Kubernetes-Installation.md#test-pod-stuck-pending-control-plane-taint).
 
 **Cleanup — removing the test workload and restoring the taint:**
 ```
@@ -247,10 +211,11 @@ This taint stays on the control-plane permanently from here on: the OptiPlex wor
 
 ## Next step — completed
 
-The second node joined successfully, including recovering from a real mistake along the way (`kubeadm init` run instead of `kubeadm join`). Full process in [Second Node Setup](./SRV-06-Second-Node-Setup.md).
+The second node joined successfully. Full process in [Second Node Setup](./SRV-06-Second-Node-Setup.md).
 
 ## Related
 
+- [SRV-05-TRBL](./SRV-05-TRBL-Kubernetes-Installation.md) — troubleshooting for this doc
 - [Second Node Setup](./SRV-06-Second-Node-Setup.md) — the OptiPlex worker node that has since joined this cluster
 - [Guide: kubeadm init vs. kubeadm join](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-Kubeadm-Init-vs-Join.md) — companion Guides repository
 - [Kubernetes vs k3s](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-Kubernetes-vs-k3s.md) — companion Guides repository

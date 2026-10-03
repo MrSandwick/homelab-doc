@@ -8,6 +8,8 @@ tags: [homelab, project, kubernetes, gpu, nvidia]
 
 This continues from [Node Profile — GPU Laptop Worker](./SRV-11-GPU-Laptop-Node-Profile.md), which covers what `<GPU_HOSTNAME>` is and the trade-offs of running it, and from [Second Node Setup](./SRV-06-Second-Node-Setup.md), whose join process this node followed. This doc covers the additional steps needed to make its GPU actually usable by pods — joining a node is not sufficient by itself; Kubernetes has no awareness of a GPU on a node unless a specific chain of components is set up.
 
+Problems hit during this work are recorded separately in [SRV-12-TRBL](./SRV-12-TRBL-GPU-Node-Setup.md).
+
 ## Why this node specifically
 
 Unlike the two headless Server-OS nodes ([Hardware Selection](./SRV-01-Hardware-Selection.md)), this is a Desktop Ubuntu installation on a laptop that doubles as a daily driver — see [Node Profile](./SRV-11-GPU-Laptop-Node-Profile.md) for the swap/memory trade-off discussion specific to running a GUI alongside cluster workloads. The GPU is the reason this machine was added to the cluster at all — see the "Target workloads" list in [Project Overview](./SRV-00-Project-Overview.md) (the self-hosted RAG stack, previously deprioritized, is the direct motivation).
@@ -47,9 +49,7 @@ sudo nvidia-ctk runtime configure --runtime=containerd --config=/etc/containerd/
 sudo systemctl restart containerd
 ```
 
-### Real troubleshooting: config written to the wrong place on the first attempt
-
-The first run of `nvidia-ctk runtime configure --runtime=containerd` (without an explicit `--config` path) reported success and wrote to `/etc/containerd/conf.d/99-nvidia.toml` — but inspecting that file afterward showed only `version = 3`, with no `nvidia` runtime section at all. Re-running the exact same command **with the `--config` path explicitly specified** (as shown above) produced the full, correct configuration, including the `[plugins."io.containerd.cri.v1.runtime".containerd.runtimes.nvidia]` block. The root cause of the first attempt's silent no-op wasn't fully diagnosed — explicitly passing `--config` is now the recommended invocation to avoid relying on whatever default path resolution the tool falls back to.
+The `--config` path is passed explicitly: without it, the first run reported success but wrote an empty config — see [SRV-12-TRBL](./SRV-12-TRBL-GPU-Node-Setup.md#nvidia-ctk-wrote-an-empty-config-on-the-first-attempt).
 
 Confirmed correct config:
 
@@ -67,44 +67,7 @@ cat /etc/containerd/conf.d/99-nvidia.toml
 
 `SystemdCgroup = true` carried over correctly from the original containerd setup (see [Kubernetes Installation, Step 2](./SRV-05-Kubernetes-Installation.md#step-2--install-and-configure-containerd)) — this matters, since a mismatched cgroup driver between containerd and kubelet is what originally caused node registration failures on the first two nodes.
 
-## Step 3 — install the NVIDIA Device Plugin
-
-Run from the control-plane node (`<HOSTNAME>`), not the GPU node — this creates a cluster-wide `DaemonSet`:
-
-```bash
-kubectl apply -f https://raw.githubusercontent.com/NVIDIA/k8s-device-plugin/main/deployments/static/nvidia-device-plugin.yml
-```
-
-### Real troubleshooting: DaemonSet scheduled on every node, crashed on the two without a GPU
-
-The static manifest has no built-in awareness of which nodes actually have a GPU — it schedules a pod on **every** node in the cluster by default. On the two CPU-only nodes (`<HOSTNAME>`, `<WORKER_HOSTNAME>`), the pods immediately entered `CrashLoopBackOff`.
-
-**Fix — label the GPU node and restrict the DaemonSet to it:**
-
-```bash
-kubectl label node <GPU_HOSTNAME> accelerator=nvidia-gpu
-kubectl patch daemonset nvidia-device-plugin-daemonset -n kube-system \
-  -p '{"spec": {"template": {"spec": {"nodeSelector": {"accelerator": "nvidia-gpu"}}}}}'
-```
-
-The pods on the two non-GPU nodes were automatically removed once the `nodeSelector` no longer matched them.
-
-### Real troubleshooting: plugin still crashed on the correct node — wrong default container runtime
-
-Even restricted to `<GPU_HOSTNAME>`, the plugin pod kept crashing. Logs showed the actual cause:
-
-```bash
-kubectl logs -n kube-system <nvidia-device-plugin-pod-name>
-```
-
-```
-E... factory.go:99] Failed to initialize NVML: ERROR_LIBRARY_NOT_FOUND.
-E... factory.go:100] If this is a GPU node, did you set the docker default runtime to `nvidia`?
-```
-
-**Root cause:** the `nvidia` runtime existed in containerd's configuration (Step 2), but containerd was still launching containers with the default `runc` runtime, which has no access to the NVIDIA driver libraries — defining a runtime isn't the same as making it the one actually used by default.
-
-**Fix — on the GPU node**, set `nvidia` as the default runtime:
+Defining the `nvidia` runtime does not make containerd use it; it is also set as the **default** runtime in the same file:
 
 ```bash
 sudo nano /etc/containerd/conf.d/99-nvidia.toml
@@ -119,13 +82,25 @@ sudo nano /etc/containerd/conf.d/99-nvidia.toml
 sudo systemctl restart containerd
 ```
 
-Then, from the control plane, deleted the crashing pod so the DaemonSet would recreate it under the new config:
+Without this the Device Plugin cannot load the NVIDIA libraries — see [SRV-12-TRBL](./SRV-12-TRBL-GPU-Node-Setup.md#device-plugin-crashed-on-the-gpu-node-wrong-default-runtime).
+
+## Step 3 — install the NVIDIA Device Plugin
+
+Run from the control-plane node (`<HOSTNAME>`), not the GPU node — this creates a cluster-wide `DaemonSet`:
 
 ```bash
-kubectl delete pod -n kube-system <nvidia-device-plugin-pod-name>
+kubectl apply -f https://raw.githubusercontent.com/NVIDIA/k8s-device-plugin/main/deployments/static/nvidia-device-plugin.yml
 ```
 
-It came up `Running` with zero restarts on the next attempt.
+The static manifest schedules a pod on **every** node. The GPU node is labelled and the DaemonSet restricted to it:
+
+```bash
+kubectl label node <GPU_HOSTNAME> accelerator=nvidia-gpu
+kubectl patch daemonset nvidia-device-plugin-daemonset -n kube-system \
+  -p '{"spec": {"template": {"spec": {"nodeSelector": {"accelerator": "nvidia-gpu"}}}}}'
+```
+
+Before the restriction, the pods on the two CPU-only nodes crash-looped — see [SRV-12-TRBL](./SRV-12-TRBL-GPU-Node-Setup.md#device-plugin-daemonset-crashed-on-the-nodes-without-a-gpu).
 
 ## Step 4 — verification
 
@@ -200,6 +175,7 @@ combined with `nodeSelector: { kubernetes.io/hostname: <GPU_HOSTNAME> }` (or a t
 
 ## Related
 
+- [SRV-12-TRBL](./SRV-12-TRBL-GPU-Node-Setup.md) — troubleshooting for this doc
 - [Node Profile — GPU Laptop Worker](./SRV-11-GPU-Laptop-Node-Profile.md) — what this machine is, and the swap/GUI trade-off discussion
 - [Second Node Setup](./SRV-06-Second-Node-Setup.md) — the join process this node followed
 - [Project Overview](./SRV-00-Project-Overview.md) — the RAG-stack target workload this GPU access enables

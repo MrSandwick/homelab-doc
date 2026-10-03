@@ -14,12 +14,13 @@ Picks up after [Ansible Node Provisioning](./SRV-09-Ansible-Node-Provisioning.md
 2. [End state](#end-state)
 3. [Step 1 — Build the image](#step-1--build-the-image)
 4. [Step 2 — Import the image into containerd](#step-2--import-the-image-into-containerd)
-5. [Step 3 — First deployment: control plane (reverted)](#step-3--first-deployment-control-plane-reverted)
-6. [Step 4 — Redeployment on the worker](#step-4--redeployment-on-the-worker)
-7. [Step 5 — Route through the Ingress](#step-5--route-through-the-ingress)
-8. [Verification](#verification)
-9. [Files](#files)
-10. [Related](#related)
+5. [Step 3 — Deployment on the worker](#step-3--deployment-on-the-worker)
+6. [Step 4 — Route through the Ingress](#step-4--route-through-the-ingress)
+7. [Verification](#verification)
+8. [Files](#files)
+9. [Related](#related)
+
+Problems hit during this work are recorded separately in [SRV-10-TRBL](./SRV-10-TRBL-First-Real-Workload.md).
 
 ## Components
 
@@ -51,60 +52,7 @@ FROM nginx:alpine
 COPY index.html /usr/share/nginx/html/index.html
 ```
 
-```
-cd ~/my-site
-docker build -t my-site:v1 .
-```
-
-## Step 2 — Import the image into containerd
-
-No registry is used; the Docker-built image was imported into containerd's `k8s.io` namespace directly. See [Guide: Local Container Images Without a Registry](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-Local-Container-Images-Without-a-Registry.md).
-
-```
-docker save my-site:v1 | sudo ctr -n k8s.io images import -
-sudo ctr -n k8s.io images list | grep my-site
-```
-
-Listed with `io.cri-containerd.image=managed`. The image exists only on the node it was imported on, so the Deployment must be pinned to that node.
-
-## Step 3 — First deployment: control plane (reverted)
-
-### ⚠️ Real mistake made here
-
-**What happened:** the image had been imported on the control-plane node, so the first Deployment was pinned there:
-
-```yaml
-nodeSelector:
-  kubernetes.io/hostname: <HOSTNAME>
-```
-
-The pod stayed `Pending`:
-
-```
-0/2 nodes are available: 1 node(s) didn't match Pod's node affinity/selector, 1 node(s) had untolerated taint {node-role.kubernetes.io/control-plane: }
-```
-
-A toleration was added and the pod ran:
-
-```yaml
-tolerations:
-  - key: node-role.kubernetes.io/control-plane
-    operator: Exists
-    effect: NoSchedule
-```
-
-**Root cause:** node placement followed where the image had been imported, not where the workload belonged. The result put an application on the control plane, contrary to the taint restored in [Kubernetes Installation, Step 10](./SRV-05-Kubernetes-Installation.md#step-10--first-test-workload-and-the-control-plane-taint).
-
-**Resolution:** everything deployed so far was removed and redone on the worker (Step 4):
-
-```
-kubectl delete -f deployment.yaml
-kubectl delete -f ingress.yaml
-```
-
-## Step 4 — Redeployment on the worker
-
-Site source copied to the worker, then the image rebuilt and imported **on the worker**:
+The image is built on the node that will run it. Site source copied from the control plane to the worker:
 
 ```
 scp -r ~/my-site <USERNAME>@<WORKER_IP>:~/my-site
@@ -115,10 +63,24 @@ On `<WORKER_HOSTNAME>`:
 ```
 cd ~/my-site
 docker build -t my-site:v1 .
-docker save my-site:v1 | sudo ctr -n k8s.io images import -
 ```
 
-`deployment.yaml` — `nodeSelector` pointed at the worker, `tolerations` removed:
+## Step 2 — Import the image into containerd
+
+No registry is used; the Docker-built image is imported into containerd's `k8s.io` namespace directly, on `<WORKER_HOSTNAME>`. See [Guide: Local Container Images Without a Registry](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-Local-Container-Images-Without-a-Registry.md).
+
+```
+docker save my-site:v1 | sudo ctr -n k8s.io images import -
+sudo ctr -n k8s.io images list | grep my-site
+```
+
+Listed with `io.cri-containerd.image=managed`. The image exists only on the node it was imported on, so the Deployment must be pinned to that node.
+
+The image was first built and imported on the control plane, and the Deployment pinned there — reverted; see [SRV-10-TRBL](./SRV-10-TRBL-First-Real-Workload.md#first-deployment-pinned-to-the-control-plane-reverted).
+
+## Step 3 — Deployment on the worker
+
+`deployment.yaml` — `nodeSelector` points at the worker; no `tolerations`:
 
 ```yaml
 apiVersion: apps/v1
@@ -165,7 +127,7 @@ kubectl get pods -l app=my-site -o wide
 
 `NODE`: `<WORKER_HOSTNAME>`.
 
-## Step 5 — Route through the Ingress
+## Step 4 — Route through the Ingress
 
 Added as a second path on the existing ingress-nginx entry point ([SRV-08](./SRV-08-Helm-Observability-Ingress.md)). `ingress.yaml`:
 
@@ -216,6 +178,7 @@ kubectl apply -f ingress.yaml
 
 ## Related
 
+- [SRV-10-TRBL](./SRV-10-TRBL-First-Real-Workload.md) — troubleshooting for this doc
 - [Helm, Observability, and Ingress](./SRV-08-Helm-Observability-Ingress.md) — the ingress and MetalLB entry point this reuses
 - [Kubernetes Installation](./SRV-05-Kubernetes-Installation.md) — the control-plane taint, and why it was restored
 - [Second Node Setup](./SRV-06-Second-Node-Setup.md) — the worker this runs on

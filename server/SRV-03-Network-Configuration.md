@@ -11,8 +11,10 @@ tags: [homelab, project, network]
 3. [DHCP lease (initial)](#dhcp-lease-initial)
 4. [Making the IP static](#making-the-ip-static)
 5. [Result](#result)
-6. [Real troubleshooting: ISP blocking public DNS resolvers](#real-troubleshooting-isp-blocking-public-dns-resolvers)
+6. [DNS](#dns)
 7. [Related](#related)
+
+Problems hit during this work are recorded separately in [SRV-03-TRBL](./SRV-03-TRBL-Network-Configuration.md).
 
 ## Initial state
 
@@ -42,7 +44,7 @@ Static IP was configured via **netplan** (Ubuntu's default network configuration
 
 ### Finding the correct config file
 
-Ubuntu Server's installer (subiquity) writes the network config to a file whose exact name is **not guaranteed** — it's commonly `50-cloud-init.yaml`, but on this install it turned out to be `00-installer-config.yaml`. Guessing the filename wasted a troubleshooting cycle; the reliable way to find it:
+Ubuntu Server's installer (subiquity) writes the network config to a file whose exact name is **not guaranteed** — it's commonly `50-cloud-init.yaml`, but on this install it is `00-installer-config.yaml`. To find it:
 
 ```
 ls /etc/netplan/
@@ -67,7 +69,7 @@ network:
   wifis: {}
 ```
 
-This is the actual root cause of the earlier "IP resets after every reboot / needs manual `dhcpcd`" symptom: this file only *matched and renamed* the interface by MAC address — it never specified `dhcp4` or a static address at all. It wasn't a case of something silently reverting the config (e.g. cloud-init); the static config from an earlier session had simply never been written into the file the system actually reads on boot.
+The file only matches and renames the interface by MAC address — it specifies neither `dhcp4` nor a static address, so nothing persists across a reboot. See [SRV-03-TRBL](./SRV-03-TRBL-Network-Configuration.md#ip-address-lost-after-every-reboot).
 
 ### Correct config
 
@@ -92,8 +94,7 @@ network:
           via: <GATEWAY_IP>
       nameservers:
         addresses:
-          - 8.8.8.8
-          - 1.1.1.1
+          - <GATEWAY_IP>
     enp2s0:
       accept-ra: true
   version: 2
@@ -119,76 +120,19 @@ ssh <USERNAME>@<SERVER_IP>
 ```
 If this connects without needing a manual `sudo dhclient eno1` / `sudo dhcpcd eno1` first, the static config is correctly persisted.
 
-### Troubleshooting note: subnet mismatch
-
-A separate issue surfaced during this process and is worth recording, since it produced the same *symptom* (SSH connection timing out / `ping` returning "Destination host unreachable") but had a completely different cause: the static IP was assigned in the `<SERVER_SUBNET>` range, while the laptop used to connect was on a **different subnet** (`<CLIENT_SUBNET>`, a different gateway). Two devices on different subnets cannot reach each other directly regardless of how correctly the server's own static IP is configured.
-
-**Diagnosis:** compare the server's actual gateway/subnet against the client's:
-- On the server: `ip route` (shows the real default gateway in use)
-- On a Windows client: `ipconfig` (shows the client's IPv4 address, subnet mask, and default gateway)
-
-If the two devices report different subnets/gateways, the static IP must be re-issued to match the subnet the server is physically connected to — not assumed from an earlier session.
+The static IP must be in the subnet the server is physically connected to; an address issued in the wrong subnet was diagnosed and corrected — see [SRV-03-TRBL](./SRV-03-TRBL-Network-Configuration.md#subnet-mismatch-between-server-and-client).
 
 ## Result
 
 - Server hostname: `<HOSTNAME>`
-- Static IP: `<SERVER_IP>` — re-issued in the correct subnet after the mismatch was diagnosed (see troubleshooting note above); confirmed reachable via `ping` and `ssh` from a same-subnet client, and confirmed persistent across reboot during the `kubeadm init` process
+- Static IP: `<SERVER_IP>` — re-issued in the correct subnet after a subnet mismatch was diagnosed ([SRV-03-TRBL](./SRV-03-TRBL-Network-Configuration.md#subnet-mismatch-between-server-and-client)); confirmed reachable via `ping` and `ssh` from a same-subnet client, and confirmed persistent across reboot during the `kubeadm init` process
 - SSH access: `ssh <USERNAME>@<SERVER_IP>`
 
-## Real troubleshooting: ISP blocking public DNS resolvers
+## DNS
 
-**Symptom:** name resolution stopped working on this server (`ping google.com` → `Temporary failure in name resolution`), noticed around the time the second node was connected to the network — the timing initially suggested a networking regression from that change.
-
-**Diagnosis, ruling out causes one by one:**
-
-```
-ping 8.8.8.8                        # succeeds — basic connectivity is fine
-nslookup google.com 8.8.8.8         # "communications error ... timed out"
-curl -v https://8.8.8.8 --insecure  # "Connection refused" in ~36ms
-nc -zv -w3 8.8.8.8 53               # Connection refused
-nc -zv -w3 1.1.1.1 53               # Connection refused (same result)
-ping google.com                     # (from a different device) resolves and replies normally via the device's own DNS
-```
-
-`ufw` was inactive, `iptables` rules on this host only targeted internal Kubernetes service IPs, and no Omada ACL was in place — none of the usual local suspects. The decisive clue was the *type* of failure: `Connection refused` arriving in ~36ms is not a lost-packet timeout, it's an active rejection from something close by — and it affected **both** `8.8.8.8` (Google) and `1.1.1.1` (Cloudflare) identically, while an ordinary Google server IP (`142.250.217.110`) pinged normally.
-
-**Root cause:** the ISP for this connection is a cellular 5G Home Internet product (see [Internet Uplink](../network/NET-02-Internet-Uplink.md)), and this specific ISP blocks direct connections to well-known public DNS resolvers by IP — a policy some cellular/5G home internet providers use to force traffic through their own DNS. Standard DNS (port 53) and even a plain TLS connection (port 443) to `8.8.8.8`/`1.1.1.1` were both rejected; only the well-known DNS IPs seemed to be targeted, not general internet traffic to those same providers' other services.
-
-**Fix (applied on both nodes) — DNS via the router:** netplan `nameservers` set to the router, replacing `8.8.8.8` / `1.1.1.1`:
-
-```yaml
-      nameservers:
-        addresses:
-          - <GATEWAY_IP>
-```
-
-```
-sudo netplan try
-sudo netplan apply
-```
+netplan `nameservers` points at the router (`<GATEWAY_IP>`) on both nodes, not at public resolvers: the ISP blocks direct connections to `8.8.8.8` / `1.1.1.1`. The config originally used those two addresses and was changed after resolution failed — see [SRV-03-TRBL](./SRV-03-TRBL-Network-Configuration.md#isp-blocking-public-dns-resolvers), which also records the DNS-over-TLS alternative that was investigated and not applied.
 
 Confirmed running on both nodes in [Cluster Verification](./SRV-07-Cluster-Verification.md).
-
-**Alternative investigated, not applied — DNS-over-TLS via `systemd-resolved`.** Not configured on either node (`resolvectl status`: `-DNSOverTLS`; `resolved.conf` default); the router-DNS fix was sufficient. Reference config:
-
-```
-sudo nano /etc/systemd/resolved.conf
-```
-
-```ini
-[Resolve]
-DNS=9.9.9.9#dns.quad9.net 1.1.1.1#cloudflare-dns.com
-DNSOverTLS=opportunistic
-```
-
-```
-sudo systemctl restart systemd-resolved
-resolvectl status   # expect "+DNSOverTLS" on the active link
-```
-
-`opportunistic` rather than `yes`, to fall back instead of failing if TLS is unavailable. See [Guide-DNS-over-TLS-and-ISP-DNS-Blocking](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-DNS-over-TLS-and-ISP-DNS-Blocking.md).
-
-**Caveat:** host DNS settings do not propagate into pod/container network namespaces; the same blocking inside a pod would need separate DNS configuration.
 
 ## Related
 
@@ -196,3 +140,4 @@ resolvectl status   # expect "+DNSOverTLS" on the active link
 - [Kubernetes Installation](./SRV-05-Kubernetes-Installation.md) — this static IP is the address used for `kubeadm init` and later `kubeadm join`
 - [Guide-DNS-over-TLS-and-ISP-DNS-Blocking](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-DNS-over-TLS-and-ISP-DNS-Blocking.md) — companion Guides repository
 - [Cluster Verification](./SRV-07-Cluster-Verification.md) — confirmed which DNS fix is running
+- [SRV-03-TRBL](./SRV-03-TRBL-Network-Configuration.md) — troubleshooting for this doc
