@@ -20,6 +20,8 @@ Picks up after [Cluster Verification](./SRV-07-Cluster-Verification.md). Command
 8. [Files created](#files-created)
 9. [Related](#related)
 
+Problems hit during this work are recorded separately in [SRV-08-TRBL](./SRV-08-TRBL-Helm-Observability-Ingress.md).
+
 ## Components installed
 
 | Component | Installed as | Namespace | Role |
@@ -49,7 +51,7 @@ curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
 helm version
 ```
 
-**Issue encountered:** the script failed — `raw.githubusercontent.com` did not resolve. Same ISP DNS blocking as in [Network Configuration](./SRV-03-Network-Configuration.md#real-troubleshooting-isp-blocking-public-dns-resolvers). Re-applying the router-DNS fix (netplan `nameservers` → `<GATEWAY_IP>`) restored resolution and the script completed.
+The script needs working DNS for `raw.githubusercontent.com`; the first run failed on the ISP DNS blocking — see [SRV-08-TRBL](./SRV-08-TRBL-Helm-Observability-Ingress.md#helm-install-script-failed-to-resolve).
 
 ### Chart repositories
 
@@ -109,26 +111,7 @@ helm install ingress-nginx ingress-nginx/ingress-nginx \
   --namespace ingress-nginx --create-namespace
 ```
 
-### ⚠️ Real mistake made here: interrupting `helm install`
-
-**What happened:** the install was interrupted with `Ctrl+C` before completion (a follow-up `kubectl get pods` was typed into the same session). Retrying failed:
-
-```
-Error: INSTALLATION FAILED: cannot re-use a name that is still in use
-```
-
-**Root cause:** the release had already been recorded before the interruption and was left in `failed` state, still owning the name `ingress-nginx`.
-
-**Fix:**
-
-```
-helm uninstall ingress-nginx -n ingress-nginx
-kubectl get pods -n ingress-nginx      # confirmed empty
-helm install ingress-nginx ingress-nginx/ingress-nginx \
-  --namespace ingress-nginx --create-namespace
-```
-
-The reinstall was allowed to complete before any further commands were run. See [Guide: Helm Basics](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-Helm-Basics.md).
+The install must be left to complete before running further commands in the same session; an interrupted first attempt left a `failed` release behind — see [SRV-08-TRBL](./SRV-08-TRBL-Helm-Observability-Ingress.md#helm-install-interrupted-cannot-re-use-a-name).
 
 ## Step 4 — Load balancer: MetalLB
 
@@ -230,9 +213,10 @@ Verified from another LAN machine: `http://<INGRESS_IP>` serves Grafana without 
 
 ## Related
 
+- [SRV-08-TRBL](./SRV-08-TRBL-Helm-Observability-Ingress.md) — troubleshooting for this doc
 - [Cluster Verification](./SRV-07-Cluster-Verification.md) — the state of the cluster this builds on
-- [Network Configuration](./SRV-03-Network-Configuration.md) — the ISP DNS-blocking fix that had to be re-applied before Helm would install
-- [Kubernetes Installation](./SRV-05-Kubernetes-Installation.md) — the original `port-forward` gotcha
+- [Network Configuration](./SRV-03-Network-Configuration.md) — the router-DNS configuration Helm's install script depends on
+- [Kubernetes Installation](./SRV-05-Kubernetes-Installation.md) — the original `port-forward` usage
 - [Router Configuration](../network/NET-04-Router-Configuration.md) — the Admin VLAN DHCP pool the MetalLB range sits outside of
 - [First Real Workload](./SRV-10-First-Real-Workload.md) — the second route added to this ingress
 - [Guide: The Stack](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-Stack.md) — companion Guides repository

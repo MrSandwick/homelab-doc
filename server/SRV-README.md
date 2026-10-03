@@ -2,7 +2,9 @@
 
 A chronological, technical log of building a home Kubernetes lab from scratch: hardware selection, OS install, networking, container runtime, and cluster bootstrap via `kubeadm`.
 
-This section documents *what was done and why* — decisions made, exact commands run, and problems encountered along the way (including real troubleshooting sessions, not just the happy path).
+This section documents *what was done and why* — decisions made, exact commands run, and problems encountered along the way.
+
+Each numbered doc records the working procedure. The problems hit along the way — symptom, root cause, fix — are kept in a companion file with the same number and a `TRBL` tag (`SRV-13-TRBL-ArgoCD-GitOps.md` alongside `SRV-13-ArgoCD-GitOps.md`), linked from the doc it belongs to.
 
 ## Contents
 
@@ -20,6 +22,17 @@ This section documents *what was done and why* — decisions made, exact command
 12. See [Node Profile — GPU Laptop Worker](./SRV-11-GPU-Laptop-Node-Profile.md)
 13. See [GPU Node Setup](./SRV-12-GPU-Node-Setup.md)
 14. See [ArgoCD and GitOps](./SRV-13-ArgoCD-GitOps.md)
+
+Troubleshooting files:
+
+- [SRV-03-TRBL](./SRV-03-TRBL-Network-Configuration.md) — IP lost on reboot, subnet mismatch, ISP blocking public DNS resolvers
+- [SRV-05-TRBL](./SRV-05-TRBL-Kubernetes-Installation.md) — `conntrack` preflight, Flannel crash loop, pod `Pending` on the taint, `port-forward`
+- [SRV-06-TRBL](./SRV-06-TRBL-Second-Node-Setup.md) — no IPv4 address, `kubeadm init` run instead of `join`
+- [SRV-08-TRBL](./SRV-08-TRBL-Helm-Observability-Ingress.md) — Helm script DNS failure, interrupted `helm install`
+- [SRV-09-TRBL](./SRV-09-TRBL-Ansible-Node-Provisioning.md) — SSH host-key and auth failures, `sudo-rs`
+- [SRV-10-TRBL](./SRV-10-TRBL-First-Real-Workload.md) — first deployment pinned to the control plane
+- [SRV-12-TRBL](./SRV-12-TRBL-GPU-Node-Setup.md) — empty `nvidia-ctk` config, Device Plugin crash loops
+- [SRV-13-TRBL](./SRV-13-TRBL-ArgoCD-GitOps.md) — pods on an unexpected node, GitHub push failures
 
 ## Stack
 
@@ -46,4 +59,4 @@ Conceptual explanations of the technologies used here (Kubernetes vs k3s, Docker
 
 ## Status
 
-🟢 The cluster is now three nodes, all `Ready` (`kubeadm`, containerd, Flannel CNI healthy on each): the GMKtec M8 control plane, the Dell OptiPlex 7050 Micro worker, and a repurposed Acer Nitro laptop worker. A test workload was deployed on a worker node and verified reachable. See [Second Node Setup](./SRV-06-Second-Node-Setup.md) for the full join process, including a real `kubeadm init`-vs-`join` mistake and recovery. The laptop's GPU (NVIDIA RTX 3050 Ti Mobile) is fully usable by pods — see [GPU Node Setup](./SRV-12-GPU-Node-Setup.md).
+🟢 The cluster is now three nodes, all `Ready` (`kubeadm`, containerd, Flannel CNI healthy on each): the GMKtec M8 control plane, the Dell OptiPlex 7050 Micro worker, and a repurposed Acer Nitro laptop worker. A test workload was deployed on a worker node and verified reachable. See [Second Node Setup](./SRV-06-Second-Node-Setup.md) for the full join process ([SRV-06-TRBL](./SRV-06-TRBL-Second-Node-Setup.md) for the `kubeadm init`-vs-`join` mistake and recovery). The laptop's GPU (NVIDIA RTX 3050 Ti Mobile) is fully usable by pods — see [GPU Node Setup](./SRV-12-GPU-Node-Setup.md).

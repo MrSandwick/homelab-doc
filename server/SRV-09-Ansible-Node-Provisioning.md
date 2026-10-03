@@ -13,12 +13,14 @@ Picks up after [Helm, Observability, and Ingress](./SRV-08-Helm-Observability-In
 1. [Components](#components)
 2. [Installation](#installation)
 3. [Test phase on a non-cluster node](#test-phase-on-a-non-cluster-node)
-4. [Real troubleshooting #1: SSH host-key and authentication failures](#real-troubleshooting-1-ssh-host-key-and-authentication-failures)
-5. [Real troubleshooting #2: `sudo-rs` breaks privilege escalation](#real-troubleshooting-2-sudo-rs-breaks-privilege-escalation)
+4. [SSH access to the cluster nodes](#ssh-access-to-the-cluster-nodes)
+5. [Privilege escalation: classic `sudo`](#privilege-escalation-classic-sudo)
 6. [Inventory and variables](#inventory-and-variables)
 7. [Playbook scope: trimmed before running on live nodes](#playbook-scope-trimmed-before-running-on-live-nodes)
 8. [Final verified run](#final-verified-run)
 9. [Related](#related)
+
+Problems hit during this work are recorded separately in [SRV-09-TRBL](./SRV-09-TRBL-Ansible-Node-Provisioning.md).
 
 ## Components
 
@@ -96,53 +98,22 @@ ansible-playbook -i inventory.ini learn-playbook.yml --ask-become-pass
 
 Same result on two consecutive runs.
 
-## Real troubleshooting #1: SSH host-key and authentication failures
+## SSH access to the cluster nodes
 
-First playbook run against the cluster nodes:
-
-```
-Host key verification failed
-```
-
-**Root cause:** `~/.ssh/known_hosts` for this user on the control node was empty — no recorded fingerprint for the worker or for the control node's own address (it manages itself over SSH). **Fix:** one manual SSH to each, accepting the fingerprint:
+Before the first playbook run against the cluster, each node's host key is recorded and the control node's public key is copied to it — including the control node's own address, since it manages itself over SSH:
 
 ```
-ssh <USERNAME>@<SERVER_IP>     # control node (self)
-ssh <USERNAME>@<WORKER_IP>     # worker
-```
-
-Next run:
-
-```
-Permission denied (publickey,password)
-```
-
-**Root cause:** the key had not been copied to either cluster node. **Fix:**
-
-```
+ssh <USERNAME>@<SERVER_IP>             # control node (self) — accept the fingerprint
+ssh <USERNAME>@<WORKER_IP>             # worker — accept the fingerprint
 ssh-copy-id <USERNAME>@<SERVER_IP>     # control node (self)
 ssh-copy-id <USERNAME>@<WORKER_IP>     # worker
 ```
 
-## Real troubleshooting #2: `sudo-rs` breaks privilege escalation
+Both steps were initially missed — see [SRV-09-TRBL](./SRV-09-TRBL-Ansible-Node-Provisioning.md#ssh-host-key-and-authentication-failures).
 
-Every `become` task then failed, with a correct password:
+## Privilege escalation: classic `sudo`
 
-```
-Timeout (12s) waiting for privilege escalation prompt:
-```
-
-**Diagnosis:** `-vvv` showed Ansible issuing `sudo -S -p "[sudo via ansible, key=...] password:"` and never receiving that prompt back.
-
-```
-ansible-playbook -i inventory.ini site.yml -vvv --ask-become-pass
-sudo --version
-dpkg -l | grep sudo
-```
-
-**Root cause:** Ubuntu 26.04 ships `sudo-rs` alongside classic `sudo`, with `sudo-rs` as the active `update-alternatives` choice. Its prompt handling is incompatible with Ansible's `become`. See [Guide: sudo-rs and Privilege Escalation](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-Sudo-rs-and-Privilege-Escalation.md).
-
-**Fix (per node):**
+Ubuntu 26.04 ships `sudo-rs` as the active `sudo`; its prompt handling is incompatible with Ansible's `become`. Every managed node is switched to classic `sudo`:
 
 ```
 update-alternatives --list sudo
@@ -155,7 +126,7 @@ sudo update-alternatives --config sudo
 sudo --version    # confirms classic sudo
 ```
 
-Required on all three machines (test laptop and both cluster nodes) — an Ubuntu 26.04 default, not a per-host misconfiguration.
+Applied on all three machines (test laptop and both cluster nodes). Symptom and diagnosis: [SRV-09-TRBL](./SRV-09-TRBL-Ansible-Node-Provisioning.md#sudo-rs-breaks-privilege-escalation). See also [Guide: sudo-rs and Privilege Escalation](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-Sudo-rs-and-Privilege-Escalation.md).
 
 ## Inventory and variables
 
@@ -216,6 +187,7 @@ Re-run: idempotent except the Kubernetes apt-key task (`ansible.builtin.get_url`
 
 ## Related
 
+- [SRV-09-TRBL](./SRV-09-TRBL-Ansible-Node-Provisioning.md) — troubleshooting for this doc
 - [Helm, Observability, and Ingress](./SRV-08-Helm-Observability-Ingress.md) — the platform layer this provisioning sits under
 - [Kubernetes Installation](./SRV-05-Kubernetes-Installation.md) — the manual steps this playbook now codifies
 - [Second Node Setup](./SRV-06-Second-Node-Setup.md) — the worker's manual provisioning

@@ -8,6 +8,8 @@ tags: [homelab-project, homelab, note, project, networking, radius]
 
 Installed on the same server documented in the [server section](../server/SRV-README.md) (Ubuntu Server, systemd). This doc covers only the RADIUS-specific setup — OS and Docker installation live in the [server section](../server/SRV-README.md).
 
+Problems hit during this work are recorded separately in [NET-05-TRBL](./NET-05-TRBL-FreeRADIUS-Installation.md).
+
 ## Install
 
 ```
@@ -67,33 +69,11 @@ radtest <TEST_USER> <TEST_PASSWORD> localhost 0 <LOCALHOST_CLIENT_SECRET>
 
 A successful response includes `Access-Accept`. The `localhost` secret comes from the `client localhost { }` block that ships in `clients.conf` by default (`testing123` unless changed) — this is a separate entry from the `router`/`eap610` clients configured above, since `radtest` run on the server itself talks to the `127.0.0.1` client entry, not to either real device's entry.
 
-## Real troubleshooting: `default_eap_type = md5`
+## EAP configuration
 
-> Background on what EAP even is, and how PEAP/MSCHAPv2 relate to each other: [Guide-EAP-Methods](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/network/Guide-EAP-Methods.md).
+> Background on what EAP is, and how PEAP/MSCHAPv2 relate to each other: [Guide-EAP-Methods](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/network/Guide-EAP-Methods.md).
 
-**Symptom:** Windows refused to even prompt for credentials on the WPA2-Enterprise SSID — it failed instantly with *"Can't connect to this network,"* and nothing arrived at the RADIUS server at all (confirmed with `sudo freeradius -X` showing no `RADIUS:`-prefixed lines during a connection attempt, only the generic `AAA/BIND` / `AAA/AUTHEN/LOGIN` lines from method-list selection).
-
-**Root cause:** `/etc/freeradius/3.0/mods-available/eap` had its **top-level** `default_eap_type` set to `md5`:
-
-```
-eap {
-    default_eap_type = md5   # <- this line was the problem, not the ones below
-
-    md5 {
-        ...
-    }
-    peap {
-        default_eap_type = mschapv2   # already correct — a different, nested setting
-    }
-    ttls {
-        default_eap_type = mschapv2   # also unrelated — TTLS's own inner method
-    }
-}
-```
-
-EAP-MD5 isn't offered by modern Windows or Android as a Wi-Fi authentication method at all, so the client abandoned the negotiation before a credentials prompt ever appeared — an entirely different failure mode from a wrong password, and one that leaves no server-side log line pointing directly at the fix.
-
-**Fix:** change only the top-level `default_eap_type` to `peap`; the nested `peap { default_eap_type = mschapv2 }` and `ttls { default_eap_type = mschapv2 }` blocks are unrelated settings for their own respective inner methods and were left untouched:
+The **top-level** `default_eap_type` in `/etc/freeradius/3.0/mods-available/eap` is set to `peap` (shipped value: `md5`). The nested `peap { default_eap_type = mschapv2 }` and `ttls { default_eap_type = mschapv2 }` settings are left as shipped:
 
 ```
 sudo nano /etc/freeradius/3.0/mods-available/eap
@@ -101,7 +81,9 @@ sudo nano /etc/freeradius/3.0/mods-available/eap
 sudo systemctl restart freeradius
 ```
 
-After this change, an Android device authenticated successfully via WPA2-Enterprise/PEAP/MSCHAPv2 (Identity = MAC, Password = MAC), confirmed both by a successful Wi-Fi connection and by a matching `Access-Accept` line in `sudo freeradius -X` output.
+Verified: an Android device authenticated via WPA2-Enterprise/PEAP/MSCHAPv2 (Identity = MAC, Password = MAC), with a matching `Access-Accept` line in `sudo freeradius -X` output.
+
+With the shipped `md5` value, clients failed before any credentials prompt — see [NET-05-TRBL](./NET-05-TRBL-FreeRADIUS-Installation.md#default_eap_type--md5).
 
 ## Debugging workflow used throughout
 
@@ -121,5 +103,6 @@ sudo systemctl start freeradius   # return to normal background operation when d
 
 ## Related
 
+- [NET-05-TRBL](./NET-05-TRBL-FreeRADIUS-Installation.md) — troubleshooting for this doc
 - [Wireless / RADIUS Integration](./NET-06-Wireless-RADIUS-Integration.md)
 - Guides: [RADIUS and AAA](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/network/Guide-RADIUS-and-AAA.md) · [EAP Methods](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/network/Guide-EAP-Methods.md) · [MAC Address Filtering and Spoofing](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/network/Guide-MAC-Address-Filtering-and-Spoofing.md)

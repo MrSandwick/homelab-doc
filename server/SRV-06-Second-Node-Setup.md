@@ -18,9 +18,11 @@ Installed on: **Dell OptiPlex 7050 Micro** (second/worker node)
 6. [Network configuration](#network-configuration)
 7. [Docker installation](#docker-installation)
 8. [Kubernetes prerequisites](#kubernetes-prerequisites)
-9. [Real troubleshooting: `kubeadm init` run by mistake instead of `kubeadm join`](#real-troubleshooting-kubeadm-init-run-by-mistake-instead-of-kubeadm-join)
+9. [Joining the cluster](#joining-the-cluster)
 10. [Verification](#verification)
 11. [Related](#related)
+
+Problems hit during this work are recorded separately in [SRV-06-TRBL](./SRV-06-TRBL-Second-Node-Setup.md).
 
 Components installed on this node match the primary node (Ubuntu Server 26.04, Docker, containerd, kubelet/kubeadm/kubectl v1.31); see [Kubernetes Installation](./SRV-05-Kubernetes-Installation.md#components-installed).
 
@@ -78,56 +80,13 @@ Result: `df -h /` 466G available; `vgs` `VFree 0`. Primary node fixed later — 
 
 ## Network configuration
 
-Ethernet to switch Port 5, VLAN 20 ([VLAN Design and Switch Configuration](../network/NET-03-VLAN-Design-and-Switch-Configuration.md)). Initially brought up on DHCP during the troubleshooting below; now on a static IP (`<WORKER_IP>`, `dhcp4: no`), confirmed in [Cluster Verification](./SRV-07-Cluster-Verification.md).
+Ethernet to switch Port 5, VLAN 20, port PVID 20 ([VLAN Design and Switch Configuration](../network/NET-03-VLAN-Design-and-Switch-Configuration.md)). Static IP `<WORKER_IP>`, confirmed in [Cluster Verification](./SRV-07-Cluster-Verification.md).
 
-### Real troubleshooting: no IPv4 address despite a healthy link
+The installer-written netplan file contains only `match`/`set-name`, as on the primary node ([Network Configuration](./SRV-03-Network-Configuration.md)); addressing is added to it:
 
-**Symptom:** `ip a` showed `enp0s31f6` `UP` with `LOWER_UP` and an IPv6 link-local address, but no IPv4 address.
-
-**Two separate causes, found in sequence:**
-
-1. **Switch port PVID mismatch** — Port 5 VLAN membership correct, PVID still `1` (same class of bug as in [VLAN Design and Switch Configuration](../network/NET-03-VLAN-Design-and-Switch-Configuration.md)). Fixed: `802.1Q PVID Setting` → `Port 5 → PVID 20`.
-
-2. **No `dhcp4` directive in netplan.** Installer-generated config:
-
-   ```
-   sudo cat /etc/netplan/*.yaml
-   ```
-
-   ```yaml
-   network:
-     ethernets:
-       enp0s31f6:
-         match:
-           macaddress: <WORKER_MAC>
-         set-name: enp0s31f6
-     version: 2
-   ```
-
-   Same root cause as on the primary node ([Network Configuration](./SRV-03-Network-Configuration.md)): `match`/`set-name` only, no addressing. **Fix:**
-
-   ```
-   sudo nano /etc/netplan/00-installer-config.yaml
-   ```
-
-   ```yaml
-   network:
-     ethernets:
-       enp0s31f6:
-         match:
-           macaddress: <WORKER_MAC>
-         set-name: enp0s31f6
-         dhcp4: true
-     version: 2
-   ```
-
-   ```
-   sudo netplan apply
-   ```
-
-   IPv4 address obtained immediately.
-
-**Follow-up — superseded by a static config** (same structure as the primary node):
+```
+sudo nano /etc/netplan/00-installer-config.yaml
+```
 
 ```yaml
 network:
@@ -148,7 +107,13 @@ network:
   version: 2
 ```
 
-`nameservers` → router: DNS fix for ISP public-resolver blocking ([Network Configuration](./SRV-03-Network-Configuration.md#real-troubleshooting-isp-blocking-public-dns-resolvers)).
+```
+sudo netplan apply
+```
+
+`nameservers` → router, not public resolvers ([Network Configuration — DNS](./SRV-03-Network-Configuration.md#dns)).
+
+The node first came up with no IPv4 address and ran on DHCP before the static config — see [SRV-06-TRBL](./SRV-06-TRBL-Second-Node-Setup.md#no-ipv4-address-despite-a-healthy-link).
 
 ## Docker installation
 
@@ -205,43 +170,17 @@ sudo apt-mark hold kubelet kubeadm kubectl
 sudo apt install -y conntrack ethtool socat
 ```
 
-`br_netfilter` registered in `/etc/modules-load.d/k8s.conf` up front, avoiding the reboot-persistence failure from [Kubernetes Installation, Step 8](./SRV-05-Kubernetes-Installation.md#step-8--installing-flannel-cni).
+`br_netfilter` registered in `/etc/modules-load.d/k8s.conf` up front, avoiding the reboot-persistence failure hit on the primary node ([SRV-05-TRBL](./SRV-05-TRBL-Kubernetes-Installation.md#flannel-in-crashloopbackoff-br_netfilter-not-loaded)).
 
-## Real troubleshooting: `kubeadm init` run by mistake instead of `kubeadm join`
+## Joining the cluster
 
-**What happened:** ran on this node:
-
-```
-sudo kubeadm init --pod-network-cidr=10.244.0.0/16
-```
-
-It completed successfully and printed its own `kubeadm join` line, making the error non-obvious. See [Guide: kubeadm init vs. kubeadm join](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-Kubeadm-Init-vs-Join.md).
-
-**Consequence:** the node became the control plane of a separate cluster (own CA, etcd, API server on `<WORKER_IP>:6443`), disconnected from the real one on `<SERVER_IP>`.
-
-**Fix — reset the node:**
-
-```
-sudo kubeadm reset -f
-sudo rm -rf /etc/cni/net.d
-sudo rm -rf $HOME/.kube
-sudo iptables -F
-sudo iptables -t nat -F
-sudo iptables -t mangle -F
-sudo iptables -X
-```
-
-- `/etc/cni/net.d` — stale Flannel config from the accidental `init`
-- `$HOME/.kube` — kubeconfig for the discarded cluster
-- `iptables` — `kube-proxy` chains from the discarded cluster
-
-**Fresh join command** (on `<HOSTNAME>`; the original token had expired — 24h default):
+A worker joins with `kubeadm join`, never `kubeadm init`. Join command generated on `<HOSTNAME>` (the token printed by the original `kubeadm init` had expired — 24h default):
 
 ```
 kubeadm token create --print-join-command
 ```
 
-**Join** (on this node):
+On this node:
 
 ```
 sudo kubeadm join <SERVER_IP>:6443 --token <JOIN_TOKEN> \
@@ -249,6 +188,8 @@ sudo kubeadm join <SERVER_IP>:6443 --token <JOIN_TOKEN> \
 ```
 
 No kubeconfig on the worker (`kubeadm join` produces no `admin.conf`); `kubectl` runs from `<HOSTNAME>`.
+
+`kubeadm init` was first run on this node by mistake and the node had to be reset before joining — see [SRV-06-TRBL](./SRV-06-TRBL-Second-Node-Setup.md#kubeadm-init-run-instead-of-kubeadm-join).
 
 ## Verification
 
@@ -276,12 +217,13 @@ Scheduled on the worker with the control-plane taint in place; the taint remains
 
 ## Related
 
+- [SRV-06-TRBL](./SRV-06-TRBL-Second-Node-Setup.md) — troubleshooting for this doc
 - [Hardware Selection](./SRV-01-Hardware-Selection.md) — why the OptiPlex 7050 was chosen over the 3050
 - [OS Installation](./SRV-02-OS-Installation.md) — full install-media process, shared with the primary node
-- [Network Configuration](./SRV-03-Network-Configuration.md) — the primary node's netplan setup, whose missing-`dhcp4` bug recurred here
+- [Network Configuration](./SRV-03-Network-Configuration.md) — the primary node's netplan setup, whose installer-written netplan file has the same gap
 - [Kubernetes Installation](./SRV-05-Kubernetes-Installation.md) — control-plane side this node joined
-- [VLAN Design and Switch Configuration](../network/NET-03-VLAN-Design-and-Switch-Configuration.md) — the PVID bug that also affected this node's switch port
+- [VLAN Design and Switch Configuration](../network/NET-03-VLAN-Design-and-Switch-Configuration.md) — switch port and PVID for this node
 - [LVM Partition Sizing](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-LVM-Partition-Sizing.md) — companion Guides repository — the root-partition issue, fixed on this node
 - [Cluster Verification](./SRV-07-Cluster-Verification.md) — live check of both nodes against these docs
-- [Guide: kubeadm init vs. kubeadm join](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-Kubeadm-Init-vs-Join.md) — companion Guides repository, written directly from the mistake documented above
+- [Guide: kubeadm init vs. kubeadm join](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-Kubeadm-Init-vs-Join.md) — companion Guides repository, written from the `init`-instead-of-`join` mistake
 - [Kubernetes Taints and Tolerations](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-Kubernetes-Taints-and-Tolerations.md) — companion Guides repository

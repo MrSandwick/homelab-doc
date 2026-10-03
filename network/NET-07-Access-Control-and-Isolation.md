@@ -6,6 +6,8 @@ tags: [homelab-project, homelab, note, project, networking, security]
 
 > VLANs, Network Isolation, and ACLs sound similar but answer different questions — see [Guide-Network-Isolation-vs-ACLs](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/network/Guide-Network-Isolation-vs-ACLs.md) if the distinction below isn't obvious.
 
+Problems hit during this work are recorded separately in [NET-07-TRBL](./NET-07-TRBL-Access-Control-and-Isolation.md).
+
 ## What's implemented on the real network
 
 Omada's built-in **Network Isolation** (a per-LAN setting under `Settings → Wired Networks → LAN → <network>`) is enabled on VLAN 10 (Users) and left disabled on VLAN 20 (Admin). This blocks client-to-client traffic *within* the Users VLAN (e.g. one guest device can't reach another), and — combined with VLAN separation itself — prevents Users-VLAN devices from reaching Admin-VLAN devices at all.
@@ -39,12 +41,9 @@ The original design goal — *only specific admin devices, identified by IP, may
 
 Order matters — Omada evaluates rules top-down and stops at the first match, so the Permit rule for trusted devices must sit above the general Deny.
 
-### Real troubleshooting: two rule-authoring mistakes caught before they caused a lockout or a leak
+No other active rule may sit above this pair: a leftover broad Permit rule from testing, and a Permit rule whose Action was still `Deny`, were both found and corrected by reviewing the full rule list — see [NET-07-TRBL](./NET-07-TRBL-Access-Control-and-Isolation.md#two-gateway-acl-rule-authoring-mistakes).
 
-1. **Action/name mismatch.** The first version of the Permit rule was named `Permit-to-Management` but had its **Action** field still set to `Deny` — which would have blocked the very devices it was meant to allow. Caught by re-reading the rule table rather than assuming the name matched the behavior; fixed by flipping Action to `Permit`.
-2. **An overly broad rule silently defeated the narrow one.** A second rule, `Allow-Admin-to-Network` (Source: `Network:Admin` — the *entire* Admin VLAN, not just the trusted IP group; Destination: `Default, Users`; Action: `Permit`), had been created earlier during testing and was still active, positioned **above** the intended Deny rule. Since it matched first, it silently granted management access to every device on the Admin VLAN, not just the trusted ones — making the narrower Permit/Deny pair irrelevant. Found by reviewing the full rule list end-to-end rather than testing only the two rules just written; removed once identified.
-
-**Verified after cleanup:**
+**Verified:**
 
 ```
 http://<ROUTER_MGMT_IP>   # from a trusted (fixed-IP) admin device: loads normally
@@ -54,10 +53,11 @@ ping 8.8.8.8              # from either: unaffected — the ACL is scoped to the
 
 ## What's still open
 
-It's still unclear whether the earlier controller-management-port issue (documented in [Router Configuration](./NET-04-Router-Configuration.md)) was routing-related or an Omada firewall default — the investigation into the `Layer-3 Accessibility` toggle as a possible fix was interrupted by the Management VLAN incident and hasn't been resumed. The physical-VLAN-1-connection workaround remains in use for controller-level device management (Force Provision, Adopt, etc.) in the meantime.
+It's still unclear whether the earlier controller-management-port issue (documented in [NET-04-TRBL](./NET-04-TRBL-Router-Configuration.md#controller-connectivity-lost-after-an-ssid-change)) was routing-related or an Omada firewall default — the investigation into the `Layer-3 Accessibility` toggle as a possible fix was interrupted by the Management VLAN incident and hasn't been resumed. The physical-VLAN-1-connection workaround remains in use for controller-level device management (Force Provision, Adopt, etc.) in the meantime.
 
 ## Related
 
+- [NET-07-TRBL](./NET-07-TRBL-Access-Control-and-Isolation.md) — troubleshooting for this doc
 - [Project Overview](./NET-00-Project-Overview.md)
 - [VLAN Design and Switch Configuration](./NET-03-VLAN-Design-and-Switch-Configuration.md)
 - [Router Configuration](./NET-04-Router-Configuration.md)
