@@ -58,4 +58,4 @@ remote: Invalid username or token. Password authentication is not supported for 
 
 - [ArgoCD and GitOps](../server/SRV-13-ArgoCD-GitOps.md) — the working procedure
 - [Node Profile — GPU Laptop Worker](../server/SRV-11-GPU-Laptop-Node-Profile.md) — the third node the pods first landed on
-- [Guide: GitOps and ArgoCD](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-GitOps-and-ArgoCD.md) — companion Guides repository
+- [Guide: GitOps and ArgoCD](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/platform/Guide-GitOps-and-ArgoCD.md) — companion Guides repository

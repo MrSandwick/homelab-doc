@@ -26,7 +26,7 @@ This is the one node in the cluster that's also actively used for everyday work 
 
 ### The swap decision
 
-At idle, this machine already uses ~2GiB of RAM just for the GNOME desktop session — before any browser tabs, IDE, or scheduled pods are factored in. Kubernetes requires swap disabled (see [Kubernetes Swap Requirement](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-Kubernetes-Swap-Requirement.md) for why), but on a 15GB machine also running a full desktop environment, removing swap's out-of-memory safety net is a more meaningful trade-off here than on the two headless server nodes, where the only consumers of RAM are predictable background services.
+At idle, this machine already uses ~2GiB of RAM just for the GNOME desktop session — before any browser tabs, IDE, or scheduled pods are factored in. Kubernetes requires swap disabled (see [Kubernetes Swap Requirement](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/kubernetes/Guide-Kubernetes-Swap-Requirement.md) for why), but on a 15GB machine also running a full desktop environment, removing swap's out-of-memory safety net is a more meaningful trade-off here than on the two headless server nodes, where the only consumers of RAM are predictable background services.
 
 **Decision:** swap was disabled (standard requirement, non-negotiable for `kubeadm`), but two operational practices were adopted specifically to compensate on this node:
 
@@ -65,4 +65,4 @@ A few things differed from the Server-OS installs on the other two nodes, worth 
 - [Second Node Setup](./SRV-06-Second-Node-Setup.md) — the join process this node followed (the same process applies regardless of Desktop vs. Server OS)
 - [GPU Node Setup](./SRV-12-GPU-Node-Setup.md) — making the GPU usable by pods
 - [Hardware Selection](./SRV-01-Hardware-Selection.md) — the two purchased nodes this one complements
-- [Guide: Kubernetes Taints and Tolerations](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-Kubernetes-Taints-and-Tolerations.md) — a more automated alternative to manual cordon/uncordon worth evaluating later (e.g. a taint reserving this node for GPU workloads specifically)
+- [Guide: Kubernetes Taints and Tolerations](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/kubernetes/Guide-Kubernetes-Taints-and-Tolerations.md) — a more automated alternative to manual cordon/uncordon worth evaluating later (e.g. a taint reserving this node for GPU workloads specifically)

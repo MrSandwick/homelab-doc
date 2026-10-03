@@ -10,7 +10,7 @@ tags: [homelab-project, homelab, note, project, networking, radius, troubleshoot
 
 **Relates to:** [EAP configuration](../network/NET-05-FreeRADIUS-Installation.md#eap-configuration).
 
-> Background on what EAP is, and how PEAP/MSCHAPv2 relate to each other: [Guide-EAP-Methods](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/network/Guide-EAP-Methods.md).
+> Background on what EAP is, and how PEAP/MSCHAPv2 relate to each other: [Guide-EAP-Methods](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/network/wifi-auth/Guide-EAP-Methods.md).
 
 **Symptom:** Windows refused to even prompt for credentials on the WPA2-Enterprise SSID — it failed instantly with *"Can't connect to this network,"* and nothing arrived at the RADIUS server at all (confirmed with `sudo freeradius -X` showing no `RADIUS:`-prefixed lines during a connection attempt, only the generic `AAA/BIND` / `AAA/AUTHEN/LOGIN` lines from method-list selection).
 
@@ -42,4 +42,4 @@ After the change, an Android device authenticated via WPA2-Enterprise/PEAP/MSCHA
 
 - [FreeRADIUS Installation](../network/NET-05-FreeRADIUS-Installation.md) — the working configuration
 - [Wireless / RADIUS Integration](../network/NET-06-Wireless-RADIUS-Integration.md)
-- Guide: [EAP Methods](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/network/Guide-EAP-Methods.md)
+- Guide: [EAP Methods](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/network/wifi-auth/Guide-EAP-Methods.md)

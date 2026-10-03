@@ -40,10 +40,10 @@ helm install ingress-nginx ingress-nginx/ingress-nginx \
   --namespace ingress-nginx --create-namespace
 ```
 
-The reinstall was allowed to complete before any further commands were run. See [Guide: Helm Basics](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-Helm-Basics.md).
+The reinstall was allowed to complete before any further commands were run. See [Guide: Helm Basics](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/platform/Guide-Helm-Basics.md).
 
 ## Related
 
 - [Helm, Observability, and Ingress](../server/SRV-08-Helm-Observability-Ingress.md) — the working procedure
 - [SRV-03-TRBL](./SRV-03-TRBL-Network-Configuration.md) — the original ISP DNS-blocking incident
-- [Guide: Helm Basics](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-Helm-Basics.md) — companion Guides repository
+- [Guide: Helm Basics](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/platform/Guide-Helm-Basics.md) — companion Guides repository

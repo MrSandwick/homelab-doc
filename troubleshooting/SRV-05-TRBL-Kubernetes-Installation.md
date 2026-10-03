@@ -72,7 +72,7 @@ kubectl describe pod <pod-name>
 {node-role.kubernetes.io/control-plane: }
 ```
 
-**Root cause:** `kubeadm init` applies a taint to the control-plane node (`node-role.kubernetes.io/control-plane:NoSchedule`) so ordinary workloads are not scheduled onto it. With only one node in the cluster, there was nowhere else to schedule the pod. See [Kubernetes Taints and Tolerations](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-Kubernetes-Taints-and-Tolerations.md).
+**Root cause:** `kubeadm init` applies a taint to the control-plane node (`node-role.kubernetes.io/control-plane:NoSchedule`) so ordinary workloads are not scheduled onto it. With only one node in the cluster, there was nowhere else to schedule the pod. See [Kubernetes Taints and Tolerations](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/kubernetes/Guide-Kubernetes-Taints-and-Tolerations.md).
 
 **Fix (temporary, single-node only):** the taint was removed for the duration of the test and restored afterwards — see [Step 10](../server/SRV-05-Kubernetes-Installation.md#step-10--first-test-workload-and-the-control-plane-taint).
 
@@ -94,4 +94,4 @@ kubectl port-forward --address 0.0.0.0 deployment/nginx-test 8080:80
 
 - [Kubernetes Installation (kubeadm)](../server/SRV-05-Kubernetes-Installation.md) — the working procedure
 - [Second Node Setup](../server/SRV-06-Second-Node-Setup.md) — where the `br_netfilter` fix was applied up front
-- [Kubernetes Taints and Tolerations](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-Kubernetes-Taints-and-Tolerations.md) — companion Guides repository
+- [Kubernetes Taints and Tolerations](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/kubernetes/Guide-Kubernetes-Taints-and-Tolerations.md) — companion Guides repository

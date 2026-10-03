@@ -86,7 +86,7 @@ helm install prometheus prometheus-community/kube-prometheus-stack \
 
 ### node-exporter on both nodes
 
-node-exporter (DaemonSet) came up on both nodes with the control-plane `NoSchedule` taint left in place — the chart's DaemonSet carries the toleration. See [Guide: Kubernetes Taints and Tolerations](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-Kubernetes-Taints-and-Tolerations.md).
+node-exporter (DaemonSet) came up on both nodes with the control-plane `NoSchedule` taint left in place — the chart's DaemonSet carries the toleration. See [Guide: Kubernetes Taints and Tolerations](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/kubernetes/Guide-Kubernetes-Taints-and-Tolerations.md).
 
 ### Initial access
 
@@ -115,7 +115,7 @@ The install must be left to complete before running further commands in the same
 
 ## Step 4 — Load balancer: MetalLB
 
-Required for the ingress controller's `LoadBalancer` Service to receive an external IP on bare metal. See [Guide: Ingress and MetalLB](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-Ingress-and-MetalLB.md).
+Required for the ingress controller's `LoadBalancer` Service to receive an external IP on bare metal. See [Guide: Ingress and MetalLB](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/platform/Guide-Ingress-and-MetalLB.md).
 
 ### Install
 
@@ -220,6 +220,6 @@ Verified from another LAN machine: `http://<INGRESS_IP>` serves Grafana without 
 - [Router Configuration](../network/NET-04-Router-Configuration.md) — the Admin VLAN DHCP pool the MetalLB range sits outside of
 - [First Real Workload](./SRV-10-First-Real-Workload.md) — the second route added to this ingress
 - [Guide: The Stack](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-Stack.md) — companion Guides repository
-- [Guide: Helm Basics](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-Helm-Basics.md) — companion Guides repository
-- [Guide: Ingress and MetalLB](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-Ingress-and-MetalLB.md) — companion Guides repository
-- [Guide: Kubernetes Taints and Tolerations](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-Kubernetes-Taints-and-Tolerations.md) — companion Guides repository
+- [Guide: Helm Basics](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/platform/Guide-Helm-Basics.md) — companion Guides repository
+- [Guide: Ingress and MetalLB](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/platform/Guide-Ingress-and-MetalLB.md) — companion Guides repository
+- [Guide: Kubernetes Taints and Tolerations](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/kubernetes/Guide-Kubernetes-Taints-and-Tolerations.md) — companion Guides repository

@@ -54,5 +54,5 @@ The site source was then copied to the worker, the image rebuilt and imported th
 ## Related
 
 - [First Real Workload](../server/SRV-10-First-Real-Workload.md) — the working procedure
-- [Guide: Local Container Images Without a Registry](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-Local-Container-Images-Without-a-Registry.md) — companion Guides repository
-- [Guide: Kubernetes Taints and Tolerations](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-Kubernetes-Taints-and-Tolerations.md) — companion Guides repository
+- [Guide: Local Container Images Without a Registry](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/containers/Guide-Local-Container-Images-Without-a-Registry.md) — companion Guides repository
+- [Guide: Kubernetes Taints and Tolerations](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/kubernetes/Guide-Kubernetes-Taints-and-Tolerations.md) — companion Guides repository

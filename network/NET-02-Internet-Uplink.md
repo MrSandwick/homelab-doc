@@ -18,7 +18,7 @@ IP Passthrough — bridging the ISP gateway so a downstream router receives the 
 
 ## Decision: Double NAT
 
-> New to NAT, or unsure why running two of them in a row is usually fine? See [Guide-Double-NAT-and-IP-Passthrough](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/network/Guide-Double-NAT-and-IP-Passthrough.md) for the plain-language version.
+> New to NAT, or unsure why running two of them in a row is usually fine? See [Guide-Double-NAT-and-IP-Passthrough](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/network/segmentation/Guide-Double-NAT-and-IP-Passthrough.md) for the plain-language version.
 
 Rather than spend more time chasing a Passthrough toggle that may not exist in this firmware/hardware combination, the ISP gateway was left in its default routing mode and the Omada router's WAN port was connected to one of the gateway's LAN ports.
 
@@ -55,4 +55,4 @@ This ISP also blocks direct connections to well-known public DNS resolvers (`8.8
 - [Project Overview](./NET-00-Project-Overview.md)
 - [VLAN Design and Switch Configuration](./NET-03-VLAN-Design-and-Switch-Configuration.md)
 - Server docs: [SRV-03-TRBL](../troubleshooting/SRV-03-TRBL-Network-Configuration.md#isp-blocking-public-dns-resolvers) — the DNS-blocking troubleshooting for this ISP
-- Guide: [Double NAT and IP Passthrough](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/network/Guide-Double-NAT-and-IP-Passthrough.md)
+- Guide: [Double NAT and IP Passthrough](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/network/segmentation/Guide-Double-NAT-and-IP-Passthrough.md)

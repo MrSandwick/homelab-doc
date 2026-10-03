@@ -4,7 +4,7 @@ tags: [homelab-project, homelab, note, project, networking, radius]
 
 # FreeRADIUS Installation
 
-> New to RADIUS/AAA, or the "client" and "shared secret" terminology below? See [Guide-RADIUS-and-AAA](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/network/Guide-RADIUS-and-AAA.md).
+> New to RADIUS/AAA, or the "client" and "shared secret" terminology below? See [Guide-RADIUS-and-AAA](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/network/wifi-auth/Guide-RADIUS-and-AAA.md).
 
 Installed on the same server documented in the [server section](../server/SRV-README.md) (Ubuntu Server, systemd). This doc covers only the RADIUS-specific setup — OS and Docker installation live in the [server section](../server/SRV-README.md).
 
@@ -58,7 +58,7 @@ sudo nano /etc/freeradius/3.0/users
 <ADMIN_PHONE_MAC>  Cleartext-Password := "<ADMIN_PHONE_MAC>"
 ```
 
-> Using the MAC address itself as the password is weak by design — MAC addresses are visible in plaintext 802.11 management frames and are trivially spoofable with off-the-shelf tools. It was a deliberate choice for this project's threat model (a home network, where the goal is *filtering by known device* rather than defending against a determined local attacker), not a general security recommendation. See [Guide-MAC-Address-Filtering-and-Spoofing](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/network/Guide-MAC-Address-Filtering-and-Spoofing.md) and "Known limitations" below.
+> Using the MAC address itself as the password is weak by design — MAC addresses are visible in plaintext 802.11 management frames and are trivially spoofable with off-the-shelf tools. It was a deliberate choice for this project's threat model (a home network, where the goal is *filtering by known device* rather than defending against a determined local attacker), not a general security recommendation. See [Guide-MAC-Address-Filtering-and-Spoofing](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/network/wifi-auth/Guide-MAC-Address-Filtering-and-Spoofing.md) and "Known limitations" below.
 
 ## Verifying the daemon locally
 
@@ -71,7 +71,7 @@ A successful response includes `Access-Accept`. The `localhost` secret comes fro
 
 ## EAP configuration
 
-> Background on what EAP is, and how PEAP/MSCHAPv2 relate to each other: [Guide-EAP-Methods](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/network/Guide-EAP-Methods.md).
+> Background on what EAP is, and how PEAP/MSCHAPv2 relate to each other: [Guide-EAP-Methods](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/network/wifi-auth/Guide-EAP-Methods.md).
 
 The **top-level** `default_eap_type` in `/etc/freeradius/3.0/mods-available/eap` is set to `peap` (shipped value: `md5`). The nested `peap { default_eap_type = mschapv2 }` and `ttls { default_eap_type = mschapv2 }` settings are left as shipped:
 
@@ -105,4 +105,4 @@ sudo systemctl start freeradius   # return to normal background operation when d
 
 - [NET-05-TRBL](../troubleshooting/NET-05-TRBL-FreeRADIUS-Installation.md) — troubleshooting for this doc
 - [Wireless / RADIUS Integration](./NET-06-Wireless-RADIUS-Integration.md)
-- Guides: [RADIUS and AAA](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/network/Guide-RADIUS-and-AAA.md) · [EAP Methods](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/network/Guide-EAP-Methods.md) · [MAC Address Filtering and Spoofing](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/network/Guide-MAC-Address-Filtering-and-Spoofing.md)
+- Guides: [RADIUS and AAA](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/network/wifi-auth/Guide-RADIUS-and-AAA.md) · [EAP Methods](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/network/wifi-auth/Guide-EAP-Methods.md) · [MAC Address Filtering and Spoofing](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/network/wifi-auth/Guide-MAC-Address-Filtering-and-Spoofing.md)

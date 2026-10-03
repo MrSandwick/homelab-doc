@@ -4,7 +4,7 @@ tags: [homelab-project, homelab, note, project, networking, radius, wifi]
 
 # Wireless / RADIUS Integration (Omada SSIDs)
 
-> For a side-by-side comparison of what each mode below actually looks like from a connecting device, see [Guide-WiFi-Security-Modes](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/network/Guide-WiFi-Security-Modes.md).
+> For a side-by-side comparison of what each mode below actually looks like from a connecting device, see [Guide-WiFi-Security-Modes](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/network/wifi-auth/Guide-WiFi-Security-Modes.md).
 
 > **Status update:** the WPA-Enterprise SSID documented below ("SuperAlga") was working and verified, but was wiped by an access-point factory reset during an unrelated Management VLAN experiment — see [NET-04-TRBL](../troubleshooting/NET-04-TRBL-Router-Configuration.md#changing-the-management-vlan-made-connectivity-worse). It needs to be recreated using the exact recipe in section 1 below; nothing about the recipe itself changed. The simpler WPA-Personal "Users" SSID survived/was trivially recreated, which is itself a useful data point — see the note at the end of the Router Configuration incident.
 
@@ -55,4 +55,4 @@ Kept intentionally simple: WPA-Personal with a normal shared passphrase, no RADI
 
 - [FreeRADIUS Installation](./NET-05-FreeRADIUS-Installation.md)
 - [NET-04-TRBL](../troubleshooting/NET-04-TRBL-Router-Configuration.md#controller-connectivity-lost-after-an-ssid-change) — the controller-connectivity incident triggered while editing these SSIDs
-- Guides: [Wi-Fi Security Modes](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/network/Guide-WiFi-Security-Modes.md) · [EAP Methods](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/network/Guide-EAP-Methods.md) · [MAC Address Filtering and Spoofing](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/network/Guide-MAC-Address-Filtering-and-Spoofing.md)
+- Guides: [Wi-Fi Security Modes](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/network/wifi-auth/Guide-WiFi-Security-Modes.md) · [EAP Methods](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/network/wifi-auth/Guide-EAP-Methods.md) · [MAC Address Filtering and Spoofing](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/network/wifi-auth/Guide-MAC-Address-Filtering-and-Spoofing.md)

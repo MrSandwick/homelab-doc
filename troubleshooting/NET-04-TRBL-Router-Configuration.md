@@ -61,4 +61,4 @@ The controller-management ports were unreachable specifically **when tested from
 - [Router Configuration (ER605)](../network/NET-04-Router-Configuration.md) — the working configuration
 - [Wireless / RADIUS Integration](../network/NET-06-Wireless-RADIUS-Integration.md) — the SSID change that triggered the connectivity incident
 - [Access Control and Isolation](../network/NET-07-Access-Control-and-Isolation.md) — the ACL work done using the VLAN-1-connection workaround
-- Guide: [SDN Controller vs. Standalone](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/network/Guide-SDN-Controller-vs-Standalone.md)
+- Guide: [SDN Controller vs. Standalone](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/network/operations/Guide-SDN-Controller-vs-Standalone.md)

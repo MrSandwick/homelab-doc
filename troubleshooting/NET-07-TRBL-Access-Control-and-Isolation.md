@@ -17,4 +17,4 @@ tags: [homelab-project, homelab, note, project, networking, security, troublesho
 
 - [Access Control and Isolation](../network/NET-07-Access-Control-and-Isolation.md) — the working configuration
 - [NET-04-TRBL](./NET-04-TRBL-Router-Configuration.md) — the controller-management-port issue still open
-- Guide: [Network Isolation vs. ACLs](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/network/Guide-Network-Isolation-vs-ACLs.md)
+- Guide: [Network Isolation vs. ACLs](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/network/segmentation/Guide-Network-Isolation-vs-ACLs.md)

@@ -67,7 +67,7 @@ docker build -t my-site:v1 .
 
 ## Step 2 — Import the image into containerd
 
-No registry is used; the Docker-built image is imported into containerd's `k8s.io` namespace directly, on `<WORKER_HOSTNAME>`. See [Guide: Local Container Images Without a Registry](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-Local-Container-Images-Without-a-Registry.md).
+No registry is used; the Docker-built image is imported into containerd's `k8s.io` namespace directly, on `<WORKER_HOSTNAME>`. See [Guide: Local Container Images Without a Registry](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/containers/Guide-Local-Container-Images-Without-a-Registry.md).
 
 ```
 docker save my-site:v1 | sudo ctr -n k8s.io images import -
@@ -183,6 +183,6 @@ kubectl apply -f ingress.yaml
 - [Kubernetes Installation](./SRV-05-Kubernetes-Installation.md) — the control-plane taint, and why it was restored
 - [Second Node Setup](./SRV-06-Second-Node-Setup.md) — the worker this runs on
 - [Guide: The Stack](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-Stack.md) — companion Guides repository
-- [Guide: Local Container Images Without a Registry](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-Local-Container-Images-Without-a-Registry.md) — companion Guides repository
-- [Guide: Kubernetes Taints and Tolerations](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-Kubernetes-Taints-and-Tolerations.md) — companion Guides repository
-- [Guide: What Is a Cluster](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-Homelab-Clusters.md) — companion Guides repository — workload placement and choice of first workload
+- [Guide: Local Container Images Without a Registry](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/containers/Guide-Local-Container-Images-Without-a-Registry.md) — companion Guides repository
+- [Guide: Kubernetes Taints and Tolerations](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/kubernetes/Guide-Kubernetes-Taints-and-Tolerations.md) — companion Guides repository
+- [Guide: What Is a Cluster](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/decisions/Guide-Homelab-Clusters.md) — companion Guides repository — workload placement and choice of first workload
