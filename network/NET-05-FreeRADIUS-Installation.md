@@ -8,7 +8,7 @@ tags: [homelab-project, homelab, note, project, networking, radius]
 
 Installed on the same server documented in the [server section](../server/SRV-README.md) (Ubuntu Server, systemd). This doc covers only the RADIUS-specific setup — OS and Docker installation live in the [server section](../server/SRV-README.md).
 
-Problems hit during this work are recorded separately in [NET-05-TRBL](./NET-05-TRBL-FreeRADIUS-Installation.md).
+Problems hit during this work are recorded separately in [NET-05-TRBL](../troubleshooting/NET-05-TRBL-FreeRADIUS-Installation.md).
 
 ## Install
 
@@ -83,7 +83,7 @@ sudo systemctl restart freeradius
 
 Verified: an Android device authenticated via WPA2-Enterprise/PEAP/MSCHAPv2 (Identity = MAC, Password = MAC), with a matching `Access-Accept` line in `sudo freeradius -X` output.
 
-With the shipped `md5` value, clients failed before any credentials prompt — see [NET-05-TRBL](./NET-05-TRBL-FreeRADIUS-Installation.md#default_eap_type--md5).
+With the shipped `md5` value, clients failed before any credentials prompt — see [NET-05-TRBL](../troubleshooting/NET-05-TRBL-FreeRADIUS-Installation.md#default_eap_type--md5).
 
 ## Debugging workflow used throughout
 
@@ -103,6 +103,6 @@ sudo systemctl start freeradius   # return to normal background operation when d
 
 ## Related
 
-- [NET-05-TRBL](./NET-05-TRBL-FreeRADIUS-Installation.md) — troubleshooting for this doc
+- [NET-05-TRBL](../troubleshooting/NET-05-TRBL-FreeRADIUS-Installation.md) — troubleshooting for this doc
 - [Wireless / RADIUS Integration](./NET-06-Wireless-RADIUS-Integration.md)
 - Guides: [RADIUS and AAA](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/network/Guide-RADIUS-and-AAA.md) · [EAP Methods](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/network/Guide-EAP-Methods.md) · [MAC Address Filtering and Spoofing](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/network/Guide-MAC-Address-Filtering-and-Spoofing.md)

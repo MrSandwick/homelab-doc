@@ -6,16 +6,17 @@ The docs record *what was done and why* — decisions and rejected alternatives,
 
 ## How this repository is organised
 
-The project has two layers, each documented in its own folder. Every file name carries its layer prefix, so no two documents in the repository share a name or a number:
+The project has two layers, each documented in its own folder, plus one folder for troubleshooting. Every file name carries its layer prefix, so no two documents in the repository share a name or a number:
 
 | Folder | Prefix | Layer | Start here |
 |---|---|---|---|
 | [`server/`](server/) | `SRV-` | Hardware, OS, Docker, Kubernetes cluster | [SRV-README](server/SRV-README.md) |
 | [`network/`](network/) | `NET-` | ISP uplink, VLANs, router/switch/AP, FreeRADIUS, monitoring | [NET-README](network/NET-README.md) |
+| [`troubleshooting/`](troubleshooting/) | `SRV-nn-TRBL-`, `NET-nn-TRBL-` | Incidents hit in either layer: symptom, root cause, fix | Linked from each doc |
 
 Numbers are only meaningful *within* a layer (`SRV-03` is the third server doc, `NET-03` the third network doc) — the prefix is what identifies the document.
 
-A `TRBL` tag after the number marks a troubleshooting file: `SRV-08-TRBL-Helm-Observability-Ingress.md` holds the incidents (symptom, root cause, fix) hit while doing the work in `SRV-08-Helm-Observability-Ingress.md`. Docs with no incidents have no `TRBL` file.
+A `TRBL` tag after the number marks a troubleshooting file, kept in `troubleshooting/`: `troubleshooting/SRV-08-TRBL-Helm-Observability-Ingress.md` holds the incidents (symptom, root cause, fix) hit while doing the work in `server/SRV-08-Helm-Observability-Ingress.md`. Docs with no incidents have no `TRBL` file.
 
 ## Architecture at a glance
 
@@ -55,17 +56,17 @@ The FreeRADIUS server that authenticates Wi-Fi clients in `network/` runs on the
 | [SRV-00 Project Overview](server/SRV-00-Project-Overview.md) | Goals, target workloads, key decisions, status | — |
 | [SRV-01 Hardware Selection](server/SRV-01-Hardware-Selection.md) | Options compared, GMKtec M8 + OptiPlex 7050 | — |
 | [SRV-02 OS Installation](server/SRV-02-OS-Installation.md) | Ubuntu Server 26.04 LTS, LVM layout | — |
-| [SRV-03 Network Configuration](server/SRV-03-Network-Configuration.md) | Static IP with netplan, subnet-mismatch troubleshooting | [SRV-03-TRBL](server/SRV-03-TRBL-Network-Configuration.md) |
+| [SRV-03 Network Configuration](server/SRV-03-Network-Configuration.md) | Static IP with netplan, subnet-mismatch troubleshooting | [SRV-03-TRBL](troubleshooting/SRV-03-TRBL-Network-Configuration.md) |
 | [SRV-04 Docker Installation](server/SRV-04-Docker-Installation.md) | Docker for local image builds | — |
-| [SRV-05 Kubernetes Installation](server/SRV-05-Kubernetes-Installation.md) | containerd, `kubeadm init`, Flannel, first workload | [SRV-05-TRBL](server/SRV-05-TRBL-Kubernetes-Installation.md) |
-| [SRV-06 Second Node Setup](server/SRV-06-Second-Node-Setup.md) | OptiPlex worker node preparation | [SRV-06-TRBL](server/SRV-06-TRBL-Second-Node-Setup.md) |
+| [SRV-05 Kubernetes Installation](server/SRV-05-Kubernetes-Installation.md) | containerd, `kubeadm init`, Flannel, first workload | [SRV-05-TRBL](troubleshooting/SRV-05-TRBL-Kubernetes-Installation.md) |
+| [SRV-06 Second Node Setup](server/SRV-06-Second-Node-Setup.md) | OptiPlex worker node preparation | [SRV-06-TRBL](troubleshooting/SRV-06-TRBL-Second-Node-Setup.md) |
 | [SRV-07 Cluster Verification](server/SRV-07-Cluster-Verification.md) | Live-state check against the docs; LVM fixed on the control plane; DNS fix corrected | — |
-| [SRV-08 Helm, Observability, and Ingress](server/SRV-08-Helm-Observability-Ingress.md) | Helm, kube-prometheus-stack, ingress-nginx + MetalLB | [SRV-08-TRBL](server/SRV-08-TRBL-Helm-Observability-Ingress.md) |
-| [SRV-09 Ansible Node Provisioning](server/SRV-09-Ansible-Node-Provisioning.md) | Ansible control node, idempotency demo, sudo-rs incompatibility fix, trimmed production-safe playbook | [SRV-09-TRBL](server/SRV-09-TRBL-Ansible-Node-Provisioning.md) |
-| [SRV-10 First Real Workload](server/SRV-10-First-Real-Workload.md) | First application workload (static site) deployed via Ingress, scheduled onto the worker node | [SRV-10-TRBL](server/SRV-10-TRBL-First-Real-Workload.md) |
+| [SRV-08 Helm, Observability, and Ingress](server/SRV-08-Helm-Observability-Ingress.md) | Helm, kube-prometheus-stack, ingress-nginx + MetalLB | [SRV-08-TRBL](troubleshooting/SRV-08-TRBL-Helm-Observability-Ingress.md) |
+| [SRV-09 Ansible Node Provisioning](server/SRV-09-Ansible-Node-Provisioning.md) | Ansible control node, idempotency demo, sudo-rs incompatibility fix, trimmed production-safe playbook | [SRV-09-TRBL](troubleshooting/SRV-09-TRBL-Ansible-Node-Provisioning.md) |
+| [SRV-10 First Real Workload](server/SRV-10-First-Real-Workload.md) | First application workload (static site) deployed via Ingress, scheduled onto the worker node | [SRV-10-TRBL](troubleshooting/SRV-10-TRBL-First-Real-Workload.md) |
 | [SRV-11 Node Profile — GPU Laptop Worker](server/SRV-11-GPU-Laptop-Node-Profile.md) | The repurposed laptop node and its daily-driver trade-offs | — |
-| [SRV-12 GPU Node Setup](server/SRV-12-GPU-Node-Setup.md) | NVIDIA Container Toolkit, containerd runtime, Device Plugin | [SRV-12-TRBL](server/SRV-12-TRBL-GPU-Node-Setup.md) |
-| [SRV-13 ArgoCD and GitOps](server/SRV-13-ArgoCD-GitOps.md) | ArgoCD under `/argocd`, `homelab-gitops` repository, automated sync for `my-site` | [SRV-13-TRBL](server/SRV-13-TRBL-ArgoCD-GitOps.md) |
+| [SRV-12 GPU Node Setup](server/SRV-12-GPU-Node-Setup.md) | NVIDIA Container Toolkit, containerd runtime, Device Plugin | [SRV-12-TRBL](troubleshooting/SRV-12-TRBL-GPU-Node-Setup.md) |
+| [SRV-13 ArgoCD and GitOps](server/SRV-13-ArgoCD-GitOps.md) | ArgoCD under `/argocd`, `homelab-gitops` repository, automated sync for `my-site` | [SRV-13-TRBL](troubleshooting/SRV-13-TRBL-ArgoCD-GitOps.md) |
 
 ### Network — VLANs and RADIUS
 
@@ -74,12 +75,12 @@ The FreeRADIUS server that authenticates Wi-Fi clients in `network/` runs on the
 | [NET-00 Project Overview](network/NET-00-Project-Overview.md) | Goals, requirements, key decisions, status | — |
 | [NET-01 Hardware Selection](network/NET-01-Hardware-Selection.md) | ER605, TL-SG108E, EAP610 | — |
 | [NET-02 Internet Uplink](network/NET-02-Internet-Uplink.md) | Double NAT behind the ISP gateway | — |
-| [NET-03 VLAN Design and Switch Configuration](network/NET-03-VLAN-Design-and-Switch-Configuration.md) | VLAN plan, trunking, PVID troubleshooting | [NET-03-TRBL](network/NET-03-TRBL-VLAN-Design-and-Switch-Configuration.md) |
-| [NET-04 Router Configuration](network/NET-04-Router-Configuration.md) | ER605, Omada controller adoption | [NET-04-TRBL](network/NET-04-TRBL-Router-Configuration.md) |
-| [NET-05 FreeRADIUS Installation](network/NET-05-FreeRADIUS-Installation.md) | MAC-based RADIUS users, EAP troubleshooting | [NET-05-TRBL](network/NET-05-TRBL-FreeRADIUS-Installation.md) |
+| [NET-03 VLAN Design and Switch Configuration](network/NET-03-VLAN-Design-and-Switch-Configuration.md) | VLAN plan, trunking, PVID troubleshooting | [NET-03-TRBL](troubleshooting/NET-03-TRBL-VLAN-Design-and-Switch-Configuration.md) |
+| [NET-04 Router Configuration](network/NET-04-Router-Configuration.md) | ER605, Omada controller adoption | [NET-04-TRBL](troubleshooting/NET-04-TRBL-Router-Configuration.md) |
+| [NET-05 FreeRADIUS Installation](network/NET-05-FreeRADIUS-Installation.md) | MAC-based RADIUS users, EAP troubleshooting | [NET-05-TRBL](troubleshooting/NET-05-TRBL-FreeRADIUS-Installation.md) |
 | [NET-06 Wireless / RADIUS Integration](network/NET-06-Wireless-RADIUS-Integration.md) | Admin and Users SSIDs | — |
-| [NET-07 Access Control and Isolation](network/NET-07-Access-Control-and-Isolation.md) | Network isolation, planned ACLs | [NET-07-TRBL](network/NET-07-TRBL-Access-Control-and-Isolation.md) |
-| [NET-08 Traffic Monitoring](network/NET-08-Monitoring.md) | Port mirroring, ntopng | [NET-08-TRBL](network/NET-08-TRBL-Monitoring.md) |
+| [NET-07 Access Control and Isolation](network/NET-07-Access-Control-and-Isolation.md) | Network isolation, planned ACLs | [NET-07-TRBL](troubleshooting/NET-07-TRBL-Access-Control-and-Isolation.md) |
+| [NET-08 Traffic Monitoring](network/NET-08-Monitoring.md) | Port mirroring, ntopng | [NET-08-TRBL](troubleshooting/NET-08-TRBL-Monitoring.md) |
 
 ## Stack
 

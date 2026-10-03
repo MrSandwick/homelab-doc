@@ -4,15 +4,15 @@ tags: [homelab, project, network, troubleshooting]
 
 # Troubleshooting — Server Network Configuration
 
-> Companion to [Server — Network Configuration](./SRV-03-Network-Configuration.md), which records only the working configuration. This file records the problems hit while getting there, in the order they occurred.
+> Companion to [Server — Network Configuration](../server/SRV-03-Network-Configuration.md), which records only the working configuration. This file records the problems hit while getting there, in the order they occurred.
 
 ## Contents
 
 | Incident | Relates to |
 |---|---|
-| [IP address lost after every reboot](#ip-address-lost-after-every-reboot) | [Making the IP static](./SRV-03-Network-Configuration.md#making-the-ip-static) |
-| [Subnet mismatch between server and client](#subnet-mismatch-between-server-and-client) | [Making the IP static](./SRV-03-Network-Configuration.md#making-the-ip-static) |
-| [ISP blocking public DNS resolvers](#isp-blocking-public-dns-resolvers) | [DNS](./SRV-03-Network-Configuration.md#dns) |
+| [IP address lost after every reboot](#ip-address-lost-after-every-reboot) | [Making the IP static](../server/SRV-03-Network-Configuration.md#making-the-ip-static) |
+| [Subnet mismatch between server and client](#subnet-mismatch-between-server-and-client) | [Making the IP static](../server/SRV-03-Network-Configuration.md#making-the-ip-static) |
+| [ISP blocking public DNS resolvers](#isp-blocking-public-dns-resolvers) | [DNS](../server/SRV-03-Network-Configuration.md#dns) |
 
 ## IP address lost after every reboot
 
@@ -40,7 +40,7 @@ network:
 
 **Root cause:** the installer-written file only matched and renamed the interface by MAC address — it specified neither `dhcp4` nor a static address. Nothing was reverting the config (e.g. cloud-init); the static config from an earlier session had never been written into the file the system reads on boot.
 
-**Fix:** addressing directives added inside the existing `eno1` entry of that file — see [Making the IP static](./SRV-03-Network-Configuration.md#making-the-ip-static).
+**Fix:** addressing directives added inside the existing `eno1` entry of that file — see [Making the IP static](../server/SRV-03-Network-Configuration.md#making-the-ip-static).
 
 ## Subnet mismatch between server and client
 
@@ -87,7 +87,7 @@ sudo netplan try
 sudo netplan apply
 ```
 
-Confirmed running on both nodes in [Cluster Verification](./SRV-07-Cluster-Verification.md).
+Confirmed running on both nodes in [Cluster Verification](../server/SRV-07-Cluster-Verification.md).
 
 **Alternative investigated, not applied — DNS-over-TLS via `systemd-resolved`.** Not configured on either node (`resolvectl status`: `-DNSOverTLS`; `resolved.conf` default); the router-DNS fix was sufficient. Reference config:
 
@@ -114,6 +114,6 @@ resolvectl status   # expect "+DNSOverTLS" on the active link
 
 ## Related
 
-- [Server — Network Configuration](./SRV-03-Network-Configuration.md) — the working configuration
+- [Server — Network Configuration](../server/SRV-03-Network-Configuration.md) — the working configuration
 - [Internet Uplink](../network/NET-02-Internet-Uplink.md) — the ISP connection behind the DNS blocking
-- [Cluster Verification](./SRV-07-Cluster-Verification.md) — confirmed which DNS fix is running
+- [Cluster Verification](../server/SRV-07-Cluster-Verification.md) — confirmed which DNS fix is running

@@ -4,15 +4,15 @@ tags: [homelab-project, homelab, note, project, networking, vlan, troubleshootin
 
 # Troubleshooting — VLAN Design and Switch Configuration
 
-> Companion to [VLAN Design and Switch Configuration](./NET-03-VLAN-Design-and-Switch-Configuration.md), which records only the working configuration. This file records the problems hit during that work, in the order they occurred.
+> Companion to [VLAN Design and Switch Configuration](../network/NET-03-VLAN-Design-and-Switch-Configuration.md), which records only the working configuration. This file records the problems hit during that work, in the order they occurred.
 
 ## Contents
 
 | Incident | Relates to |
 |---|---|
-| [VLAN membership set, PVID left at default](#vlan-membership-set-pvid-left-at-default) | [Switch-side configuration](./NET-03-VLAN-Design-and-Switch-Configuration.md#switch-side-configuration-tl-sg108e-via-easy-smart-utility) |
-| [Switch management IP confusion](#switch-management-ip-confusion) | [Switch-side configuration](./NET-03-VLAN-Design-and-Switch-Configuration.md#switch-side-configuration-tl-sg108e-via-easy-smart-utility) |
-| [Same PVID bug recurred when adding a second server](#same-pvid-bug-recurred-when-adding-a-second-server) | [Switch-side configuration](./NET-03-VLAN-Design-and-Switch-Configuration.md#switch-side-configuration-tl-sg108e-via-easy-smart-utility) |
+| [VLAN membership set, PVID left at default](#vlan-membership-set-pvid-left-at-default) | [Switch-side configuration](../network/NET-03-VLAN-Design-and-Switch-Configuration.md#switch-side-configuration-tl-sg108e-via-easy-smart-utility) |
+| [Switch management IP confusion](#switch-management-ip-confusion) | [Switch-side configuration](../network/NET-03-VLAN-Design-and-Switch-Configuration.md#switch-side-configuration-tl-sg108e-via-easy-smart-utility) |
+| [Same PVID bug recurred when adding a second server](#same-pvid-bug-recurred-when-adding-a-second-server) | [Switch-side configuration](../network/NET-03-VLAN-Design-and-Switch-Configuration.md#switch-side-configuration-tl-sg108e-via-easy-smart-utility) |
 
 ## VLAN membership set, PVID left at default
 
@@ -44,9 +44,9 @@ Two separate, unrelated issues combined to make the switch's management address 
 
 **Root cause:** VLAN membership was set correctly (Untagged, VLAN 20), but the port's PVID had been left at its default of `1`.
 
-**Fix:** `802.1Q PVID Setting → Port 5 → 20`. The check has to be repeated for *every* new access port, not just the first few configured. Server-side view of the same incident: [SRV-06-TRBL](../server/SRV-06-TRBL-Second-Node-Setup.md#no-ipv4-address-despite-a-healthy-link).
+**Fix:** `802.1Q PVID Setting → Port 5 → 20`. The check has to be repeated for *every* new access port, not just the first few configured. Server-side view of the same incident: [SRV-06-TRBL](./SRV-06-TRBL-Second-Node-Setup.md#no-ipv4-address-despite-a-healthy-link).
 
 ## Related
 
-- [VLAN Design and Switch Configuration](./NET-03-VLAN-Design-and-Switch-Configuration.md) — the working configuration
+- [VLAN Design and Switch Configuration](../network/NET-03-VLAN-Design-and-Switch-Configuration.md) — the working configuration
 - Guide: [VLANs, Trunk vs. Access, PVID](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/network/Guide-VLANs-Trunk-Access-PVID.md)

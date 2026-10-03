@@ -4,15 +4,15 @@ tags: [homelab, project, kubernetes, gpu, nvidia, troubleshooting]
 
 # Troubleshooting — GPU Node Setup
 
-> Companion to [GPU Node Setup — NVIDIA Container Runtime on the Laptop Worker](./SRV-12-GPU-Node-Setup.md), which records only the working procedure. This file records the problems hit during that work, in the order they occurred.
+> Companion to [GPU Node Setup — NVIDIA Container Runtime on the Laptop Worker](../server/SRV-12-GPU-Node-Setup.md), which records only the working procedure. This file records the problems hit during that work, in the order they occurred.
 
 ## Contents
 
 | Incident | Step |
 |---|---|
-| [`nvidia-ctk` wrote an empty config on the first attempt](#nvidia-ctk-wrote-an-empty-config-on-the-first-attempt) | [Step 2](./SRV-12-GPU-Node-Setup.md#step-2--configure-containerd-to-use-the-nvidia-runtime) |
-| [Device Plugin DaemonSet crashed on the nodes without a GPU](#device-plugin-daemonset-crashed-on-the-nodes-without-a-gpu) | [Step 3](./SRV-12-GPU-Node-Setup.md#step-3--install-the-nvidia-device-plugin) |
-| [Device Plugin crashed on the GPU node: wrong default runtime](#device-plugin-crashed-on-the-gpu-node-wrong-default-runtime) | [Step 2](./SRV-12-GPU-Node-Setup.md#step-2--configure-containerd-to-use-the-nvidia-runtime) |
+| [`nvidia-ctk` wrote an empty config on the first attempt](#nvidia-ctk-wrote-an-empty-config-on-the-first-attempt) | [Step 2](../server/SRV-12-GPU-Node-Setup.md#step-2--configure-containerd-to-use-the-nvidia-runtime) |
+| [Device Plugin DaemonSet crashed on the nodes without a GPU](#device-plugin-daemonset-crashed-on-the-nodes-without-a-gpu) | [Step 3](../server/SRV-12-GPU-Node-Setup.md#step-3--install-the-nvidia-device-plugin) |
+| [Device Plugin crashed on the GPU node: wrong default runtime](#device-plugin-crashed-on-the-gpu-node-wrong-default-runtime) | [Step 2](../server/SRV-12-GPU-Node-Setup.md#step-2--configure-containerd-to-use-the-nvidia-runtime) |
 
 ## `nvidia-ctk` wrote an empty config on the first attempt
 
@@ -78,5 +78,5 @@ It came up `Running` with zero restarts on the next attempt.
 
 ## Related
 
-- [GPU Node Setup](./SRV-12-GPU-Node-Setup.md) — the working procedure
-- [Node Profile — GPU Laptop Worker](./SRV-11-GPU-Laptop-Node-Profile.md)
+- [GPU Node Setup](../server/SRV-12-GPU-Node-Setup.md) — the working procedure
+- [Node Profile — GPU Laptop Worker](../server/SRV-11-GPU-Laptop-Node-Profile.md)

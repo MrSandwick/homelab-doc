@@ -20,7 +20,7 @@ Picks up after [Cluster Verification](./SRV-07-Cluster-Verification.md). Command
 8. [Files created](#files-created)
 9. [Related](#related)
 
-Problems hit during this work are recorded separately in [SRV-08-TRBL](./SRV-08-TRBL-Helm-Observability-Ingress.md).
+Problems hit during this work are recorded separately in [SRV-08-TRBL](../troubleshooting/SRV-08-TRBL-Helm-Observability-Ingress.md).
 
 ## Components installed
 
@@ -51,7 +51,7 @@ curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
 helm version
 ```
 
-The script needs working DNS for `raw.githubusercontent.com`; the first run failed on the ISP DNS blocking — see [SRV-08-TRBL](./SRV-08-TRBL-Helm-Observability-Ingress.md#helm-install-script-failed-to-resolve).
+The script needs working DNS for `raw.githubusercontent.com`; the first run failed on the ISP DNS blocking — see [SRV-08-TRBL](../troubleshooting/SRV-08-TRBL-Helm-Observability-Ingress.md#helm-install-script-failed-to-resolve).
 
 ### Chart repositories
 
@@ -111,7 +111,7 @@ helm install ingress-nginx ingress-nginx/ingress-nginx \
   --namespace ingress-nginx --create-namespace
 ```
 
-The install must be left to complete before running further commands in the same session; an interrupted first attempt left a `failed` release behind — see [SRV-08-TRBL](./SRV-08-TRBL-Helm-Observability-Ingress.md#helm-install-interrupted-cannot-re-use-a-name).
+The install must be left to complete before running further commands in the same session; an interrupted first attempt left a `failed` release behind — see [SRV-08-TRBL](../troubleshooting/SRV-08-TRBL-Helm-Observability-Ingress.md#helm-install-interrupted-cannot-re-use-a-name).
 
 ## Step 4 — Load balancer: MetalLB
 
@@ -213,7 +213,7 @@ Verified from another LAN machine: `http://<INGRESS_IP>` serves Grafana without 
 
 ## Related
 
-- [SRV-08-TRBL](./SRV-08-TRBL-Helm-Observability-Ingress.md) — troubleshooting for this doc
+- [SRV-08-TRBL](../troubleshooting/SRV-08-TRBL-Helm-Observability-Ingress.md) — troubleshooting for this doc
 - [Cluster Verification](./SRV-07-Cluster-Verification.md) — the state of the cluster this builds on
 - [Network Configuration](./SRV-03-Network-Configuration.md) — the router-DNS configuration Helm's install script depends on
 - [Kubernetes Installation](./SRV-05-Kubernetes-Installation.md) — the original `port-forward` usage

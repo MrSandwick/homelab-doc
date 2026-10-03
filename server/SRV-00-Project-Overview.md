@@ -43,7 +43,7 @@ See [Hardware Selection](./SRV-01-Hardware-Selection.md) for the full comparison
 - ✅ containerd + kubeadm + kubelet + kubectl installed
 - ✅ Control plane initialized (`kubeadm init`), node `Ready`, Flannel CNI healthy
 - ✅ First test workload (nginx) deployed, verified reachable over the network, and cleaned up
-- ✅ Second node (`<WORKER_HOSTNAME>`, Dell OptiPlex 7050 Micro) joined the cluster via `kubeadm join` — see [Second Node Setup](./SRV-06-Second-Node-Setup.md) for the full process, and [SRV-06-TRBL](./SRV-06-TRBL-Second-Node-Setup.md) for a mistake made and recovered from along the way
+- ✅ Second node (`<WORKER_HOSTNAME>`, Dell OptiPlex 7050 Micro) joined the cluster via `kubeadm join` — see [Second Node Setup](./SRV-06-Second-Node-Setup.md) for the full process, and [SRV-06-TRBL](../troubleshooting/SRV-06-TRBL-Second-Node-Setup.md) for a mistake made and recovered from along the way
 - ✅ Third node (`<GPU_HOSTNAME>`, Acer Nitro laptop with an NVIDIA GPU) joined — see [Node Profile](./SRV-11-GPU-Laptop-Node-Profile.md) for what it is and the daily-driver trade-offs it brings
 - ✅ Cluster is now three nodes, all `Ready`: `<HOSTNAME>` (control-plane), `<WORKER_HOSTNAME>` and `<GPU_HOSTNAME>` (workers)
 - ✅ GPU access verified end-to-end on the laptop worker — a test pod ran `nvidia-smi` inside the cluster, matching the host's own output. See [GPU Node Setup](./SRV-12-GPU-Node-Setup.md)

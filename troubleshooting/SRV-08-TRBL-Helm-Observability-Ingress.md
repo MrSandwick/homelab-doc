@@ -4,14 +4,14 @@ tags: [homelab, project, kubernetes, helm, troubleshooting]
 
 # Troubleshooting — Helm, Observability, and Ingress
 
-> Companion to [Helm, Observability, and Ingress](./SRV-08-Helm-Observability-Ingress.md), which records only the working procedure. This file records the problems hit during that work, in the order they occurred.
+> Companion to [Helm, Observability, and Ingress](../server/SRV-08-Helm-Observability-Ingress.md), which records only the working procedure. This file records the problems hit during that work, in the order they occurred.
 
 ## Contents
 
 | Incident | Step |
 |---|---|
-| [Helm install script failed to resolve](#helm-install-script-failed-to-resolve) | [Step 1](./SRV-08-Helm-Observability-Ingress.md#step-1--helm) |
-| [`helm install` interrupted: "cannot re-use a name"](#helm-install-interrupted-cannot-re-use-a-name) | [Step 3](./SRV-08-Helm-Observability-Ingress.md#step-3--ingress-controller-ingress-nginx) |
+| [Helm install script failed to resolve](#helm-install-script-failed-to-resolve) | [Step 1](../server/SRV-08-Helm-Observability-Ingress.md#step-1--helm) |
+| [`helm install` interrupted: "cannot re-use a name"](#helm-install-interrupted-cannot-re-use-a-name) | [Step 3](../server/SRV-08-Helm-Observability-Ingress.md#step-3--ingress-controller-ingress-nginx) |
 
 ## Helm install script failed to resolve
 
@@ -44,6 +44,6 @@ The reinstall was allowed to complete before any further commands were run. See 
 
 ## Related
 
-- [Helm, Observability, and Ingress](./SRV-08-Helm-Observability-Ingress.md) — the working procedure
+- [Helm, Observability, and Ingress](../server/SRV-08-Helm-Observability-Ingress.md) — the working procedure
 - [SRV-03-TRBL](./SRV-03-TRBL-Network-Configuration.md) — the original ISP DNS-blocking incident
 - [Guide: Helm Basics](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-Helm-Basics.md) — companion Guides repository

@@ -20,7 +20,7 @@ Picks up after [Ansible Node Provisioning](./SRV-09-Ansible-Node-Provisioning.md
 8. [Files](#files)
 9. [Related](#related)
 
-Problems hit during this work are recorded separately in [SRV-10-TRBL](./SRV-10-TRBL-First-Real-Workload.md).
+Problems hit during this work are recorded separately in [SRV-10-TRBL](../troubleshooting/SRV-10-TRBL-First-Real-Workload.md).
 
 ## Components
 
@@ -76,7 +76,7 @@ sudo ctr -n k8s.io images list | grep my-site
 
 Listed with `io.cri-containerd.image=managed`. The image exists only on the node it was imported on, so the Deployment must be pinned to that node.
 
-The image was first built and imported on the control plane, and the Deployment pinned there — reverted; see [SRV-10-TRBL](./SRV-10-TRBL-First-Real-Workload.md#first-deployment-pinned-to-the-control-plane-reverted).
+The image was first built and imported on the control plane, and the Deployment pinned there — reverted; see [SRV-10-TRBL](../troubleshooting/SRV-10-TRBL-First-Real-Workload.md#first-deployment-pinned-to-the-control-plane-reverted).
 
 ## Step 3 — Deployment on the worker
 
@@ -178,7 +178,7 @@ kubectl apply -f ingress.yaml
 
 ## Related
 
-- [SRV-10-TRBL](./SRV-10-TRBL-First-Real-Workload.md) — troubleshooting for this doc
+- [SRV-10-TRBL](../troubleshooting/SRV-10-TRBL-First-Real-Workload.md) — troubleshooting for this doc
 - [Helm, Observability, and Ingress](./SRV-08-Helm-Observability-Ingress.md) — the ingress and MetalLB entry point this reuses
 - [Kubernetes Installation](./SRV-05-Kubernetes-Installation.md) — the control-plane taint, and why it was restored
 - [Second Node Setup](./SRV-06-Second-Node-Setup.md) — the worker this runs on

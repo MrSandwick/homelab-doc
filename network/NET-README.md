@@ -8,7 +8,7 @@ A chronological, technical log of building the network layer for a home lab: ISP
 
 This section documents *what was done and why* — decisions made, exact commands run, and problems encountered along the way.
 
-Each numbered doc records the working configuration. The problems hit along the way — symptom, root cause, fix — are kept in a companion file with the same number and a `TRBL` tag (`NET-04-TRBL-Router-Configuration.md` alongside `NET-04-Router-Configuration.md`), linked from the doc it belongs to.
+Each numbered doc records the working configuration. The problems hit along the way — symptom, root cause, fix — are kept in a companion file with the same number and a `TRBL` tag in the [`troubleshooting/`](../troubleshooting/) folder (`troubleshooting/NET-04-TRBL-Router-Configuration.md` for `NET-04-Router-Configuration.md`), linked from the doc it belongs to.
 
 ## Contents
 
@@ -24,11 +24,11 @@ Each numbered doc records the working configuration. The problems hit along the 
 
 Troubleshooting files:
 
-- [NET-03-TRBL](./NET-03-TRBL-VLAN-Design-and-Switch-Configuration.md) — PVID left at default (twice), switch management IP confusion
-- [NET-04-TRBL](./NET-04-TRBL-Router-Configuration.md) — config lost on adoption, controller connectivity lost, Management VLAN change
-- [NET-05-TRBL](./NET-05-TRBL-FreeRADIUS-Installation.md) — `default_eap_type = md5`
-- [NET-07-TRBL](./NET-07-TRBL-Access-Control-and-Isolation.md) — two Gateway ACL rule-authoring mistakes
-- [NET-08-TRBL](./NET-08-TRBL-Monitoring.md) — image tag, NIC offloading, Ghost Networks, `NO-CARRIER`, forgotten password
+- [NET-03-TRBL](../troubleshooting/NET-03-TRBL-VLAN-Design-and-Switch-Configuration.md) — PVID left at default (twice), switch management IP confusion
+- [NET-04-TRBL](../troubleshooting/NET-04-TRBL-Router-Configuration.md) — config lost on adoption, controller connectivity lost, Management VLAN change
+- [NET-05-TRBL](../troubleshooting/NET-05-TRBL-FreeRADIUS-Installation.md) — `default_eap_type = md5`
+- [NET-07-TRBL](../troubleshooting/NET-07-TRBL-Access-Control-and-Isolation.md) — two Gateway ACL rule-authoring mistakes
+- [NET-08-TRBL](../troubleshooting/NET-08-TRBL-Monitoring.md) — image tag, NIC offloading, Ghost Networks, `NO-CARRIER`, forgotten password
 
 ## Stack
 

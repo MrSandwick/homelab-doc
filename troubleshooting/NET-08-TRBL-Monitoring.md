@@ -4,17 +4,17 @@ tags: [homelab-project, homelab, note, project, networking, monitoring, troubles
 
 # Troubleshooting — Traffic Monitoring
 
-> Companion to [Traffic Monitoring](./NET-08-Monitoring.md), which records only the working configuration. This file records the problems hit during that work, in the order they occurred.
+> Companion to [Traffic Monitoring](../network/NET-08-Monitoring.md), which records only the working configuration. This file records the problems hit during that work, in the order they occurred.
 
 ## Contents
 
 | Incident | Relates to |
 |---|---|
-| [`ntop/ntopng:stable` tag does not exist](#ntopntopngstable-tag-does-not-exist) | [ntopng](./NET-08-Monitoring.md#ntopng-docker-with-redis) |
-| [NIC offloading corrupts monitored packet sizes](#nic-offloading-corrupts-monitored-packet-sizes) | [Port mirroring](./NET-08-Monitoring.md#network-wide-visibility-switch-port-mirroring) |
-| ["Ghost Networks" alerts](#ghost-networks-alerts) | [ntopng](./NET-08-Monitoring.md#ntopng-docker-with-redis) |
-| [Monitoring interface showed `NO-CARRIER`](#monitoring-interface-showed-no-carrier) | [Port mirroring](./NET-08-Monitoring.md#network-wide-visibility-switch-port-mirroring) |
-| [Forgotten ntopng admin password](#forgotten-ntopng-admin-password) | [ntopng](./NET-08-Monitoring.md#ntopng-docker-with-redis) |
+| [`ntop/ntopng:stable` tag does not exist](#ntopntopngstable-tag-does-not-exist) | [ntopng](../network/NET-08-Monitoring.md#ntopng-docker-with-redis) |
+| [NIC offloading corrupts monitored packet sizes](#nic-offloading-corrupts-monitored-packet-sizes) | [Port mirroring](../network/NET-08-Monitoring.md#network-wide-visibility-switch-port-mirroring) |
+| ["Ghost Networks" alerts](#ghost-networks-alerts) | [ntopng](../network/NET-08-Monitoring.md#ntopng-docker-with-redis) |
+| [Monitoring interface showed `NO-CARRIER`](#monitoring-interface-showed-no-carrier) | [Port mirroring](../network/NET-08-Monitoring.md#network-wide-visibility-switch-port-mirroring) |
+| [Forgotten ntopng admin password](#forgotten-ntopng-admin-password) | [ntopng](../network/NET-08-Monitoring.md#ntopng-docker-with-redis) |
 
 ## `ntop/ntopng:stable` tag does not exist
 
@@ -35,7 +35,7 @@ WARNING: If TSO/GRO is enabled, please disable it for best accuracy
 
 **Root cause:** hardware offloading features (TSO/GSO on transmit, GRO on receive) merge multiple real packets into one larger "virtual" packet before software sees them — a performance optimization that is harmful on a monitoring interface, since ntopng needs genuine per-packet boundaries and timing. A merged "packet" of 1646 bytes is larger than Ethernet's real 1518-byte maximum.
 
-**Fix:** offloading disabled on `enp2s0` and made persistent with a systemd unit — see [Port mirroring](./NET-08-Monitoring.md#network-wide-visibility-switch-port-mirroring).
+**Fix:** offloading disabled on `enp2s0` and made persistent with a systemd unit — see [Port mirroring](../network/NET-08-Monitoring.md#network-wide-visibility-switch-port-mirroring).
 
 ## "Ghost Networks" alerts
 
@@ -57,7 +57,7 @@ docker compose up -d --force-recreate ntopng
 <NO-CARRIER,BROADCAST,MULTICAST,PROMISC,UP> ... state DOWN
 ```
 
-**Root cause:** a purely physical-layer issue, unrelated to any ntopng or switch configuration — `NO-CARRIER` means the interface detects no electrical signal from the switch. The monitoring cable had become disconnected (or was never fully seated) at one end, likely disturbed while re-cabling the switch to accommodate the second and third cluster nodes joining around the same time (see [VLAN Design and Switch Configuration](./NET-03-VLAN-Design-and-Switch-Configuration.md) for the port reassignments in that period).
+**Root cause:** a purely physical-layer issue, unrelated to any ntopng or switch configuration — `NO-CARRIER` means the interface detects no electrical signal from the switch. The monitoring cable had become disconnected (or was never fully seated) at one end, likely disturbed while re-cabling the switch to accommodate the second and third cluster nodes joining around the same time (see [VLAN Design and Switch Configuration](../network/NET-03-VLAN-Design-and-Switch-Configuration.md) for the port reassignments in that period).
 
 **Fix:** reseated the cable between the server's `enp2s0` NIC and the switch's mirroring port. `PROMISC` and `UP` being already set did not matter — without `LOWER_UP` (physical link detected), no traffic can arrive regardless of any mirroring or interface configuration.
 
@@ -80,6 +80,6 @@ This clears ntopng's accumulated traffic history along with its user database �
 
 ## Related
 
-- [Traffic Monitoring](./NET-08-Monitoring.md) — the working configuration
-- [VLAN Design and Switch Configuration](./NET-03-VLAN-Design-and-Switch-Configuration.md) — the port reassignments around the cable fault
+- [Traffic Monitoring](../network/NET-08-Monitoring.md) — the working configuration
+- [VLAN Design and Switch Configuration](../network/NET-03-VLAN-Design-and-Switch-Configuration.md) — the port reassignments around the cable fault
 - Guide: [Port Mirroring and Promiscuous Mode](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/network/Guide-Port-Mirroring-and-Promiscuous-Mode.md)

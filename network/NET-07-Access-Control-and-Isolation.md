@@ -6,7 +6,7 @@ tags: [homelab-project, homelab, note, project, networking, security]
 
 > VLANs, Network Isolation, and ACLs sound similar but answer different questions — see [Guide-Network-Isolation-vs-ACLs](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/network/Guide-Network-Isolation-vs-ACLs.md) if the distinction below isn't obvious.
 
-Problems hit during this work are recorded separately in [NET-07-TRBL](./NET-07-TRBL-Access-Control-and-Isolation.md).
+Problems hit during this work are recorded separately in [NET-07-TRBL](../troubleshooting/NET-07-TRBL-Access-Control-and-Isolation.md).
 
 ## What's implemented on the real network
 
@@ -41,7 +41,7 @@ The original design goal — *only specific admin devices, identified by IP, may
 
 Order matters — Omada evaluates rules top-down and stops at the first match, so the Permit rule for trusted devices must sit above the general Deny.
 
-No other active rule may sit above this pair: a leftover broad Permit rule from testing, and a Permit rule whose Action was still `Deny`, were both found and corrected by reviewing the full rule list — see [NET-07-TRBL](./NET-07-TRBL-Access-Control-and-Isolation.md#two-gateway-acl-rule-authoring-mistakes).
+No other active rule may sit above this pair: a leftover broad Permit rule from testing, and a Permit rule whose Action was still `Deny`, were both found and corrected by reviewing the full rule list — see [NET-07-TRBL](../troubleshooting/NET-07-TRBL-Access-Control-and-Isolation.md#two-gateway-acl-rule-authoring-mistakes).
 
 **Verified:**
 
@@ -53,11 +53,11 @@ ping 8.8.8.8              # from either: unaffected — the ACL is scoped to the
 
 ## What's still open
 
-It's still unclear whether the earlier controller-management-port issue (documented in [NET-04-TRBL](./NET-04-TRBL-Router-Configuration.md#controller-connectivity-lost-after-an-ssid-change)) was routing-related or an Omada firewall default — the investigation into the `Layer-3 Accessibility` toggle as a possible fix was interrupted by the Management VLAN incident and hasn't been resumed. The physical-VLAN-1-connection workaround remains in use for controller-level device management (Force Provision, Adopt, etc.) in the meantime.
+It's still unclear whether the earlier controller-management-port issue (documented in [NET-04-TRBL](../troubleshooting/NET-04-TRBL-Router-Configuration.md#controller-connectivity-lost-after-an-ssid-change)) was routing-related or an Omada firewall default — the investigation into the `Layer-3 Accessibility` toggle as a possible fix was interrupted by the Management VLAN incident and hasn't been resumed. The physical-VLAN-1-connection workaround remains in use for controller-level device management (Force Provision, Adopt, etc.) in the meantime.
 
 ## Related
 
-- [NET-07-TRBL](./NET-07-TRBL-Access-Control-and-Isolation.md) — troubleshooting for this doc
+- [NET-07-TRBL](../troubleshooting/NET-07-TRBL-Access-Control-and-Isolation.md) — troubleshooting for this doc
 - [Project Overview](./NET-00-Project-Overview.md)
 - [VLAN Design and Switch Configuration](./NET-03-VLAN-Design-and-Switch-Configuration.md)
 - [Router Configuration](./NET-04-Router-Configuration.md)
