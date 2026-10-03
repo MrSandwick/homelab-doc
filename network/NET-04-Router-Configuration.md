@@ -8,7 +8,7 @@ Problems hit during this work are recorded separately in [NET-04-TRBL](../troubl
 
 ## Management path
 
-> Unfamiliar with the standalone-vs-controller distinction, or what "adopting" a device means? See [Guide-SDN-Controller-vs-Standalone](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/network/Guide-SDN-Controller-vs-Standalone.md).
+> Unfamiliar with the standalone-vs-controller distinction, or what "adopting" a device means? See [Guide-SDN-Controller-vs-Standalone](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/network/operations/Guide-SDN-Controller-vs-Standalone.md).
 
 Configured first via the router's own standalone web UI (`<ROUTER_MGMT_IP>`), then migrated to the Omada SDN Controller once the switch and access point were also brought under controller management, so all three devices could eventually be administered from one place.
 
@@ -36,4 +36,4 @@ Both points come out of two incidents — see [NET-04-TRBL](../troubleshooting/N
 - [VLAN Design and Switch Configuration](./NET-03-VLAN-Design-and-Switch-Configuration.md)
 - [Wireless / RADIUS Integration](./NET-06-Wireless-RADIUS-Integration.md) — the SSID change that triggered the controller-connectivity incident
 - [Access Control and Isolation](./NET-07-Access-Control-and-Isolation.md) — the ACL work done using the VLAN-1-connection workaround
-- Guides: [SDN Controller vs. Standalone](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/network/Guide-SDN-Controller-vs-Standalone.md) · [Network Isolation vs. ACLs](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/network/Guide-Network-Isolation-vs-ACLs.md)
+- Guides: [SDN Controller vs. Standalone](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/network/operations/Guide-SDN-Controller-vs-Standalone.md) · [Network Isolation vs. ACLs](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/network/segmentation/Guide-Network-Isolation-vs-ACLs.md)

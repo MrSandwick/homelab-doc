@@ -37,7 +37,7 @@ Overview of each component: [Guide: The Stack](https://github.com/MrSandwick/OVa
 
 ## Installation
 
-Introduced to codify the manual provisioning steps from [Kubernetes Installation](./SRV-05-Kubernetes-Installation.md) and [Second Node Setup](./SRV-06-Second-Node-Setup.md). Installed on the control node only; managed nodes require only SSH and Python. See [Guide: Ansible Basics](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-Ansible-Basics.md).
+Introduced to codify the manual provisioning steps from [Kubernetes Installation](./SRV-05-Kubernetes-Installation.md) and [Second Node Setup](./SRV-06-Second-Node-Setup.md). Installed on the control node only; managed nodes require only SSH and Python. See [Guide: Ansible Basics](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/platform/Guide-Ansible-Basics.md).
 
 ```
 sudo apt update && sudo apt install ansible -y
@@ -126,7 +126,7 @@ sudo update-alternatives --config sudo
 sudo --version    # confirms classic sudo
 ```
 
-Applied on all three machines (test laptop and both cluster nodes). Symptom and diagnosis: [SRV-09-TRBL](../troubleshooting/SRV-09-TRBL-Ansible-Node-Provisioning.md#sudo-rs-breaks-privilege-escalation). See also [Guide: sudo-rs and Privilege Escalation](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-Sudo-rs-and-Privilege-Escalation.md).
+Applied on all three machines (test laptop and both cluster nodes). Symptom and diagnosis: [SRV-09-TRBL](../troubleshooting/SRV-09-TRBL-Ansible-Node-Provisioning.md#sudo-rs-breaks-privilege-escalation). See also [Guide: sudo-rs and Privilege Escalation](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/host/Guide-Sudo-rs-and-Privilege-Escalation.md).
 
 ## Inventory and variables
 
@@ -192,5 +192,5 @@ Re-run: idempotent except the Kubernetes apt-key task (`ansible.builtin.get_url`
 - [Kubernetes Installation](./SRV-05-Kubernetes-Installation.md) — the manual steps this playbook now codifies
 - [Second Node Setup](./SRV-06-Second-Node-Setup.md) — the worker's manual provisioning
 - [Network Configuration](./SRV-03-Network-Configuration.md) — the hand-written netplan and DNS config the playbook deliberately does not manage
-- [Guide: Ansible Basics](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-Ansible-Basics.md) — companion Guides repository
-- [Guide: sudo-rs and Privilege Escalation](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-Sudo-rs-and-Privilege-Escalation.md) — companion Guides repository
+- [Guide: Ansible Basics](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/platform/Guide-Ansible-Basics.md) — companion Guides repository
+- [Guide: sudo-rs and Privilege Escalation](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/host/Guide-Sudo-rs-and-Privilege-Escalation.md) — companion Guides repository

@@ -61,11 +61,11 @@ sudo --version
 dpkg -l | grep sudo
 ```
 
-**Root cause:** Ubuntu 26.04 ships `sudo-rs` alongside classic `sudo`, with `sudo-rs` as the active `update-alternatives` choice. Its prompt handling is incompatible with Ansible's `become`. See [Guide: sudo-rs and Privilege Escalation](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-Sudo-rs-and-Privilege-Escalation.md).
+**Root cause:** Ubuntu 26.04 ships `sudo-rs` alongside classic `sudo`, with `sudo-rs` as the active `update-alternatives` choice. Its prompt handling is incompatible with Ansible's `become`. See [Guide: sudo-rs and Privilege Escalation](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/host/Guide-Sudo-rs-and-Privilege-Escalation.md).
 
 **Fix (per node):** switch the active `sudo` to the classic implementation — commands in [Privilege escalation: classic `sudo`](../server/SRV-09-Ansible-Node-Provisioning.md#privilege-escalation-classic-sudo). Required on all three machines (test laptop and both cluster nodes) — an Ubuntu 26.04 default, not a per-host misconfiguration.
 
 ## Related
 
 - [Ansible Node Provisioning](../server/SRV-09-Ansible-Node-Provisioning.md) — the working procedure
-- [Guide: sudo-rs and Privilege Escalation](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-Sudo-rs-and-Privilege-Escalation.md) — companion Guides repository
+- [Guide: sudo-rs and Privilege Escalation](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/host/Guide-Sudo-rs-and-Privilege-Escalation.md) — companion Guides repository

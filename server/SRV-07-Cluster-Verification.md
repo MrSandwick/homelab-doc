@@ -41,7 +41,7 @@ Status pages implied both nodes were fixed; only the worker was.
 
 - **Worker:** `df -h /` 466G available; `vgs` `VFree 0`.
 - **Control plane, before:** installer default — ~100GB root LV of ~473GB in the VG ([OS Installation](./SRV-02-OS-Installation.md)).
-- **Control plane, fix** ([LVM Partition Sizing](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-LVM-Partition-Sizing.md)):
+- **Control plane, fix** ([LVM Partition Sizing](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/host/Guide-LVM-Partition-Sizing.md)):
 
   ```
   sudo lvextend -l +100%FREE /dev/ubuntu-vg/ubuntu-lv
@@ -65,5 +65,5 @@ Worker netplan: `dhcp4: no`, fixed address. [Second Node Setup](./SRV-06-Second-
 - [Second Node Setup](./SRV-06-Second-Node-Setup.md) — the worker join, LVM fix and static-IP follow-up
 - [Kubernetes Installation](./SRV-05-Kubernetes-Installation.md) — the control-plane side of the cluster
 - [Network Configuration](./SRV-03-Network-Configuration.md) — the DNS fix, corrected
-- [LVM Partition Sizing](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-LVM-Partition-Sizing.md) — companion Guides repository
-- [DNS-over-TLS and ISP DNS Blocking](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-DNS-over-TLS-and-ISP-DNS-Blocking.md) — companion Guides repository
+- [LVM Partition Sizing](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/host/Guide-LVM-Partition-Sizing.md) — companion Guides repository
+- [DNS-over-TLS and ISP DNS Blocking](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/host/Guide-DNS-over-TLS-and-ISP-DNS-Blocking.md) — companion Guides repository

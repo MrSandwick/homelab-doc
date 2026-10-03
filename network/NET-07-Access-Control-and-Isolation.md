@@ -4,7 +4,7 @@ tags: [homelab-project, homelab, note, project, networking, security]
 
 # Access Control and Isolation
 
-> VLANs, Network Isolation, and ACLs sound similar but answer different questions — see [Guide-Network-Isolation-vs-ACLs](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/network/Guide-Network-Isolation-vs-ACLs.md) if the distinction below isn't obvious.
+> VLANs, Network Isolation, and ACLs sound similar but answer different questions — see [Guide-Network-Isolation-vs-ACLs](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/network/segmentation/Guide-Network-Isolation-vs-ACLs.md) if the distinction below isn't obvious.
 
 Problems hit during this work are recorded separately in [NET-07-TRBL](../troubleshooting/NET-07-TRBL-Access-Control-and-Isolation.md).
 
@@ -61,4 +61,4 @@ It's still unclear whether the earlier controller-management-port issue (documen
 - [Project Overview](./NET-00-Project-Overview.md)
 - [VLAN Design and Switch Configuration](./NET-03-VLAN-Design-and-Switch-Configuration.md)
 - [Router Configuration](./NET-04-Router-Configuration.md)
-- Guide: [Network Isolation vs. ACLs](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/network/Guide-Network-Isolation-vs-ACLs.md)
+- Guide: [Network Isolation vs. ACLs](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/network/segmentation/Guide-Network-Isolation-vs-ACLs.md)

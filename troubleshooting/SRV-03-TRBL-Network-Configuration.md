@@ -106,7 +106,7 @@ sudo systemctl restart systemd-resolved
 resolvectl status   # expect "+DNSOverTLS" on the active link
 ```
 
-`opportunistic` rather than `yes`, to fall back instead of failing if TLS is unavailable. See [Guide-DNS-over-TLS-and-ISP-DNS-Blocking](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-DNS-over-TLS-and-ISP-DNS-Blocking.md).
+`opportunistic` rather than `yes`, to fall back instead of failing if TLS is unavailable. See [Guide-DNS-over-TLS-and-ISP-DNS-Blocking](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/host/Guide-DNS-over-TLS-and-ISP-DNS-Blocking.md).
 
 **Caveat:** host DNS settings do not propagate into pod/container network namespaces; the same blocking inside a pod would need separate DNS configuration.
 

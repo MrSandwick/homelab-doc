@@ -67,7 +67,7 @@ Same as the primary node ([OS Installation](./SRV-02-OS-Installation.md)). `fast
 ```
 Disk (/): 6.92 GiB / 97.87 GiB (7%)
 ```
-Guided installer default — ~100GB root LV, remainder unallocated in the VG. See [LVM Partition Sizing](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-LVM-Partition-Sizing.md).
+Guided installer default — ~100GB root LV, remainder unallocated in the VG. See [LVM Partition Sizing](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/host/Guide-LVM-Partition-Sizing.md).
 
 **Status: ✅ fixed.**
 
@@ -223,7 +223,7 @@ Scheduled on the worker with the control-plane taint in place; the taint remains
 - [Network Configuration](./SRV-03-Network-Configuration.md) — the primary node's netplan setup, whose installer-written netplan file has the same gap
 - [Kubernetes Installation](./SRV-05-Kubernetes-Installation.md) — control-plane side this node joined
 - [VLAN Design and Switch Configuration](../network/NET-03-VLAN-Design-and-Switch-Configuration.md) — switch port and PVID for this node
-- [LVM Partition Sizing](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-LVM-Partition-Sizing.md) — companion Guides repository — the root-partition issue, fixed on this node
+- [LVM Partition Sizing](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/host/Guide-LVM-Partition-Sizing.md) — companion Guides repository — the root-partition issue, fixed on this node
 - [Cluster Verification](./SRV-07-Cluster-Verification.md) — live check of both nodes against these docs
-- [Guide: kubeadm init vs. kubeadm join](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-Kubeadm-Init-vs-Join.md) — companion Guides repository, written from the `init`-instead-of-`join` mistake
-- [Kubernetes Taints and Tolerations](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-Kubernetes-Taints-and-Tolerations.md) — companion Guides repository
+- [Guide: kubeadm init vs. kubeadm join](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/kubernetes/Guide-Kubeadm-Init-vs-Join.md) — companion Guides repository, written from the `init`-instead-of-`join` mistake
+- [Kubernetes Taints and Tolerations](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/kubernetes/Guide-Kubernetes-Taints-and-Tolerations.md) — companion Guides repository

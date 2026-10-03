@@ -136,8 +136,8 @@ Confirmed running on both nodes in [Cluster Verification](./SRV-07-Cluster-Verif
 
 ## Related
 
-- [SSH Remote Access](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-SSH-Remote-Access.md) — companion Guides repository — how the SSH connection itself works
+- [SSH Remote Access](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/host/Guide-SSH-Remote-Access.md) — companion Guides repository — how the SSH connection itself works
 - [Kubernetes Installation](./SRV-05-Kubernetes-Installation.md) — this static IP is the address used for `kubeadm init` and later `kubeadm join`
-- [Guide-DNS-over-TLS-and-ISP-DNS-Blocking](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-DNS-over-TLS-and-ISP-DNS-Blocking.md) — companion Guides repository
+- [Guide-DNS-over-TLS-and-ISP-DNS-Blocking](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/host/Guide-DNS-over-TLS-and-ISP-DNS-Blocking.md) — companion Guides repository
 - [Cluster Verification](./SRV-07-Cluster-Verification.md) — confirmed which DNS fix is running
 - [SRV-03-TRBL](../troubleshooting/SRV-03-TRBL-Network-Configuration.md) — troubleshooting for this doc

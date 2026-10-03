@@ -82,4 +82,4 @@ This clears ntopng's accumulated traffic history along with its user database �
 
 - [Traffic Monitoring](../network/NET-08-Monitoring.md) — the working configuration
 - [VLAN Design and Switch Configuration](../network/NET-03-VLAN-Design-and-Switch-Configuration.md) — the port reassignments around the cable fault
-- Guide: [Port Mirroring and Promiscuous Mode](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/network/Guide-Port-Mirroring-and-Promiscuous-Mode.md)
+- Guide: [Port Mirroring and Promiscuous Mode](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/network/operations/Guide-Port-Mirroring-and-Promiscuous-Mode.md)

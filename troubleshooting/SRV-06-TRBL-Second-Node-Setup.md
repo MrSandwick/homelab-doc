@@ -70,7 +70,7 @@ tags: [homelab, project, second-node, troubleshooting]
 sudo kubeadm init --pod-network-cidr=10.244.0.0/16
 ```
 
-It completed successfully and printed its own `kubeadm join` line, making the error non-obvious. See [Guide: kubeadm init vs. kubeadm join](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-Kubeadm-Init-vs-Join.md).
+It completed successfully and printed its own `kubeadm join` line, making the error non-obvious. See [Guide: kubeadm init vs. kubeadm join](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/kubernetes/Guide-Kubeadm-Init-vs-Join.md).
 
 **Consequence:** the node became the control plane of a separate cluster (own CA, etcd, API server on `<WORKER_IP>:6443`), disconnected from the real one on `<SERVER_IP>`.
 
@@ -96,4 +96,4 @@ The node was then joined with a fresh join command — see [Joining the cluster]
 
 - [Second Node Setup](../server/SRV-06-Second-Node-Setup.md) — the working procedure
 - [NET-03-TRBL](./NET-03-TRBL-VLAN-Design-and-Switch-Configuration.md) — the PVID bug on the switch side
-- [Guide: kubeadm init vs. kubeadm join](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-Kubeadm-Init-vs-Join.md) — companion Guides repository
+- [Guide: kubeadm init vs. kubeadm join](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/kubernetes/Guide-Kubeadm-Init-vs-Join.md) — companion Guides repository

@@ -49,4 +49,4 @@ Two separate, unrelated issues combined to make the switch's management address 
 ## Related
 
 - [VLAN Design and Switch Configuration](../network/NET-03-VLAN-Design-and-Switch-Configuration.md) — the working configuration
-- Guide: [VLANs, Trunk vs. Access, PVID](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/network/Guide-VLANs-Trunk-Access-PVID.md)
+- Guide: [VLANs, Trunk vs. Access, PVID](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/network/segmentation/Guide-VLANs-Trunk-Access-PVID.md)

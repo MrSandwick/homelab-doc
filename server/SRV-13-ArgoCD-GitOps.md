@@ -34,7 +34,7 @@ Problems hit during this work are recorded separately in [SRV-13-TRBL](../troubl
 | `homelab-gitops` | Public GitHub repository | `github.com/MrSandwick/homelab-gitops` | Source of truth for workload manifests |
 | `my-site` | ArgoCD `Application` | `argocd` | Syncs `apps/my-site` from the repository into namespace `default` |
 
-Git is the source of truth for `my-site` from this point: changes are made by commit, and manual changes in the cluster are reverted. Concepts: [Guide: GitOps and ArgoCD](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-GitOps-and-ArgoCD.md).
+Git is the source of truth for `my-site` from this point: changes are made by commit, and manual changes in the cluster are reverted. Concepts: [Guide: GitOps and ArgoCD](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/platform/Guide-GitOps-and-ArgoCD.md).
 
 ## End state
 
@@ -206,5 +206,5 @@ Not implemented: storing the `Application` manifests in the repository as well (
 - [Helm, Observability, and Ingress](./SRV-08-Helm-Observability-Ingress.md) — the ingress entry point ArgoCD is served through
 - [Node Profile — GPU Laptop Worker](./SRV-11-GPU-Laptop-Node-Profile.md) — the third node the pods first landed on
 - [Ansible Node Provisioning](./SRV-09-Ansible-Node-Provisioning.md) — inventory that does not yet include the laptop
-- [Guide: GitOps and ArgoCD](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-GitOps-and-ArgoCD.md) — companion Guides repository
+- [Guide: GitOps and ArgoCD](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/platform/Guide-GitOps-and-ArgoCD.md) — companion Guides repository
 - [Guide: The Stack](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-Stack.md) — companion Guides repository
