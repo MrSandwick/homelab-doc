@@ -6,6 +6,8 @@ tags: [homelab, project, kubernetes, workload, ingress, scheduling]
 
 > Status: 🟢 **Complete.** Static site (nginx) served through the existing ingress-nginx + MetalLB entry point at `/site`, scheduled on the worker node. Closes the last open item in [SRV-00](./SRV-00-Project-Overview.md).
 
+> **Superseded in part:** the node-local image import and the `nodeSelector` / `imagePullPolicy: Never` workarounds described below were later replaced by an image built in GitHub Actions and pulled from GHCR — see [CI/CD with GitHub Actions and GHCR](./SRV-14-CI-CD-GHCR.md). This document is kept as the record of how it was first done.
+
 Picks up after [Ansible Node Provisioning](./SRV-09-Ansible-Node-Provisioning.md). Commands run on the control-plane node (`<HOSTNAME>`) unless noted.
 
 ## Contents
