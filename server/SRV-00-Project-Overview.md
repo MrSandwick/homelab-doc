@@ -55,7 +55,8 @@ See [Hardware Selection](./SRV-01-Hardware-Selection.md) for the full comparison
 - ✅ ArgoCD installed and reachable at `/argocd` through the existing ingress — see [ArgoCD and GitOps](./SRV-13-ArgoCD-GitOps.md)
 - ✅ GitOps loop verified for `my-site`: synced from the public `homelab-gitops` repository with automated sync, prune and self-heal
 - ⬜ ArgoCD admin password not yet rotated; `argocd-initial-admin-secret` not yet deleted
-- ⬜ `my-site` image still imported only into the worker's containerd — to be moved to a registry
+- ✅ `my-site` image moved off the worker's local containerd: built by GitHub Actions on every push to the `my-site` repository and pulled from GHCR, so it no longer pins the workload to one node — see [CI/CD with GitHub Actions and GHCR](./SRV-14-CI-CD-GHCR.md)
+- ⬜ The image tag in `homelab-gitops` is still updated by hand after each build — to be automated
 - ⬜ Laptop node (`<GPU_HOSTNAME>`) cordoned during the ArgoCD install and absent from the Ansible inventory — scheduling policy to be reconciled with [Node Profile](./SRV-11-GPU-Laptop-Node-Profile.md)
 
-Continue at [ArgoCD and GitOps](./SRV-13-ArgoCD-GitOps.md) for the current state of the cluster and its open items.
+Continue at [CI/CD with GitHub Actions and GHCR](./SRV-14-CI-CD-GHCR.md) for the current state of the cluster and its open items.

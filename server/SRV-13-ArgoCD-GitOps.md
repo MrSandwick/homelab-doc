@@ -4,7 +4,7 @@ tags: [homelab, project, kubernetes, argocd, gitops]
 
 # ArgoCD and GitOps
 
-> Status: 🟢 **Working.** ArgoCD installed and reachable at `http://<INGRESS_IP>/argocd`; the `my-site` workload is synced from the public `homelab-gitops` repository with automated sync, prune and self-heal verified. 🟡 Open: admin password rotation, registry-hosted image for `my-site`, laptop-node scheduling policy — see [Open items](#open-items).
+> Status: 🟢 **Working.** ArgoCD installed and reachable at `http://<INGRESS_IP>/argocd`; the `my-site` workload is synced from the public `homelab-gitops` repository with automated sync, prune and self-heal verified. The image is now served from GHCR ([SRV-14](./SRV-14-CI-CD-GHCR.md)). 🟡 Open: admin password rotation, laptop-node scheduling policy — see [Open items](#open-items).
 
 Picks up after [First Real Workload](./SRV-10-First-Real-Workload.md). Commands run on the control-plane node (`<HOSTNAME>`) unless noted.
 
@@ -40,7 +40,7 @@ Git is the source of truth for `my-site` from this point: changes are made by co
 
 ```
 Browser (LAN) → <INGRESS_IP> (MetalLB) → ingress-nginx → Grafana (path: /)
-                                          ├→ my-site (path: /site, on the worker)
+                                          ├→ my-site (path: /site)
                                           └→ ArgoCD (path: /argocd)
 
 homelab-gitops (GitHub, main) ── polled by ArgoCD ──→ Application my-site ──→ namespace default
@@ -188,7 +188,7 @@ Not implemented: storing the `Application` manifests in the repository as well (
 ## Open items
 
 - ⬜ **Admin password:** change the ArgoCD admin password and delete `argocd-initial-admin-secret`. Not yet done.
-- ⬜ **`my-site` image:** still imported only into the worker's containerd ([SRV-10](./SRV-10-First-Real-Workload.md)) — a weak point under GitOps. Move it to a registry (GHCR or Docker Hub), then drop `imagePullPolicy: Never` and the `nodeSelector`.
+- ✅ **`my-site` image:** was imported only into the worker's containerd ([SRV-10](./SRV-10-First-Real-Workload.md)), a weak point under GitOps. Resolved in [SRV-14](./SRV-14-CI-CD-GHCR.md): the image is built by GitHub Actions and pulled from GHCR, and `imagePullPolicy: Never` and the `nodeSelector` are gone.
 - ⬜ **Laptop node:** absent from the Ansible inventory ([SRV-09](./SRV-09-Ansible-Node-Provisioning.md)); decide whether it belongs there. The standing-cordon decision above also needs reconciling with [SRV-11](./SRV-11-GPU-Laptop-Node-Profile.md), which describes cordon as a temporary practice and expects GPU workloads on this node.
 
 ## Files
@@ -203,6 +203,7 @@ Not implemented: storing the `Application` manifests in the repository as well (
 
 - [SRV-13-TRBL](../troubleshooting/SRV-13-TRBL-ArgoCD-GitOps.md) — troubleshooting for this doc
 - [First Real Workload](./SRV-10-First-Real-Workload.md) — the workload now managed through git
+- [CI/CD with GitHub Actions and GHCR](./SRV-14-CI-CD-GHCR.md) — the registry-hosted image that closed the open item above
 - [Helm, Observability, and Ingress](./SRV-08-Helm-Observability-Ingress.md) — the ingress entry point ArgoCD is served through
 - [Node Profile — GPU Laptop Worker](./SRV-11-GPU-Laptop-Node-Profile.md) — the third node the pods first landed on
 - [Ansible Node Provisioning](./SRV-09-Ansible-Node-Provisioning.md) — inventory that does not yet include the laptop
