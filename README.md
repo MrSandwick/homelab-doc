@@ -69,6 +69,7 @@ The FreeRADIUS server that authenticates Wi-Fi clients in `network/` runs on the
 | [SRV-13 ArgoCD and GitOps](server/SRV-13-ArgoCD-GitOps.md) | ArgoCD under `/argocd`, `homelab-gitops` repository, automated sync for `my-site` | [SRV-13-TRBL](troubleshooting/SRV-13-TRBL-ArgoCD-GitOps.md) |
 | [SRV-14 CI/CD with GitHub Actions and GHCR](server/SRV-14-CI-CD-GHCR.md) | `my-site` repository, build workflow, image published to GHCR, cluster switched to the registry image, SSH deploy keys, automatic tag update in `homelab-gitops` | [SRV-14-TRBL](troubleshooting/SRV-14-TRBL-CI-CD-GHCR.md) |
 | [SRV-15 Persistent Storage](server/SRV-15-Persistent-Storage.md) | `local-path-provisioner` and a default StorageClass; Grafana and Prometheus on persistent volumes | — |
+| [SRV-16 Logging and Alerting](server/SRV-16-Logging-and-Alerting.md) | Loki and Grafana Alloy for pod logs, Loki in Grafana, Alertmanager routing to Slack | [SRV-16-TRBL](troubleshooting/SRV-16-TRBL-Logging-and-Alerting.md) |
 
 ### Network — VLANs and RADIUS
 
@@ -86,14 +87,14 @@ The FreeRADIUS server that authenticates Wi-Fi clients in `network/` runs on the
 
 ## Stack
 
-- **Server:** GMKtec M8 (Ryzen 7 PRO 6650H, 16 GB) control plane; Dell OptiPlex 7050 Micro (i7-6700T, 16 GB) and an Acer Nitro laptop (i5-11400H, RTX 3050 Ti Mobile) as workers; Ubuntu Server 26.04 LTS; containerd; Kubernetes via `kubeadm` with Flannel; Helm; `kube-prometheus-stack` (Prometheus, Grafana, Alertmanager, node-exporter); ingress-nginx + MetalLB; Ansible for node provisioning; ArgoCD (GitOps); GitHub Actions + GHCR (image build and registry); `local-path-provisioner` (persistent volumes)
+- **Server:** GMKtec M8 (Ryzen 7 PRO 6650H, 16 GB) control plane; Dell OptiPlex 7050 Micro (i7-6700T, 16 GB) and an Acer Nitro laptop (i5-11400H, RTX 3050 Ti Mobile) as workers; Ubuntu Server 26.04 LTS; containerd; Kubernetes via `kubeadm` with Flannel; Helm; `kube-prometheus-stack` (Prometheus, Grafana, Alertmanager, node-exporter); ingress-nginx + MetalLB; Ansible for node provisioning; ArgoCD (GitOps); GitHub Actions + GHCR (image build and registry); `local-path-provisioner` (persistent volumes); Loki + Grafana Alloy (logs); Alertmanager → Slack (notifications)
 - **Network:** 5G Home Internet gateway (double NAT); TP-Link Omada ER605 router, TL-SG108E switch, EAP610 Wi-Fi 6 access point; FreeRADIUS on the server
 
 ## Status
 
 | Layer | Working | In progress / planned |
 |---|---|---|
-| Server | Three-node cluster, all `Ready` (control plane + two workers, one with an NVIDIA GPU usable by pods), Flannel CNI healthy, workload scheduling verified on the worker, Helm, `kube-prometheus-stack` monitoring both nodes, Grafana reachable on the LAN via ingress-nginx + MetalLB, Ansible-based node provisioning verified idempotent on both nodes, first application workload (static site at `/site`) running on the worker, ArgoCD at `/argocd` syncing `my-site` from the `homelab-gitops` repository (automated sync, prune, self-heal verified), `my-site` built in GitHub Actions, published to GHCR, and rolled out by ArgoCD through an automatic tag commit to `homelab-gitops`, SSH deploy keys for git access, Grafana and Prometheus on persistent volumes, ArgoCD admin password changed; the laptop node is kept cordoned and out of the Ansible inventory by decision | Logs and alerting (Loki, Alertmanager notifications); backup of the persistent volumes; additional workloads (Nextcloud, Minecraft, etc.) last |
+| Server | Three-node cluster, all `Ready` (control plane + two workers, one with an NVIDIA GPU usable by pods), Flannel CNI healthy, workload scheduling verified on the worker, Helm, `kube-prometheus-stack` monitoring both nodes, Grafana reachable on the LAN via ingress-nginx + MetalLB, Ansible-based node provisioning verified idempotent on both nodes, first application workload (static site at `/site`) running on the worker, ArgoCD at `/argocd` syncing `my-site` from the `homelab-gitops` repository (automated sync, prune, self-heal verified), `my-site` built in GitHub Actions, published to GHCR, and rolled out by ArgoCD through an automatic tag commit to `homelab-gitops`, SSH deploy keys for git access, Grafana and Prometheus on persistent volumes, ArgoCD admin password changed, pod logs collected by Grafana Alloy into Loki and queryable in Grafana, Alertmanager sending `warning`/`critical` alerts to Slack; the laptop node is kept cordoned and out of the Ansible inventory by decision | Custom alert rules; backup of the persistent volumes; additional workloads (Nextcloud, Minecraft, etc.) last |
 | Network | Double-NAT uplink, VLANs 10/20, Users/Admin isolation, management ACLs, ntopng traffic monitoring — all verified | WPA2-Enterprise SSID to be recreated after an AP factory reset; login-free MAC-based auth; IDS/IPS |
 
 Each layer's overview ([SRV-00](server/SRV-00-Project-Overview.md), [NET-00](network/NET-00-Project-Overview.md)) has the full status list.

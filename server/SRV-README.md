@@ -24,6 +24,7 @@ Each numbered doc records the working procedure. The problems hit along the way 
 14. See [ArgoCD and GitOps](./SRV-13-ArgoCD-GitOps.md)
 15. See [CI/CD with GitHub Actions and GHCR](./SRV-14-CI-CD-GHCR.md)
 16. See [Persistent Storage](./SRV-15-Persistent-Storage.md)
+17. See [Logging and Alerting](./SRV-16-Logging-and-Alerting.md)
 
 Troubleshooting files:
 
@@ -36,6 +37,7 @@ Troubleshooting files:
 - [SRV-12-TRBL](../troubleshooting/SRV-12-TRBL-GPU-Node-Setup.md) — empty `nvidia-ctk` config, Device Plugin crash loops
 - [SRV-13-TRBL](../troubleshooting/SRV-13-TRBL-ArgoCD-GitOps.md) — pods on an unexpected node, GitHub push failures
 - [SRV-14-TRBL](../troubleshooting/SRV-14-TRBL-CI-CD-GHCR.md) — same directory on two nodes, token scope, missing git identity, empty image tag breaking the manifest
+- [SRV-16-TRBL](../troubleshooting/SRV-16-TRBL-Logging-and-Alerting.md) — log collector warnings for the offline laptop node, renamed Slack dialog
 
 ## Stack
 
@@ -51,6 +53,7 @@ Troubleshooting files:
 - **GitOps:** ArgoCD, syncing from a public `homelab-gitops` repository
 - **CI / registry:** GitHub Actions builds the `my-site` image on every push, publishes it to GHCR, and commits the new commit-hash tag to `homelab-gitops`; ArgoCD rolls it out. Git access from the nodes and the workflow uses per-repository SSH deploy keys
 - **Storage:** `local-path-provisioner` (default StorageClass); Grafana and Prometheus on persistent volumes
+- **Logging and alerting:** Loki (monolithic, filesystem storage) and Grafana Alloy for pod logs; Alertmanager routing `warning`/`critical` alerts to Slack
 
 Layer-by-layer overview of the stack: [Guide: The Stack](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-Stack.md) (companion Guides repository).
 
