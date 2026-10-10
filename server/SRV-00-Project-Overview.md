@@ -54,9 +54,11 @@ See [Hardware Selection](./SRV-01-Hardware-Selection.md) for the full comparison
 - ✅ First real application workload deployed: a static site, served via the existing ingress-nginx + MetalLB entry point on a new `/site` path, scheduled onto the worker node — see [First Real Workload](./SRV-10-First-Real-Workload.md)
 - ✅ ArgoCD installed and reachable at `/argocd` through the existing ingress — see [ArgoCD and GitOps](./SRV-13-ArgoCD-GitOps.md)
 - ✅ GitOps loop verified for `my-site`: synced from the public `homelab-gitops` repository with automated sync, prune and self-heal
-- ⬜ ArgoCD admin password not yet rotated; `argocd-initial-admin-secret` not yet deleted
+- ✅ ArgoCD admin password changed; no initial-password Secret is left in the cluster — see [ArgoCD and GitOps](./SRV-13-ArgoCD-GitOps.md)
 - ✅ `my-site` image moved off the worker's local containerd: built by GitHub Actions on every push to the `my-site` repository and pulled from GHCR, so it no longer pins the workload to one node — see [CI/CD with GitHub Actions and GHCR](./SRV-14-CI-CD-GHCR.md)
-- ⬜ The image tag in `homelab-gitops` is still updated by hand after each build — to be automated
-- ⬜ Laptop node (`<GPU_HOSTNAME>`) cordoned during the ArgoCD install and absent from the Ansible inventory — scheduling policy to be reconciled with [Node Profile](./SRV-11-GPU-Laptop-Node-Profile.md)
+- ✅ The image tag in `homelab-gitops` is updated automatically by the build workflow, and pushes use per-repository SSH deploy keys instead of an expiring token — see [CI/CD with GitHub Actions and GHCR](./SRV-14-CI-CD-GHCR.md)
+- ✅ Persistent storage: `local-path-provisioner` provides a default StorageClass; Grafana and Prometheus keep their data on volumes, and Grafana's admin password survives a restart — see [Persistent Storage](./SRV-15-Persistent-Storage.md)
+- ✅ Laptop node (`<GPU_HOSTNAME>`): decision recorded — also used by another person, so it stays cordoned, out of the Ansible inventory, and receives no workloads for the foreseeable future — see [ArgoCD and GitOps](./SRV-13-ArgoCD-GitOps.md#open-items)
+- ⬜ Next: logs and alerting (Loki, Alertmanager notifications), backup of the persistent volumes; stateful side projects (Nextcloud, Minecraft) last
 
-Continue at [CI/CD with GitHub Actions and GHCR](./SRV-14-CI-CD-GHCR.md) for the current state of the cluster and its open items.
+Continue at [Persistent Storage](./SRV-15-Persistent-Storage.md) for the current state of the cluster and its open items.
