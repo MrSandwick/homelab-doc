@@ -27,7 +27,7 @@ tags: [homelab, project, kubernetes, ci-cd, github-actions, ghcr, gitops, troubl
 
 **Root cause:** the token was created for `homelab-gitops` ([SRV-13](../server/SRV-13-ArgoCD-GitOps.md#step-5--push-access)). GitHub treats a push that creates or changes a file under `.github/workflows/` as a separate permission from pushing code, so a token that can push everything else is still refused for the workflow file. The refusal looks like the earlier 403 ([SRV-13-TRBL](./SRV-13-TRBL-ArgoCD-GitOps.md#github-push-403-with-a-fine-grained-token)), which makes it easy to misdiagnose.
 
-**Fix:** Settings → Developer settings → Fine-grained tokens → the token → **Edit** → add **Workflows: Read and write**, with `my-site` in the repository list. Editing permissions keeps the token's value. Caught before the push, so no failed attempt occurred.
+**Fix:** Settings → Developer settings → Fine-grained tokens → the token → **Edit** → add **Workflows: Read and write**, with `my-site` in the repository list. Editing permissions keeps the token's value. Caught before the push, so no failed attempt occurred. The token was later replaced by deploy keys ([SRV-14 Step 7](../server/SRV-14-CI-CD-GHCR.md#step-7--replace-the-token-with-deploy-keys)), which have no permission list to get wrong.
 
 The token's value cannot be viewed again after creation; if it is not saved, **Regenerate token** is the only way back, which keeps permissions and repositories but invalidates the old value.
 

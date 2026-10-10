@@ -6,6 +6,8 @@ tags: [homelab, project, kubernetes, gpu, hardware]
 
 > Status: 🟢 Joined, healthy, GPU verified usable by pods. This doc covers *what this node is and the operational trade-offs of running it*; see [Second Node Setup](./SRV-06-Second-Node-Setup.md) for the join process it followed and [GPU Node Setup](./SRV-12-GPU-Node-Setup.md) for how its GPU was made usable by pods.
 
+> **Standing decision (October 2026):** the laptop is also used and administered by another person, so it is intentionally kept out of the Ansible inventory and out of scheduling. It stays cordoned and receives no workloads or pods beyond its node-level DaemonSets for the foreseeable future. The practices below describe how it could be used; they are not currently in effect. See [ArgoCD and GitOps — Open items](./SRV-13-ArgoCD-GitOps.md#open-items).
+
 ## What this node is
 
 Unlike the cluster's other two nodes — a GMKtec M8 and a Dell OptiPlex 7050 Micro, both purchased specifically for this project (see [Hardware Selection](./SRV-01-Hardware-Selection.md)) — this third node is an existing personal laptop, repurposed rather than bought for the cluster. It was added specifically because it has a discrete NVIDIA GPU, which neither of the other two nodes has, making it the only practical path to the self-hosted RAG stack listed in [Project Overview](./SRV-00-Project-Overview.md).

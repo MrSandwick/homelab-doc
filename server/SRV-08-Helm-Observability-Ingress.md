@@ -102,6 +102,8 @@ Admin password (chart-generated Secret):
 kubectl get secret -n monitoring prometheus-grafana -o jsonpath="{.data.admin-password}" | base64 -d
 ```
 
+> **Superseded:** Grafana was later moved to a persistent volume with its admin password in a Secret of its own (`grafana-admin`); the chart-generated Secret above is no longer used — see [Persistent Storage](./SRV-15-Persistent-Storage.md).
+
 ## Step 3 — Ingress controller: ingress-nginx
 
 ### Install

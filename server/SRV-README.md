@@ -23,6 +23,7 @@ Each numbered doc records the working procedure. The problems hit along the way 
 13. See [GPU Node Setup](./SRV-12-GPU-Node-Setup.md)
 14. See [ArgoCD and GitOps](./SRV-13-ArgoCD-GitOps.md)
 15. See [CI/CD with GitHub Actions and GHCR](./SRV-14-CI-CD-GHCR.md)
+16. See [Persistent Storage](./SRV-15-Persistent-Storage.md)
 
 Troubleshooting files:
 
@@ -48,7 +49,8 @@ Troubleshooting files:
 - **Ingress / bare-metal LoadBalancer:** ingress-nginx + MetalLB
 - **Configuration management:** Ansible (control node on the primary node; provisions base packages, kernel modules/sysctl, and Kubernetes package installation — deliberately scoped to exclude DNS and containerd-config management to avoid conflicting with the live, manually-verified configuration in those areas)
 - **GitOps:** ArgoCD, syncing from a public `homelab-gitops` repository
-- **CI / registry:** GitHub Actions builds the `my-site` image on every push and publishes it to GHCR; the cluster pulls it by commit-hash tag
+- **CI / registry:** GitHub Actions builds the `my-site` image on every push, publishes it to GHCR, and commits the new commit-hash tag to `homelab-gitops`; ArgoCD rolls it out. Git access from the nodes and the workflow uses per-repository SSH deploy keys
+- **Storage:** `local-path-provisioner` (default StorageClass); Grafana and Prometheus on persistent volumes
 
 Layer-by-layer overview of the stack: [Guide: The Stack](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-Stack.md) (companion Guides repository).
 

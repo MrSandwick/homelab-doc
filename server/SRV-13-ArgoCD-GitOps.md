@@ -4,7 +4,7 @@ tags: [homelab, project, kubernetes, argocd, gitops]
 
 # ArgoCD and GitOps
 
-> Status: 🟢 **Working.** ArgoCD installed and reachable at `http://<INGRESS_IP>/argocd`; the `my-site` workload is synced from the public `homelab-gitops` repository with automated sync, prune and self-heal verified. The image is now served from GHCR ([SRV-14](./SRV-14-CI-CD-GHCR.md)). 🟡 Open: admin password rotation, laptop-node scheduling policy — see [Open items](#open-items).
+> Status: 🟢 **Working.** ArgoCD installed and reachable at `http://<INGRESS_IP>/argocd`; the `my-site` workload is synced from the public `homelab-gitops` repository with automated sync, prune and self-heal verified. The image is now served from GHCR ([SRV-14](./SRV-14-CI-CD-GHCR.md)), the admin password has been changed, and pushes use SSH deploy keys. The only standing item is the laptop-node decision — see [Open items](#open-items).
 
 Picks up after [First Real Workload](./SRV-10-First-Real-Workload.md). Commands run on the control-plane node (`<HOSTNAME>`) unless noted.
 
@@ -114,7 +114,7 @@ spec:
 
 `/` remains claimed by Grafana; ingress-nginx selects the longest matching prefix, so `/argocd` routes to ArgoCD.
 
-Verified: login page loads at `http://<INGRESS_IP>/argocd`. The initial admin password is read from the `argocd-initial-admin-secret` Secret in the `argocd` namespace.
+Verified: login page loads at `http://<INGRESS_IP>/argocd`. The initial admin password is read from the `argocd-initial-admin-secret` Secret in the `argocd` namespace. It was changed afterwards in the ArgoCD UI (the new bcrypt hash is stored in `argocd-secret`), and `argocd-initial-admin-secret` is no longer present in the namespace, in line with the documentation's advice to delete it once the password has been changed: it holds the initial password in clear text and serves no other purpose. If a password reset is ever needed, ArgoCD re-creates the Secret on demand.
 
 ## Step 4 — GitOps repository
 
@@ -132,11 +132,11 @@ Git is initialized at the repository root, not inside `apps/`: the repository de
 
 ## Step 5 — Push access
 
-Pushes to `homelab-gitops` go over HTTPS, authenticated with a fine-grained Personal Access Token scoped to the repository with **Contents: Read and write**. GitHub does not accept the account password for git operations.
+Pushes to `homelab-gitops` from the control plane use an SSH **deploy key** with write access, scoped to this one repository — set up in [SRV-14 Step 7](./SRV-14-CI-CD-GHCR.md#step-7--replace-the-token-with-deploy-keys). It does not expire and opens nothing else.
 
-**Alternative not used:** an SSH deploy key with write access — does not expire, better suited to a headless server.
+**History:** the repository was first pushed over HTTPS with a fine-grained Personal Access Token (**Contents: Read and write**; GitHub does not accept the account password for git operations). The token had a 30-day lifetime, which is why it was replaced; it has been deleted.
 
-Two push failures preceded the working setup — see [SRV-13-TRBL](../troubleshooting/SRV-13-TRBL-ArgoCD-GitOps.md#github-push-password-authentication-rejected).
+Two push failures preceded the working token setup — see [SRV-13-TRBL](../troubleshooting/SRV-13-TRBL-ArgoCD-GitOps.md#github-push-password-authentication-rejected).
 
 ## Step 6 — ArgoCD Application
 
@@ -187,9 +187,10 @@ Not implemented: storing the `Application` manifests in the repository as well (
 
 ## Open items
 
-- ⬜ **Admin password:** change the ArgoCD admin password and delete `argocd-initial-admin-secret`. Not yet done.
+- ✅ **Admin password:** changed in the UI; `argocd-initial-admin-secret` is gone. The built-in `admin` account is still enabled; the ArgoCD documentation recommends using it only for initial configuration and disabling it once other users or SSO exist (`admin.enabled: "false"` in `argocd-cm`). Not needed for a single-user lab.
 - ✅ **`my-site` image:** was imported only into the worker's containerd ([SRV-10](./SRV-10-First-Real-Workload.md)), a weak point under GitOps. Resolved in [SRV-14](./SRV-14-CI-CD-GHCR.md): the image is built by GitHub Actions and pulled from GHCR, and `imagePullPolicy: Never` and the `nodeSelector` are gone.
-- ⬜ **Laptop node:** absent from the Ansible inventory ([SRV-09](./SRV-09-Ansible-Node-Provisioning.md)); decide whether it belongs there. The standing-cordon decision above also needs reconciling with [SRV-11](./SRV-11-GPU-Laptop-Node-Profile.md), which describes cordon as a temporary practice and expects GPU workloads on this node.
+- ✅ **Push credentials:** the expiring token was replaced by deploy keys ([SRV-14 Step 7](./SRV-14-CI-CD-GHCR.md#step-7--replace-the-token-with-deploy-keys)).
+- ✅ **Laptop node (decision):** the laptop (`<GPU_HOSTNAME>`) is also used and administered by another person. It is deliberately **not** added to the Ansible inventory ([SRV-09](./SRV-09-Ansible-Node-Provisioning.md)) and stays cordoned: it receives no workloads or pods beyond its node-level DaemonSets for the foreseeable future. [SRV-11](./SRV-11-GPU-Laptop-Node-Profile.md) describes how it could be used; that is not currently in effect.
 
 ## Files
 
@@ -206,6 +207,6 @@ Not implemented: storing the `Application` manifests in the repository as well (
 - [CI/CD with GitHub Actions and GHCR](./SRV-14-CI-CD-GHCR.md) — the registry-hosted image that closed the open item above
 - [Helm, Observability, and Ingress](./SRV-08-Helm-Observability-Ingress.md) — the ingress entry point ArgoCD is served through
 - [Node Profile — GPU Laptop Worker](./SRV-11-GPU-Laptop-Node-Profile.md) — the third node the pods first landed on
-- [Ansible Node Provisioning](./SRV-09-Ansible-Node-Provisioning.md) — inventory that does not yet include the laptop
+- [Ansible Node Provisioning](./SRV-09-Ansible-Node-Provisioning.md) — inventory, which deliberately does not include the laptop
 - [Guide: GitOps and ArgoCD](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/platform/Guide-GitOps-and-ArgoCD.md) — companion Guides repository
 - [Guide: The Stack](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-Stack.md) — companion Guides repository
