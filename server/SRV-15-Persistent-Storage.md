@@ -168,7 +168,7 @@ The same `helm upgrade` command (now revision 3) applies it. Prometheus restarts
 ## Open items
 
 - ⬜ **No backup** of the volumes. The data is easy to regenerate (metrics) or small (Grafana state), but nothing protects it.
-- ⬜ **Alertmanager** has no volume; its silences and notification log are lost on restart. Relevant once alert routing is added.
+- ⬜ **Alertmanager** has no volume; its silences and notification log are lost on restart. Alert routing now exists ([SRV-16](./SRV-16-Logging-and-Alerting.md)), so this is a real limit.
 - ⬜ **Helm releases are applied by hand,** with their values files in `~/k8s-manifests/`, not through ArgoCD. Moving them into `homelab-gitops` would make the whole platform GitOps-managed.
 
 ## Files
@@ -176,13 +176,14 @@ The same `helm upgrade` command (now revision 3) applies it. Prometheus restarts
 | File | Location | Contents |
 |---|---|---|
 | `local-path-values.yaml` | `~/k8s-manifests/` on `<HOSTNAME>` | `storageClass.defaultClass: true` |
-| `prometheus-values.yaml` | `~/k8s-manifests/` on `<HOSTNAME>` | Grafana admin Secret reference and volume, Prometheus volume and retention |
+| `prometheus-values.yaml` | `~/k8s-manifests/` on `<HOSTNAME>` | Grafana admin Secret reference and volume, Prometheus volume and retention; later also the Loki data source and Alertmanager routing ([SRV-16](./SRV-16-Logging-and-Alerting.md)) |
 | `~/local-path-provisioner/` | `<HOSTNAME>` | Clone at tag `v0.0.37`; the chart directory for `helm upgrade` |
 | Secret `grafana-admin` | Namespace `monitoring` | Created by hand; never committed |
 
 ## Related
 
 - [CI/CD with GitHub Actions and GHCR](./SRV-14-CI-CD-GHCR.md) — the previous step
+- [Logging and Alerting](./SRV-16-Logging-and-Alerting.md) — the next step; Loki also uses a `local-path` volume
 - [Helm, Observability, and Ingress](./SRV-08-Helm-Observability-Ingress.md) — where `kube-prometheus-stack` and Grafana were first installed
 - [Guide: Persistent Storage in Kubernetes](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/kubernetes/Guide-Persistent-Storage-PV-PVC-StorageClass.md) — companion Guides repository
 - [Guide: Helm Basics](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/platform/Guide-Helm-Basics.md) — companion Guides repository
