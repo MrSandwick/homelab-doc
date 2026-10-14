@@ -17,11 +17,12 @@ Picks up after [Logging and Alerting](./SRV-16-Logging-and-Alerting.md). Command
 5. [Step 2 — Label and taint](#step-2--label-and-taint)
 6. [Step 3 — Uncordon](#step-3--uncordon)
 7. [Step 4 — Namespace, quota and limits](#step-4--namespace-quota-and-limits)
-8. [Verification](#verification)
-9. [Limits](#limits)
-10. [Open items](#open-items)
-11. [Files](#files)
-12. [Related](#related)
+8. [Step 5 — DaemonSets and the taint](#step-5--daemonsets-and-the-taint)
+9. [Verification](#verification)
+10. [Limits](#limits)
+11. [Open items](#open-items)
+12. [Files](#files)
+13. [Related](#related)
 
 ## Components
 
@@ -154,15 +155,43 @@ kubectl get ns ai --show-labels
 
 `kubectl apply --dry-run=server` accepts the Namespace but answers `NotFound` for the objects inside it, because a dry run does not persist the namespace. This is not a manifest error; an empty namespace with a quota creates no pods, so it was applied directly.
 
+## Step 5 — DaemonSets and the taint
+
+The taint applies to DaemonSet pods as well. Flannel, kube-proxy and node-exporter tolerate every taint, but the NVIDIA Device Plugin and the two MetalLB DaemonSets have no toleration for `dedicated=ai`. Minutes after Step 3, Alertmanager reported `KubeDaemonSetMisScheduled` and `KubeDaemonSetRolloutStuck` for them ([SRV-17-TRBL](../troubleshooting/SRV-17-TRBL-Dedicated-GPU-Node.md#daemonset-alerts-after-tainting-the-node)). The running pods were not evicted (`NoSchedule` does not evict), but a Device Plugin pod that is recreated would not come back, and the GPU would disappear from the node.
+
+**Device Plugin: add the toleration.** It has to stay on the laptop; it is what advertises the GPU.
+
+```
+kubectl -n kube-system get ds nvidia-device-plugin-daemonset -o jsonpath='{.spec.template.spec.tolerations}'; echo
+kubectl -n kube-system patch daemonset nvidia-device-plugin-daemonset --type=json \
+  -p '[{"op":"add","path":"/spec/template/spec/tolerations/-","value":{"key":"dedicated","operator":"Equal","value":"ai","effect":"NoSchedule"}}]'
+kubectl -n kube-system rollout status ds/nvidia-device-plugin-daemonset --timeout=120s
+```
+
+**MetalLB: keep it off the laptop.** In L2 mode a speaker on a machine that is often shut down is a poor announcer for the ingress address, and its `frr-k8s` pod had restarted eleven times. The taint already keeps new pods away, so deleting the two existing ones is enough:
+
+```
+kubectl -n metallb-system delete pod <metallb-frr-k8s-pod> <metallb-speaker-pod>
+kubectl -n metallb-system get pods -o wide
+```
+
+The pod names come from `kubectl get pods -A -o wide --field-selector spec.nodeName=<GPU_HOSTNAME>`. If the laptop was announcing the ingress address, it moves to another speaker within seconds.
+
+Result: the laptop runs four DaemonSet pods (Flannel, kube-proxy, the Device Plugin, node-exporter); both MetalLB DaemonSets show `DESIRED 2` (control plane and worker); `nvidia.com/gpu: 1` is still allocatable.
+
+The toleration was added with `kubectl patch`; the Device Plugin was installed from NVIDIA's manifest ([SRV-12](./SRV-12-GPU-Node-Setup.md)), and applying that manifest again would remove it.
+
 ## Verification
 
 | Check | Result |
 |---|---|
 | `kubectl describe node <GPU_HOSTNAME> \| grep -A3 Taints` | Only `dedicated=ai:NoSchedule`; `Unschedulable: false` |
 | `kubectl get nodes --show-labels \| grep <GPU_HOSTNAME>` | Contains `workload=ai` |
-| `kubectl get pods -A -o wide --field-selector spec.nodeName=<GPU_HOSTNAME>` | The same six DaemonSet pods; nothing else was placed |
+| `kubectl get pods -A -o wide --field-selector spec.nodeName=<GPU_HOSTNAME>` | Right after Step 4: the same six DaemonSet pods, nothing else placed. After Step 5: four (MetalLB removed) |
 | `kubectl -n ai get resourcequota` | `ai-quota` with the limits above, usage `0` |
 | `kubectl get ns ai --show-labels` | The three `pod-security.kubernetes.io/...` labels |
+| `kubectl get ds -A \| grep -E "nvidia\|metallb"` | Device Plugin `DESIRED 1`, `READY 1`; both MetalLB DaemonSets `DESIRED 2` |
+| `kubectl describe node <GPU_HOSTNAME> \| grep nvidia.com/gpu` | `nvidia.com/gpu: 1` in capacity and allocatable, `0` allocated |
 
 ## Limits
 
@@ -170,6 +199,7 @@ kubectl get ns ai --show-labels
 - **The GPU is whole.** `nvidia.com/gpu: 1` gives the card to one pod entirely; it is not shared unless time-slicing is configured. With 4 GiB of VRAM only small models fit on it.
 - **The node is not always on.** The laptop is shut down or sleeps; a pod placed there is unavailable meanwhile, and its volume (`local-path`) lives on that machine's disk.
 - **`NetworkPolicy` would not be enforced.** Flannel does not implement it, so network isolation of the `ai` namespace needs a policy-capable CNI (for example Calico) — a separate change.
+- **The taint also holds back DaemonSets.** A DaemonSet that must run on the laptop needs a toleration for `dedicated=ai`; without one it simply does not run there, and a pod already running there is reported as misscheduled.
 - **Taints keep strangers out, nothing more.** They do not limit what an admitted pod does; that is what the quota, container limits and Pod Security labels are for.
 
 ## Open items
@@ -178,6 +208,7 @@ kubectl get ns ai --show-labels
 - ⬜ **Remove the laptop filters** in Alloy (the `drop` rule) and Alertmanager (the two `"null"` routes) from [SRV-16](./SRV-16-Logging-and-Alerting.md) when the first workload starts, so its logs and alerts are not hidden.
 - ⬜ **Check the real load** of the laptop in Grafana and adjust the quota.
 - ⬜ **Network isolation** needs a policy-enforcing CNI.
+- ⬜ **Keep the Device Plugin toleration** in a manifest under `~/k8s-manifests/`, so that re-applying NVIDIA's manifest does not drop it.
 - ⬜ The laptop stays **out of the Ansible inventory** ([SRV-09](./SRV-09-Ansible-Node-Provisioning.md)) by decision.
 
 ## Files
@@ -186,6 +217,7 @@ kubectl get ns ai --show-labels
 |---|---|---|
 | `ai-namespace.yaml` | `~/k8s-manifests/` on `<HOSTNAME>` | Namespace `ai`, quota, limit range, ServiceAccount |
 | Node label and taint | Node object `<GPU_HOSTNAME>` | `workload=ai`, `dedicated=ai:NoSchedule` (set with `kubectl`, not stored in a file) |
+| Toleration on `nvidia-device-plugin-daemonset` | DaemonSet in `kube-system` | Added with `kubectl patch`; not stored in a file |
 
 ## Related
 
@@ -193,5 +225,6 @@ kubectl get ns ai --show-labels
 - [Node Profile — GPU Laptop Worker](./SRV-11-GPU-Laptop-Node-Profile.md) — what the node is
 - [GPU Node Setup](./SRV-12-GPU-Node-Setup.md) — how its GPU reached pods
 - [ArgoCD and GitOps](./SRV-13-ArgoCD-GitOps.md) — where the earlier cordon decision was made
+- [SRV-17-TRBL](../troubleshooting/SRV-17-TRBL-Dedicated-GPU-Node.md) — problems hit during this step
 - [Guide: Pod Scheduling](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/kubernetes/Guide-Pod-Scheduling-nodeSelector-Affinity-Cordon.md) — companion Guides repository
 - [Guide: Kubernetes Taints and Tolerations](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/kubernetes/Guide-Kubernetes-Taints-and-Tolerations.md) — companion Guides repository

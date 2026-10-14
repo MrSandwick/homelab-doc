@@ -70,7 +70,7 @@ The FreeRADIUS server that authenticates Wi-Fi clients in `network/` runs on the
 | [SRV-14 CI/CD with GitHub Actions and GHCR](server/SRV-14-CI-CD-GHCR.md) | `my-site` repository, build workflow, image published to GHCR, cluster switched to the registry image, SSH deploy keys, automatic tag update in `homelab-gitops` | [SRV-14-TRBL](troubleshooting/SRV-14-TRBL-CI-CD-GHCR.md) |
 | [SRV-15 Persistent Storage](server/SRV-15-Persistent-Storage.md) | `local-path-provisioner` and a default StorageClass; Grafana and Prometheus on persistent volumes | — |
 | [SRV-16 Logging and Alerting](server/SRV-16-Logging-and-Alerting.md) | Loki and Grafana Alloy for pod logs, Loki in Grafana, Alertmanager routing to Slack | [SRV-16-TRBL](troubleshooting/SRV-16-TRBL-Logging-and-Alerting.md) |
-| [SRV-17 Dedicated GPU Node](server/SRV-17-Dedicated-GPU-Node.md) | The laptop reserved for GPU/AI workloads with a node label, a taint and a namespace quota; no workload yet | — |
+| [SRV-17 Dedicated GPU Node](server/SRV-17-Dedicated-GPU-Node.md) | The laptop reserved for GPU/AI workloads with a node label, a taint and a namespace quota; no workload yet | [SRV-17-TRBL](troubleshooting/SRV-17-TRBL-Dedicated-GPU-Node.md) |
 
 ### Network — VLANs and RADIUS
 
