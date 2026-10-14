@@ -6,7 +6,7 @@ tags: [homelab, project, kubernetes, gpu, hardware]
 
 > Status: 🟢 Joined, healthy, GPU verified usable by pods. This doc covers *what this node is and the operational trade-offs of running it*; see [Second Node Setup](./SRV-06-Second-Node-Setup.md) for the join process it followed and [GPU Node Setup](./SRV-12-GPU-Node-Setup.md) for how its GPU was made usable by pods.
 
-> **Standing decision (October 2026):** the laptop is also used and administered by another person, so it is intentionally kept out of the Ansible inventory and out of scheduling. It stays cordoned and receives no workloads or pods beyond its node-level DaemonSets for the foreseeable future. The practices below describe how it could be used; they are not currently in effect. See [ArgoCD and GitOps — Open items](./SRV-13-ArgoCD-GitOps.md#open-items).
+> **Update (October 2026):** the laptop is also used and administered by another person, so it stays out of the Ansible inventory. It is no longer cordoned: it carries the taint `dedicated=ai:NoSchedule` and the label `workload=ai`, so only pods built for it can be placed there, under a resource quota — see [Dedicated GPU Node](./SRV-17-Dedicated-GPU-Node.md). No workload runs on it yet. The cordon-based practices below describe how it could be protected during heavy personal use; they are not in effect by default. See [ArgoCD and GitOps — Open items](./SRV-13-ArgoCD-GitOps.md#open-items).
 
 ## What this node is
 

@@ -58,8 +58,8 @@ See [Hardware Selection](./SRV-01-Hardware-Selection.md) for the full comparison
 - ✅ `my-site` image moved off the worker's local containerd: built by GitHub Actions on every push to the `my-site` repository and pulled from GHCR, so it no longer pins the workload to one node — see [CI/CD with GitHub Actions and GHCR](./SRV-14-CI-CD-GHCR.md)
 - ✅ The image tag in `homelab-gitops` is updated automatically by the build workflow, and pushes use per-repository SSH deploy keys instead of an expiring token — see [CI/CD with GitHub Actions and GHCR](./SRV-14-CI-CD-GHCR.md)
 - ✅ Persistent storage: `local-path-provisioner` provides a default StorageClass; Grafana and Prometheus keep their data on volumes, and Grafana's admin password survives a restart — see [Persistent Storage](./SRV-15-Persistent-Storage.md)
-- ✅ Laptop node (`<GPU_HOSTNAME>`): decision recorded — also used by another person, so it stays cordoned, out of the Ansible inventory, and receives no workloads for the foreseeable future — see [ArgoCD and GitOps](./SRV-13-ArgoCD-GitOps.md#open-items)
+- ✅ Laptop node (`<GPU_HOSTNAME>`): reserved for GPU/AI workloads — labeled `workload=ai`, tainted `dedicated=ai:NoSchedule` and uncordoned; namespace `ai` with a resource quota is ready, no workload runs there yet. It stays out of the Ansible inventory because another person also uses it — see [Dedicated GPU Node](./SRV-17-Dedicated-GPU-Node.md)
 - ✅ Logging and alerting: Loki stores pod logs collected by Grafana Alloy and queried in Grafana; Alertmanager sends `warning` and `critical` alerts to a Slack channel (test alert delivered) — see [Logging and Alerting](./SRV-16-Logging-and-Alerting.md)
 - ⬜ Next: an alert rule for `my-site`, backup of the persistent volumes; stateful side projects (Nextcloud, Minecraft) last
 
-Continue at [Logging and Alerting](./SRV-16-Logging-and-Alerting.md) for the current state of the cluster and its open items.
+Continue at [Dedicated GPU Node](./SRV-17-Dedicated-GPU-Node.md) for the current state of the cluster and its open items.

@@ -25,6 +25,7 @@ Each numbered doc records the working procedure. The problems hit along the way 
 15. See [CI/CD with GitHub Actions and GHCR](./SRV-14-CI-CD-GHCR.md)
 16. See [Persistent Storage](./SRV-15-Persistent-Storage.md)
 17. See [Logging and Alerting](./SRV-16-Logging-and-Alerting.md)
+18. See [Dedicated GPU Node](./SRV-17-Dedicated-GPU-Node.md)
 
 Troubleshooting files:
 

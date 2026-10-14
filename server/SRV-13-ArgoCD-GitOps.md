@@ -65,7 +65,7 @@ kubectl delete pods --all -n argocd
 kubectl get pods -n argocd -o wide
 ```
 
-**Decision:** the laptop stays in the cluster, cordoned, running only its node-level DaemonSet pods (CNI, kube-proxy, node-exporter). It is a Wi-Fi, battery-powered machine that sleeps — unsuitable for persistent workloads.
+**Decision (replaced later by a dedicated-node taint, see [SRV-17](./SRV-17-Dedicated-GPU-Node.md)):** the laptop stays in the cluster, cordoned, running only its node-level DaemonSet pods (CNI, kube-proxy, node-exporter). It is a Wi-Fi, battery-powered machine that sleeps — unsuitable for persistent workloads.
 
 The pods initially landed on the laptop — see [SRV-13-TRBL](../troubleshooting/SRV-13-TRBL-ArgoCD-GitOps.md#argocd-pods-scheduled-on-an-unexpected-node).
 
@@ -190,7 +190,7 @@ Not implemented: storing the `Application` manifests in the repository as well (
 - ✅ **Admin password:** changed in the UI; `argocd-initial-admin-secret` is gone. The built-in `admin` account is still enabled; the ArgoCD documentation recommends using it only for initial configuration and disabling it once other users or SSO exist (`admin.enabled: "false"` in `argocd-cm`). Not needed for a single-user lab.
 - ✅ **`my-site` image:** was imported only into the worker's containerd ([SRV-10](./SRV-10-First-Real-Workload.md)), a weak point under GitOps. Resolved in [SRV-14](./SRV-14-CI-CD-GHCR.md): the image is built by GitHub Actions and pulled from GHCR, and `imagePullPolicy: Never` and the `nodeSelector` are gone.
 - ✅ **Push credentials:** the expiring token was replaced by deploy keys ([SRV-14 Step 7](./SRV-14-CI-CD-GHCR.md#step-7--replace-the-token-with-deploy-keys)).
-- ✅ **Laptop node (decision):** the laptop (`<GPU_HOSTNAME>`) is also used and administered by another person. It is deliberately **not** added to the Ansible inventory ([SRV-09](./SRV-09-Ansible-Node-Provisioning.md)) and stays cordoned: it receives no workloads or pods beyond its node-level DaemonSets for the foreseeable future. [SRV-11](./SRV-11-GPU-Laptop-Node-Profile.md) describes how it could be used; that is not currently in effect.
+- ✅ **Laptop node (decision):** the laptop (`<GPU_HOSTNAME>`) is also used and administered by another person, so it is deliberately **not** added to the Ansible inventory ([SRV-09](./SRV-09-Ansible-Node-Provisioning.md)). The cordon described above was later replaced by a dedicated-node taint: only GPU/AI pods can be placed there, under a resource quota — see [SRV-17](./SRV-17-Dedicated-GPU-Node.md). [SRV-11](./SRV-11-GPU-Laptop-Node-Profile.md) describes the node.
 
 ## Files
 
