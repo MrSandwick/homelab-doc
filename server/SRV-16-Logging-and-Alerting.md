@@ -20,11 +20,12 @@ Picks up after [Persistent Storage](./SRV-15-Persistent-Storage.md). Commands ru
 8. [Step 5 — Slack webhook and Secret](#step-5--slack-webhook-and-secret)
 9. [Step 6 — Alertmanager routing](#step-6--alertmanager-routing)
 10. [Step 7 — Test alert](#step-7--test-alert)
-11. [Verification](#verification)
-12. [Limits](#limits)
-13. [Open items](#open-items)
-14. [Files](#files)
-15. [Related](#related)
+11. [Step 8 — Make control-plane metrics reachable](#step-8--make-control-plane-metrics-reachable)
+12. [Verification](#verification)
+13. [Limits](#limits)
+14. [Open items](#open-items)
+15. [Files](#files)
+16. [Related](#related)
 
 ## Components
 
@@ -369,6 +370,44 @@ kubectl -n monitoring exec alertmanager-prometheus-kube-prometheus-alertmanager-
 
 After the 30 s `group_wait`, a `[FIRING:1] TestAlert` message appeared in `#alerts`, and a `[RESOLVED]` message followed when the test alert expired.
 
+## Step 8 — Make control-plane metrics reachable
+
+After the Slack route went live, an `etcdMembersDown` alert arrived although `kubectl` worked and etcd was healthy ([SRV-16-TRBL](../troubleshooting/SRV-16-TRBL-Logging-and-Alerting.md#etcdmembersdown-and-control-plane-targets-down)). kubeadm makes the metrics endpoints of etcd, kube-scheduler, kube-controller-manager and kube-proxy listen on `127.0.0.1`, while Prometheus scrapes the node addresses, so those targets were `down`. Diagnosis:
+
+```
+sudo grep listen-metrics /etc/kubernetes/manifests/etcd.yaml
+kubectl get --raw /api/v1/namespaces/monitoring/services/prometheus-kube-prometheus-prometheus:9090/proxy/api/v1/targets \
+  | python3 -c 'import sys,json; [print(t["labels"]["job"], t["health"], t.get("lastError","")[:70]) for t in json.load(sys.stdin)["data"]["activeTargets"] if t["health"]!="up"]'
+```
+
+The first showed `127.0.0.1:2381`; the second listed `kube-etcd`, `kube-scheduler`, `kube-controller-manager` and `kube-proxy` (all nodes) as `down` with `connection refused`.
+
+| Target | Change | Why this form |
+|---|---|---|
+| etcd | In `/etc/kubernetes/manifests/etcd.yaml`: `--listen-metrics-urls=http://127.0.0.1:2381,http://<NODE_IP>:2381` | The localhost address stays: the pod's own health probes use it |
+| kube-scheduler, kube-controller-manager | In their manifests: `--bind-address=127.0.0.1` → `--bind-address=0.0.0.0` | Their probes also use `127.0.0.1`, so the node IP alone would break them; the secure ports still require a token for metrics |
+| kube-proxy | ConfigMap `kube-proxy`: `metricsBindAddress` → `0.0.0.0:10249`, then a rolling restart | The setting lives in the ConfigMap, not in a manifest |
+
+Static pod manifests are watched by the kubelet, so a backup must not be left in that folder; it is kept in the home directory. Each edited component restarts by itself within a minute.
+
+```
+sudo cp /etc/kubernetes/manifests/etcd.yaml ~/etcd.yaml.bak
+sudo sed -i 's|--listen-metrics-urls=http://127.0.0.1:2381|--listen-metrics-urls=http://127.0.0.1:2381,http://<NODE_IP>:2381|' /etc/kubernetes/manifests/etcd.yaml
+
+for c in kube-controller-manager kube-scheduler; do
+  sudo cp /etc/kubernetes/manifests/$c.yaml ~/$c.yaml.bak
+  sudo sed -i 's|--bind-address=127.0.0.1|--bind-address=0.0.0.0|' /etc/kubernetes/manifests/$c.yaml
+done
+
+kubectl -n kube-system get cm kube-proxy -o yaml \
+  | sed -E 's|metricsBindAddress: .*|metricsBindAddress: 0.0.0.0:10249|' \
+  | kubectl replace -f -
+kubectl -n kube-system rollout restart ds/kube-proxy
+kubectl -n kube-system rollout status ds/kube-proxy --timeout=180s
+```
+
+Done in stages (etcd, then scheduler and controller manager, then kube-proxy), checking after each that the pods were `Running` and `kubectl` still answered. Result: the target query printed `total 28` and no target that was not `up`; the `etcdMembersDown` alert cleared on its own.
+
 ## Verification
 
 | Check | Result |
@@ -380,6 +419,7 @@ After the 30 s `group_wait`, a `[FIRING:1] TestAlert` message appeared in `#aler
 | Grafana → Data sources | Alertmanager, Loki, Prometheus listed |
 | Grafana → Explore → Loki, query `{namespace="argocd"}` | ArgoCD log lines shown |
 | `amtool alert add TestAlert …` | `[FIRING:1] TestAlert` and later `[RESOLVED]` in Slack |
+| Prometheus targets query from Step 8 | `total 28`, no target that is not `up` |
 
 Useful queries in Grafana Explore (Loki, **Code** mode):
 
@@ -397,6 +437,7 @@ Alertmanager logs only failed notifications; a delivered message leaves no log l
 - **One Alloy pod** is a single point of failure for collection. It has no volume, so reading positions are not kept across a restart (not verified); lines written while it is down may be missed. It reads through the API server rather than from the node's disk, which adds some load to the API server; at this cluster size that is acceptable.
 - **Alertmanager has no volume,** so its silences are lost on restart.
 - **The laptop node is filtered by label.** An alert that carries neither a `node` nor an `instance` label of that node (a `TargetDown` for the node-exporter job, for example) is not covered by the rules above.
+- **The Step 8 edits are not durable.** They are made by hand in the static pod manifests and the `kube-proxy` ConfigMap, and a `kubeadm upgrade` regenerates those; the durable place is the kubeadm cluster configuration. The etcd metrics port is plain HTTP without authentication, reachable from the LAN (metrics only, no data).
 - **The Slack webhook lives only in the cluster Secret.** If it is lost, a new one is created in Slack and the Secret is replaced.
 
 ## Open items
@@ -406,6 +447,7 @@ Alertmanager logs only failed notifications; a delivered message leaves no log l
 - ⬜ **Confirm retention:** after more than 7 days, check that old log chunks are deleted and the volume does not fill.
 - ⬜ **Volumes for Alertmanager and no backup for Loki/Grafana/Prometheus** (continuing [SRV-15](./SRV-15-Persistent-Storage.md#open-items)).
 - ⬜ **Helm releases are still applied by hand,** values in `~/k8s-manifests/`, not through ArgoCD.
+- ⬜ **Make the Step 8 changes durable** in the kubeadm configuration, and re-check them after any cluster upgrade.
 - ⬜ **Optional second receiver** (an on-call tool such as PagerDuty) once there is a reason for paging.
 
 ## Files
@@ -416,6 +458,7 @@ Alertmanager logs only failed notifications; a delivered message leaves no log l
 | `alloy-values.yaml` | `~/k8s-manifests/` on `<HOSTNAME>` | Alloy: Deployment and the log pipeline, laptop node dropped |
 | `prometheus-values.yaml` | `~/k8s-manifests/` on `<HOSTNAME>` | Extended: Loki data source and Alertmanager routing (besides the SRV-15 content) |
 | Secret `alertmanager-slack` | Namespace `monitoring` | The Slack webhook URL; created by hand, never committed |
+| Static pod manifests, ConfigMap `kube-proxy` | `/etc/kubernetes/manifests/` on `<HOSTNAME>`, `kube-system` | etcd, kube-scheduler, kube-controller-manager and kube-proxy metrics addresses, edited in Step 8; backups of the manifests in the home directory |
 
 ## Related
 

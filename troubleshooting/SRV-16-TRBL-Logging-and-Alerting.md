@@ -12,6 +12,7 @@ tags: [homelab, project, kubernetes, logging, loki, alloy, alertmanager, slack, 
 |---|---|
 | [Alloy warnings: `no route to host` for the laptop node](#alloy-warnings-no-route-to-host-for-the-laptop-node) | [Step 3](../server/SRV-16-Logging-and-Alerting.md#step-3--keep-the-laptop-node-out-of-log-collection) |
 | [Slack: no "From scratch" option](#slack-no-from-scratch-option) | [Step 5](../server/SRV-16-Logging-and-Alerting.md#step-5--slack-webhook-and-secret) |
+| [`etcdMembersDown` and control-plane targets down](#etcdmembersdown-and-control-plane-targets-down) | [Step 8](../server/SRV-16-Logging-and-Alerting.md#step-8--make-control-plane-metrics-reachable) |
 
 ## Alloy warnings: `no route to host` for the laptop node
 
@@ -39,3 +40,20 @@ This was also why Alloy was installed as a one-replica Deployment: as a DaemonSe
 **Root cause:** Slack renamed the entry; the screen is a newer version of the dialog than the instructions assumed.
 
 **Fix:** **Blank app** is the same option (an empty app with minimal setup). After it, the steps are unchanged: **Incoming Webhooks** → activate → **Add New Webhook to Workspace**.
+
+## `etcdMembersDown` and control-plane targets down
+
+**Symptom:** Slack received
+
+```
+[FIRING:1] etcdMembersDown
+etcd cluster "kube-etcd": members are down (1).
+```
+
+while `kubectl` worked normally and etcd was running.
+
+**Root cause:** not an etcd failure. The alert counts etcd scrape targets that are down, and the Prometheus target was `down` with `connection refused` on the node address. kubeadm starts etcd with `--listen-metrics-urls=http://127.0.0.1:2381`, so the metrics port is not reachable on the node IP that the monitoring stack scrapes. The same holds for kube-scheduler and kube-controller-manager (`--bind-address=127.0.0.1`) and kube-proxy (`metricsBindAddress` empty, meaning localhost): after etcd was fixed, those three were still `down`.
+
+An alert that is false for a reason like this is worth fixing rather than silencing: until the targets work, the rules that depend on them say nothing about the real state of the control plane.
+
+**Fix:** [Step 8](../server/SRV-16-Logging-and-Alerting.md#step-8--make-control-plane-metrics-reachable): widen the metrics addresses, one component at a time, with a backup kept outside the kubelet's manifest folder. All 28 targets became `up`.

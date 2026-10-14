@@ -38,7 +38,8 @@ Troubleshooting files:
 - [SRV-12-TRBL](../troubleshooting/SRV-12-TRBL-GPU-Node-Setup.md) — empty `nvidia-ctk` config, Device Plugin crash loops
 - [SRV-13-TRBL](../troubleshooting/SRV-13-TRBL-ArgoCD-GitOps.md) — pods on an unexpected node, GitHub push failures
 - [SRV-14-TRBL](../troubleshooting/SRV-14-TRBL-CI-CD-GHCR.md) — same directory on two nodes, token scope, missing git identity, empty image tag breaking the manifest
-- [SRV-16-TRBL](../troubleshooting/SRV-16-TRBL-Logging-and-Alerting.md) — log collector warnings for the offline laptop node, renamed Slack dialog
+- [SRV-16-TRBL](../troubleshooting/SRV-16-TRBL-Logging-and-Alerting.md) — log collector warnings for the offline laptop node, renamed Slack dialog, false `etcdMembersDown` from unreachable control-plane metrics
+- [SRV-17-TRBL](../troubleshooting/SRV-17-TRBL-Dedicated-GPU-Node.md) — DaemonSet alerts after tainting the laptop node
 
 ## Stack
 
