@@ -4,7 +4,7 @@ tags: [homelab, project, kubernetes, logging, loki, alloy, alertmanager, slack, 
 
 # Logging and Alerting
 
-> Status: 🟢 **Working.** Loki stores the logs of the cluster's pods, Grafana Alloy collects them, Grafana can query them, and Alertmanager sends `warning` and `critical` alerts to a Slack channel (a test alert was delivered). 🟡 Open: no custom alert rules yet, none of the new data is backed up, and the laptop node is filtered out by label only — see [Open items](#open-items).
+> Status: 🟢 **Working.** Loki stores the logs of the cluster's pods, Grafana Alloy collects them, Grafana can query them, and Alertmanager sends `warning` and `critical` alerts to a Slack channel (a test alert was delivered). 🟡 Open: none of the new data is backed up, and the laptop node is filtered out by label only — see [Open items](#open-items).
 
 Picks up after [Persistent Storage](./SRV-15-Persistent-Storage.md). Commands run on the control-plane node (`<HOSTNAME>`) unless noted.
 
@@ -21,11 +21,12 @@ Picks up after [Persistent Storage](./SRV-15-Persistent-Storage.md). Commands ru
 9. [Step 6 — Alertmanager routing](#step-6--alertmanager-routing)
 10. [Step 7 — Test alert](#step-7--test-alert)
 11. [Step 8 — Make control-plane metrics reachable](#step-8--make-control-plane-metrics-reachable)
-12. [Verification](#verification)
-13. [Limits](#limits)
-14. [Open items](#open-items)
-15. [Files](#files)
-16. [Related](#related)
+12. [Step 9 — Alert rules for `my-site`](#step-9--alert-rules-for-my-site)
+13. [Verification](#verification)
+14. [Limits](#limits)
+15. [Open items](#open-items)
+16. [Files](#files)
+17. [Related](#related)
 
 ## Components
 
@@ -36,6 +37,7 @@ Picks up after [Persistent Storage](./SRV-15-Persistent-Storage.md). Commands ru
 | Loki data source | `grafana.additionalDataSources` in `prometheus-values.yaml` | Grafana | Lets Grafana (Explore) query Loki |
 | Alertmanager routing | `alertmanager.config` in `prometheus-values.yaml` | `monitoring` | Decides which alerts are sent where |
 | Secret `alertmanager-slack` | Created by hand | `monitoring` | The Slack incoming-webhook URL |
+| PrometheusRule `my-site-alerts` | `apps/my-site/` in `homelab-gitops`, synced by ArgoCD | `monitoring` | Alerts `MySiteDown` and `MySiteDegraded` |
 
 Concepts (labels vs full-text index, the Alloy pipeline, how Alertmanager routes): [Guide: Logging and Alerting](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/platform/Guide-Logging-and-Alerting.md).
 
@@ -408,6 +410,89 @@ kubectl -n kube-system rollout status ds/kube-proxy --timeout=180s
 
 Done in stages (etcd, then scheduler and controller manager, then kube-proxy), checking after each that the pods were `Running` and `kubectl` still answered. Result: the target query printed `total 28` and no target that was not `up`; the `etcdMembersDown` alert cleared on its own.
 
+## Step 9 — Alert rules for `my-site`
+
+The built-in rules say nothing about the cluster's own workload, so `my-site` gets two of its own. They are kept in the GitOps repository next to the workload: the ArgoCD application for `my-site` syncs every manifest in `apps/my-site/` ([SRV-13](./SRV-13-ArgoCD-GitOps.md)), so a `PrometheusRule` placed there is applied by ArgoCD like the rest.
+
+Two facts decide the manifest. The Deployment is `default/my-site` (2 replicas). The Prometheus of this cluster only loads rules that carry the label `release: prometheus`:
+
+```
+kubectl get deploy -A | grep my-site
+kubectl -n monitoring get prometheus -o jsonpath='{.items[0].spec.ruleSelector}'; echo
+```
+
+`apps/my-site/my-site-alerts.yaml` in `homelab-gitops`:
+
+```yaml
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: my-site-alerts
+  namespace: monitoring
+  labels:
+    # matches the ruleSelector of the Prometheus in this cluster
+    release: prometheus
+spec:
+  groups:
+    - name: my-site
+      rules:
+        - alert: MySiteDown
+          # no available replica at all (the "or vector(0)" covers a missing metric)
+          expr: (sum(kube_deployment_status_replicas_available{namespace="default", deployment="my-site"}) or vector(0)) < 1
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "my-site has no available pod"
+            description: "Deployment default/my-site has had no available replica for 5 minutes."
+        - alert: MySiteDegraded
+          # fewer available replicas than desired
+          expr: kube_deployment_status_replicas_available{namespace="default", deployment="my-site"} < kube_deployment_spec_replicas{namespace="default", deployment="my-site"}
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: "my-site is running with fewer pods than desired"
+            description: "Deployment default/my-site has had fewer available replicas than desired for 10 minutes."
+```
+
+| Rule | Fires when | Severity | Reaches Slack |
+|---|---|---|---|
+| `MySiteDown` | No available replica for 5 minutes | `critical` | Yes (route `warning`/`critical`, Step 6) |
+| `MySiteDegraded` | Fewer available replicas than desired for 10 minutes | `warning` | Yes |
+
+The metrics come from kube-state-metrics, which the monitoring stack already runs. The file is checked, then committed and pushed; ArgoCD creates the rule within a few minutes:
+
+```
+cd ~/homelab-gitops && git pull --rebase
+kubectl apply --dry-run=server -f apps/my-site/my-site-alerts.yaml
+git add apps/my-site/my-site-alerts.yaml
+git status --short
+git diff --staged --stat
+git commit -m "my-site: add PrometheusRule (down and degraded alerts)"
+git push
+
+kubectl -n monitoring get prometheusrule my-site-alerts
+```
+
+Prometheus has loaded the rules when its rules API lists them as healthy and inactive:
+
+```
+kubectl get --raw /api/v1/namespaces/monitoring/services/prometheus-kube-prometheus-prometheus:9090/proxy/api/v1/rules \
+  | python3 -c 'import sys,json; [print(r["name"], r["health"], r["state"]) for g in json.load(sys.stdin)["data"]["groups"] if g["name"]=="my-site" for r in g["rules"]]'
+```
+
+**Firing test, through git.** `kubectl scale` would be undone at once by ArgoCD's self-heal, so the site is switched off by a commit instead, which takes it down for about 8 to 10 minutes (5 minutes of `for` plus ArgoCD's sync interval):
+
+```
+sed -i 's/replicas: 2/replicas: 0/' apps/my-site/my-site.yaml
+git diff
+git commit -am "my-site: scale to 0 to test MySiteDown alert"
+git push
+```
+
+`[FIRING:1] MySiteDown` arrived in `#alerts`. The site was then restored the same way (`replicas: 0` back to `replicas: 2`, commit, push); ArgoCD brought the pods back and the resolved message followed.
+
 ## Verification
 
 | Check | Result |
@@ -420,6 +505,8 @@ Done in stages (etcd, then scheduler and controller manager, then kube-proxy), c
 | Grafana → Explore → Loki, query `{namespace="argocd"}` | ArgoCD log lines shown |
 | `amtool alert add TestAlert …` | `[FIRING:1] TestAlert` and later `[RESOLVED]` in Slack |
 | Prometheus targets query from Step 8 | `total 28`, no target that is not `up` |
+| Rules API query from Step 9 | `MySiteDown ok inactive`, `MySiteDegraded ok inactive` |
+| `replicas: 0` pushed to `homelab-gitops` | `[FIRING:1] MySiteDown` in Slack after about 8 to 10 minutes; `[RESOLVED]` after the restore commit |
 
 Useful queries in Grafana Explore (Loki, **Code** mode):
 
@@ -435,19 +522,19 @@ Alertmanager logs only failed notifications; a delivered message leaves no log l
 
 - **Loki's data is a directory on one node's disk,** like every other `local-path` volume ([SRV-15](./SRV-15-Persistent-Storage.md#limits-of-this-storage)): not a backup, not replicated. Retention is set to 7 days; the deletion itself has not been observed yet.
 - **One Alloy pod** is a single point of failure for collection. It has no volume, so reading positions are not kept across a restart (not verified); lines written while it is down may be missed. It reads through the API server rather than from the node's disk, which adds some load to the API server; at this cluster size that is acceptable.
-- **Alertmanager has no volume,** so its silences are lost on restart.
+- **Alertmanager now has a volume** ([SRV-18 Step 6](./SRV-18-Backups-and-Platform-Config.md#step-6--a-volume-for-alertmanager)), so its silences survive a restart.
 - **The laptop node is filtered by label.** An alert that carries neither a `node` nor an `instance` label of that node (a `TargetDown` for the node-exporter job, for example) is not covered by the rules above.
-- **The Step 8 edits are not durable.** They are made by hand in the static pod manifests and the `kube-proxy` ConfigMap, and a `kubeadm upgrade` regenerates those; the durable place is the kubeadm cluster configuration. The etcd metrics port is plain HTTP without authentication, reachable from the LAN (metrics only, no data).
+- **The Step 8 edits alone are not durable.** They are made by hand in the static pod manifests and the `kube-proxy` ConfigMap, and a `kubeadm upgrade` regenerates those. The control-plane settings were later added to the kubeadm cluster configuration ([SRV-18 Step 7](./SRV-18-Backups-and-Platform-Config.md#step-7--make-control-plane-metrics-survive-upgrades)); the `kube-proxy` ConfigMap still has to be re-checked after an upgrade. The etcd metrics port is plain HTTP without authentication, reachable from the LAN (metrics only, no data).
 - **The Slack webhook lives only in the cluster Secret.** If it is lost, a new one is created in Slack and the Secret is replaced.
 
 ## Open items
 
-- ⬜ **Alert for the own workload,** for example "`my-site` has no ready pod for 5 minutes", broken on purpose to see the message arrive — so far only the chart's built-in rules exist.
+- ⬜ **Rules for further workloads** as they are added; so far only `my-site` has rules of its own besides the chart's built-in ones.
 - ⬜ **Check the laptop filter with the laptop offline:** wait for a full alert evaluation cycle and confirm nothing about that node reaches Slack.
 - ⬜ **Confirm retention:** after more than 7 days, check that old log chunks are deleted and the volume does not fill.
-- ⬜ **Volumes for Alertmanager and no backup for Loki/Grafana/Prometheus** (continuing [SRV-15](./SRV-15-Persistent-Storage.md#open-items)).
-- ⬜ **Helm releases are still applied by hand,** values in `~/k8s-manifests/`, not through ArgoCD.
-- ⬜ **Make the Step 8 changes durable** in the kubeadm configuration, and re-check them after any cluster upgrade.
+- ✅ **Alertmanager volume and backups** are in place ([SRV-18](./SRV-18-Backups-and-Platform-Config.md)); Loki and Prometheus data is deliberately not backed up.
+- 🟡 **Helm releases are still applied by hand;** their values are stored in `platform/` of `homelab-gitops`, but ArgoCD does not manage them.
+- 🟡 **Step 8 changes** are in the kubeadm configuration except for `kube-proxy`; re-check that ConfigMap after any cluster upgrade.
 - ⬜ **Optional second receiver** (an on-call tool such as PagerDuty) once there is a reason for paging.
 
 ## Files
@@ -458,6 +545,7 @@ Alertmanager logs only failed notifications; a delivered message leaves no log l
 | `alloy-values.yaml` | `~/k8s-manifests/` on `<HOSTNAME>` | Alloy: Deployment and the log pipeline, laptop node dropped |
 | `prometheus-values.yaml` | `~/k8s-manifests/` on `<HOSTNAME>` | Extended: Loki data source and Alertmanager routing (besides the SRV-15 content) |
 | Secret `alertmanager-slack` | Namespace `monitoring` | The Slack webhook URL; created by hand, never committed |
+| `my-site-alerts.yaml` | `apps/my-site/` in the `homelab-gitops` repository | PrometheusRule with `MySiteDown` and `MySiteDegraded` |
 | Static pod manifests, ConfigMap `kube-proxy` | `/etc/kubernetes/manifests/` on `<HOSTNAME>`, `kube-system` | etcd, kube-scheduler, kube-controller-manager and kube-proxy metrics addresses, edited in Step 8; backups of the manifests in the home directory |
 
 ## Related

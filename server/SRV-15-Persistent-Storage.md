@@ -4,7 +4,7 @@ tags: [homelab, project, kubernetes, storage, helm, grafana, prometheus]
 
 # Persistent Storage
 
-> Status: 🟢 **Working.** `local-path-provisioner` gives the cluster a default StorageClass; Grafana and Prometheus now keep their data on persistent volumes, and Grafana's admin password survived a pod restart. 🟡 Open: the volumes are not backed up, and Alertmanager still has no volume — see [Open items](#open-items).
+> Status: 🟢 **Working.** `local-path-provisioner` gives the cluster a default StorageClass; Grafana and Prometheus now keep their data on persistent volumes, and Grafana's admin password survived a pod restart. Backups and the Alertmanager volume were added later — see [Backups and Platform Config](./SRV-18-Backups-and-Platform-Config.md).
 
 Picks up after [CI/CD with GitHub Actions and GHCR](./SRV-14-CI-CD-GHCR.md). Commands run on the control-plane node (`<HOSTNAME>`) unless noted.
 
@@ -167,9 +167,9 @@ The same `helm upgrade` command (now revision 3) applies it. Prometheus restarts
 
 ## Open items
 
-- ⬜ **No backup** of the volumes. The data is easy to regenerate (metrics) or small (Grafana state), but nothing protects it.
-- ⬜ **Alertmanager** has no volume; its silences and notification log are lost on restart. Alert routing now exists ([SRV-16](./SRV-16-Logging-and-Alerting.md)), so this is a real limit.
-- ⬜ **Helm releases are applied by hand,** with their values files in `~/k8s-manifests/`, not through ArgoCD. Moving them into `homelab-gitops` would make the whole platform GitOps-managed.
+- ✅ **Backup:** Grafana's data and the cluster state are backed up nightly ([SRV-18](./SRV-18-Backups-and-Platform-Config.md)). Prometheus and Loki data is deliberately not backed up: metrics and logs are regenerated.
+- ✅ **Alertmanager** now has a 1Gi `local-path` volume, so silences and the notification log survive a restart ([SRV-18](./SRV-18-Backups-and-Platform-Config.md)).
+- 🟡 **Helm releases are still applied by hand.** Their values files are now stored in `platform/` of `homelab-gitops` ([SRV-18](./SRV-18-Backups-and-Platform-Config.md)), but ArgoCD does not manage them.
 
 ## Files
 
