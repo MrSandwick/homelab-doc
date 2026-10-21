@@ -60,6 +60,8 @@ See [Hardware Selection](./SRV-01-Hardware-Selection.md) for the full comparison
 - ✅ Persistent storage: `local-path-provisioner` provides a default StorageClass; Grafana and Prometheus keep their data on volumes, and Grafana's admin password survives a restart — see [Persistent Storage](./SRV-15-Persistent-Storage.md)
 - ✅ Laptop node (`<GPU_HOSTNAME>`): reserved for GPU/AI workloads — labeled `workload=ai`, tainted `dedicated=ai:NoSchedule` and uncordoned; namespace `ai` with a resource quota is ready, no workload runs there yet. It stays out of the Ansible inventory because another person also uses it — see [Dedicated GPU Node](./SRV-17-Dedicated-GPU-Node.md)
 - ✅ Logging and alerting: Loki stores pod logs collected by Grafana Alloy and queried in Grafana; Alertmanager sends `warning` and `critical` alerts to a Slack channel (test alert delivered) — see [Logging and Alerting](./SRV-16-Logging-and-Alerting.md)
-- ⬜ Next: an alert rule for `my-site`, backup of the persistent volumes; stateful side projects (Nextcloud, Minecraft) last
+- ✅ Alert rules for `my-site` (`MySiteDown`, `MySiteDegraded`) are kept in `homelab-gitops` and synced by ArgoCD; the down alert was tested by switching the site off through git and reached Slack — see [Logging and Alerting](./SRV-16-Logging-and-Alerting.md#step-9--alert-rules-for-my-site)
+- ✅ Backups: etcd, certificates, Helm values and Grafana data are saved nightly on the control plane and mirrored to the worker; Helm values are stored in `homelab-gitops`, Alertmanager has a persistent volume — see [Backups and Platform Config](./SRV-18-Backups-and-Platform-Config.md)
+- ⬜ Next: restore test and an off-site copy of the backups; stateful side projects (Nextcloud, Minecraft) last
 
-Continue at [Dedicated GPU Node](./SRV-17-Dedicated-GPU-Node.md) for the current state of the cluster and its open items.
+Continue at [Backups and Platform Config](./SRV-18-Backups-and-Platform-Config.md) for the current state of the cluster and its open items.

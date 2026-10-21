@@ -26,6 +26,7 @@ Each numbered doc records the working procedure. The problems hit along the way 
 16. See [Persistent Storage](./SRV-15-Persistent-Storage.md)
 17. See [Logging and Alerting](./SRV-16-Logging-and-Alerting.md)
 18. See [Dedicated GPU Node](./SRV-17-Dedicated-GPU-Node.md)
+19. See [Backups and Platform Config](./SRV-18-Backups-and-Platform-Config.md)
 
 Troubleshooting files:
 
@@ -55,7 +56,8 @@ Troubleshooting files:
 - **GitOps:** ArgoCD, syncing from a public `homelab-gitops` repository
 - **CI / registry:** GitHub Actions builds the `my-site` image on every push, publishes it to GHCR, and commits the new commit-hash tag to `homelab-gitops`; ArgoCD rolls it out. Git access from the nodes and the workflow uses per-repository SSH deploy keys
 - **Storage:** `local-path-provisioner` (default StorageClass); Grafana and Prometheus on persistent volumes
-- **Logging and alerting:** Loki (monolithic, filesystem storage) and Grafana Alloy for pod logs; Alertmanager routing `warning`/`critical` alerts to Slack
+- **Logging and alerting:** Loki (monolithic, filesystem storage) and Grafana Alloy for pod logs; Alertmanager routing `warning`/`critical` alerts to Slack, on its own persistent volume
+- **Backups:** nightly cron job on the control plane (etcd snapshot, certificates, Helm values, Grafana data), mirrored to the worker; Helm values also stored in `homelab-gitops/platform/`
 
 Layer-by-layer overview of the stack: [Guide: The Stack](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-Stack.md) (companion Guides repository).
 
