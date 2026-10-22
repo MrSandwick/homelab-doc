@@ -534,7 +534,7 @@ Alertmanager logs only failed notifications; a delivered message leaves no log l
 - ⬜ **Confirm retention:** after more than 7 days, check that old log chunks are deleted and the volume does not fill.
 - ✅ **Alertmanager volume and backups** are in place ([SRV-18](./SRV-18-Backups-and-Platform-Config.md)); Loki and Prometheus data is deliberately not backed up.
 - 🟡 **Helm releases are still applied by hand;** their values are stored in `platform/` of `homelab-gitops`, but ArgoCD does not manage them.
-- 🟡 **Step 8 changes** are in the kubeadm configuration except for `kube-proxy`; re-check that ConfigMap after any cluster upgrade.
+- ✅ **Step 8 changes** are in the kubeadm configuration and survived two cluster upgrades together with the `kube-proxy` setting ([SRV-19](./SRV-19-Cluster-Upgrade.md)); a quick re-check after each upgrade is still sensible.
 - ⬜ **Optional second receiver** (an on-call tool such as PagerDuty) once there is a reason for paging.
 
 ## Files

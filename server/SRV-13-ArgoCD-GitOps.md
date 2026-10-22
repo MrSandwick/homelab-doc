@@ -5,6 +5,8 @@ tags: [homelab, project, kubernetes, argocd, gitops]
 # ArgoCD and GitOps
 
 > Status: 🟢 **Working.** ArgoCD installed and reachable at `http://<INGRESS_IP>/argocd`; the `my-site` workload is synced from the public `homelab-gitops` repository with automated sync, prune and self-heal verified. The image is now served from GHCR ([SRV-14](./SRV-14-CI-CD-GHCR.md)), the admin password has been changed, and pushes use SSH deploy keys. The only standing item is the laptop-node decision — see [Open items](#open-items).
+>
+> 🔁 **Later change:** `ingress-nginx` was retired upstream and has been replaced by Envoy Gateway on the same address — see [Gateway API with Envoy Gateway](./SRV-20-Gateway-API-Envoy-Gateway.md). This file records the original installation.
 
 Picks up after [First Real Workload](./SRV-10-First-Real-Workload.md). Commands run on the control-plane node (`<HOSTNAME>`) unless noted.
 

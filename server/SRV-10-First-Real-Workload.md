@@ -5,6 +5,8 @@ tags: [homelab, project, kubernetes, workload, ingress, scheduling]
 # First Real Workload
 
 > Status: 🟢 **Complete.** Static site (nginx) served through the existing ingress-nginx + MetalLB entry point at `/site`, scheduled on the worker node. Closes the last open item in [SRV-00](./SRV-00-Project-Overview.md).
+>
+> 🔁 **Later change:** `ingress-nginx` was retired upstream and has been replaced by Envoy Gateway on the same address — see [Gateway API with Envoy Gateway](./SRV-20-Gateway-API-Envoy-Gateway.md). This file records the original installation.
 
 > **Superseded in part:** the node-local image import and the `nodeSelector` / `imagePullPolicy: Never` workarounds described below were later replaced by an image built in GitHub Actions and pulled from GHCR — see [CI/CD with GitHub Actions and GHCR](./SRV-14-CI-CD-GHCR.md). This document is kept as the record of how it was first done.
 
