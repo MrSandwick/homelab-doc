@@ -5,6 +5,8 @@ tags: [homelab, project, kubernetes, helm, observability, ingress]
 # Helm, Observability, and Ingress
 
 > Status: 🟢 **Working.** Helm installed; `kube-prometheus-stack` collecting metrics from both nodes; Grafana reachable from the LAN through ingress-nginx at a MetalLB-assigned address (`<INGRESS_IP>`).
+>
+> 🔁 **Later change:** `ingress-nginx` was retired upstream and has been replaced by Envoy Gateway on the same address — see [Gateway API with Envoy Gateway](./SRV-20-Gateway-API-Envoy-Gateway.md). This file records the original installation.
 
 Picks up after [Cluster Verification](./SRV-07-Cluster-Verification.md). Commands run on the control-plane node (`<HOSTNAME>`) unless noted.
 

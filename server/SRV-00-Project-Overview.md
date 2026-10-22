@@ -62,6 +62,8 @@ See [Hardware Selection](./SRV-01-Hardware-Selection.md) for the full comparison
 - ✅ Logging and alerting: Loki stores pod logs collected by Grafana Alloy and queried in Grafana; Alertmanager sends `warning` and `critical` alerts to a Slack channel (test alert delivered) — see [Logging and Alerting](./SRV-16-Logging-and-Alerting.md)
 - ✅ Alert rules for `my-site` (`MySiteDown`, `MySiteDegraded`) are kept in `homelab-gitops` and synced by ArgoCD; the down alert was tested by switching the site off through git and reached Slack — see [Logging and Alerting](./SRV-16-Logging-and-Alerting.md#step-9--alert-rules-for-my-site)
 - ✅ Backups: etcd, certificates, Helm values and Grafana data are saved nightly on the control plane and mirrored to the worker; Helm values are stored in `homelab-gitops`, Alertmanager has a persistent volume — see [Backups and Platform Config](./SRV-18-Backups-and-Platform-Config.md)
-- ⬜ Next: restore test and an off-site copy of the backups; stateful side projects (Nextcloud, Minecraft) last
+- ✅ Cluster upgraded from Kubernetes 1.31 to 1.33 (control plane and worker) after a restore test of the etcd snapshot; the laptop node stays on 1.31 for now — see [Cluster Upgrade 1.31 → 1.33](./SRV-19-Cluster-Upgrade.md)
+- ✅ The retired ingress-nginx is replaced by Envoy Gateway (Gateway API) on the same address; routes are `HTTPRoute` objects kept in `homelab-gitops` — see [Gateway API with Envoy Gateway](./SRV-20-Gateway-API-Envoy-Gateway.md)
+- ⬜ Next: upgrade of the laptop node and an off-site copy of the backups; stateful side projects (Nextcloud, Minecraft) last
 
-Continue at [Backups and Platform Config](./SRV-18-Backups-and-Platform-Config.md) for the current state of the cluster and its open items.
+Continue at [Gateway API with Envoy Gateway](./SRV-20-Gateway-API-Envoy-Gateway.md) for the current state of the cluster and its open items.

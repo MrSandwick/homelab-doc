@@ -254,7 +254,7 @@ kubectl -n kube-system get cm kubeadm-config -o jsonpath='{.data.ClusterConfigur
 
 Three `extraArgs` blocks appear. Nothing restarts: the running cluster is unchanged, and the values apply at the next `kubeadm upgrade`.
 
-**kube-proxy is not covered.** Its `metricsBindAddress` lives in the separate `kube-proxy` ConfigMap, which kubeadm may reset during an upgrade. After upgrading the cluster, check it again ([SRV-16 Step 8](./SRV-16-Logging-and-Alerting.md)).
+**kube-proxy is not covered by this ConfigMap.** Its `metricsBindAddress` lives in the separate `kube-proxy` ConfigMap, which kubeadm could have reset during an upgrade. It was checked after the 1.32 and 1.33 upgrades and kept its value ([SRV-19](./SRV-19-Cluster-Upgrade.md)); it is still worth a look after every upgrade.
 
 ## Verification
 
@@ -276,7 +276,7 @@ The log ends with `backup written to ...`, both machines list the same directori
 
 ## Limits
 
-- **No restore has been tested.** A backup nobody has restored is an assumption; see [Open items](#open-items).
+- **Restore tested only partly.** The etcd snapshot was restored into a scratch directory ([SRV-19 Step 1](./SRV-19-Cluster-Upgrade.md#step-1--test-a-restore-first)); a full control-plane rebuild has not been rehearsed.
 - **Same site, same network.** Both copies are in the same room. A fire, a theft or a power surge takes both.
 - **`rsync --delete` mirrors mistakes too.** If the source directory is emptied or deleted, the next night's copy empties the worker as well. The seven-day window protects against a bad day only if someone notices within a day.
 - **Secrets in the clear.** The etcd snapshot and the `pki` archive can rebuild the cluster and read every Secret; the directory modes (700) are the only protection. Do not copy the backups to anything shared.
@@ -285,10 +285,10 @@ The log ends with `backup written to ...`, both machines list the same directori
 
 ## Open items
 
-- ⬜ **Restore test.** Restore an etcd snapshot into a scratch directory (`etcdctl snapshot restore`) and, ideally, rehearse a control-plane rebuild.
+- 🟡 **Restore test.** The snapshot restores into a scratch directory ([SRV-19](./SRV-19-Cluster-Upgrade.md#step-1--test-a-restore-first)); a full control-plane rebuild is still to be rehearsed.
 - ⬜ **Off-site copy** of the backups, encrypted, to cloud storage or another location.
 - ⬜ **Alert when a backup fails or is stale.** Today a missed night is noticed only by looking at the log.
-- ⬜ **Check `metricsBindAddress` of kube-proxy** after the next cluster upgrade.
+- ✅ **`metricsBindAddress` of kube-proxy** survived both cluster upgrades ([SRV-19](./SRV-19-Cluster-Upgrade.md)).
 - ⬜ **Move the Helm releases under ArgoCD,** or keep upgrading them by hand from `platform/` (decision pending).
 
 ## Files

@@ -27,6 +27,8 @@ Each numbered doc records the working procedure. The problems hit along the way 
 17. See [Logging and Alerting](./SRV-16-Logging-and-Alerting.md)
 18. See [Dedicated GPU Node](./SRV-17-Dedicated-GPU-Node.md)
 19. See [Backups and Platform Config](./SRV-18-Backups-and-Platform-Config.md)
+20. See [Cluster Upgrade 1.31 → 1.33](./SRV-19-Cluster-Upgrade.md)
+21. See [Gateway API with Envoy Gateway](./SRV-20-Gateway-API-Envoy-Gateway.md)
 
 Troubleshooting files:
 
@@ -41,6 +43,7 @@ Troubleshooting files:
 - [SRV-14-TRBL](../troubleshooting/SRV-14-TRBL-CI-CD-GHCR.md) — same directory on two nodes, token scope, missing git identity, empty image tag breaking the manifest
 - [SRV-16-TRBL](../troubleshooting/SRV-16-TRBL-Logging-and-Alerting.md) — log collector warnings for the offline laptop node, renamed Slack dialog, false `etcdMembersDown` from unreachable control-plane metrics
 - [SRV-17-TRBL](../troubleshooting/SRV-17-TRBL-Dedicated-GPU-Node.md) — DaemonSet alerts after tainting the laptop node
+- [SRV-19-TRBL](../troubleshooting/SRV-19-TRBL-Cluster-Upgrade.md) — `upgrade apply` on the wrong node, API server pause after the kubelet restart, temporary `down` targets
 
 ## Stack
 
@@ -48,10 +51,10 @@ Troubleshooting files:
 - **OS:** Ubuntu Server 26.04 LTS on the two purchased nodes; Ubuntu 26.04 Desktop on the laptop worker
 - **GPU:** NVIDIA Container Toolkit + Device Plugin on the laptop worker, exposing `nvidia.com/gpu` to pods
 - **Container runtime:** containerd (CRI-compliant, used directly by Kubernetes)
-- **Orchestration:** Kubernetes via `kubeadm` (not a lightweight distribution — chosen deliberately for closer-to-production setup experience)
+- **Orchestration:** Kubernetes 1.33 via `kubeadm` (not a lightweight distribution — chosen deliberately for closer-to-production setup experience)
 - **Package management:** Helm
 - **Observability:** `kube-prometheus-stack` (Prometheus, Grafana, Alertmanager, node-exporter, kube-state-metrics)
-- **Ingress / bare-metal LoadBalancer:** ingress-nginx + MetalLB
+- **Ingress / bare-metal LoadBalancer:** Envoy Gateway (Gateway API) + MetalLB; replaced the retired ingress-nginx
 - **Configuration management:** Ansible (control node on the primary node; provisions base packages, kernel modules/sysctl, and Kubernetes package installation — deliberately scoped to exclude DNS and containerd-config management to avoid conflicting with the live, manually-verified configuration in those areas)
 - **GitOps:** ArgoCD, syncing from a public `homelab-gitops` repository
 - **CI / registry:** GitHub Actions builds the `my-site` image on every push, publishes it to GHCR, and commits the new commit-hash tag to `homelab-gitops`; ArgoCD rolls it out. Git access from the nodes and the workflow uses per-repository SSH deploy keys
