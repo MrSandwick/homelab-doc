@@ -64,6 +64,7 @@ See [Hardware Selection](./SRV-01-Hardware-Selection.md) for the full comparison
 - ✅ Backups: etcd, certificates, Helm values and Grafana data are saved nightly on the control plane and mirrored to the worker; Helm values are stored in `homelab-gitops`, Alertmanager has a persistent volume — see [Backups and Platform Config](./SRV-18-Backups-and-Platform-Config.md)
 - ✅ Cluster upgraded from Kubernetes 1.31 to 1.33 (control plane and worker) after a restore test of the etcd snapshot; the laptop node stays on 1.31 for now — see [Cluster Upgrade 1.31 → 1.33](./SRV-19-Cluster-Upgrade.md)
 - ✅ The retired ingress-nginx is replaced by Envoy Gateway (Gateway API) on the same address; routes are `HTTPRoute` objects kept in `homelab-gitops` — see [Gateway API with Envoy Gateway](./SRV-20-Gateway-API-Envoy-Gateway.md)
+- ✅ Kafka 4.3 (KRaft, one broker) runs under the Strimzi operator with metrics and dashboards; pod logs travel Alloy → Kafka → Alloy → Loki with the same labels, and a Loki outage of five minutes lost no lines — see [Kafka with Strimzi and a Log Pipeline](./SRV-21-Kafka-Strimzi-Log-Pipeline.md)
 - ⬜ Next: upgrade of the laptop node and an off-site copy of the backups; stateful side projects (Nextcloud, Minecraft) last
 
-Continue at [Gateway API with Envoy Gateway](./SRV-20-Gateway-API-Envoy-Gateway.md) for the current state of the cluster and its open items.
+Continue at [Kafka with Strimzi and a Log Pipeline](./SRV-21-Kafka-Strimzi-Log-Pipeline.md) for the current state of the cluster and its open items.

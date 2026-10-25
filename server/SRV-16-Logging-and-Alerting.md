@@ -6,6 +6,8 @@ tags: [homelab, project, kubernetes, logging, loki, alloy, alertmanager, slack, 
 
 > Status: 🟢 **Working.** Loki stores the logs of the cluster's pods, Grafana Alloy collects them, Grafana can query them, and Alertmanager sends `warning` and `critical` alerts to a Slack channel (a test alert was delivered). 🟡 Open: none of the new data is backed up, and the laptop node is filtered out by label only — see [Open items](#open-items).
 
+> 🔁 **Later change:** Alloy no longer pushes to Loki directly. It publishes the logs to a Kafka topic, and a second Alloy (`alloy-kafka`) reads the topic and pushes to Loki; labels are unchanged — see [Kafka with Strimzi and a Log Pipeline](./SRV-21-Kafka-Strimzi-Log-Pipeline.md). The Alloy configuration below is the original one.
+
 Picks up after [Persistent Storage](./SRV-15-Persistent-Storage.md). Commands run on the control-plane node (`<HOSTNAME>`) unless noted.
 
 ## Contents

@@ -29,6 +29,7 @@ Each numbered doc records the working procedure. The problems hit along the way 
 19. See [Backups and Platform Config](./SRV-18-Backups-and-Platform-Config.md)
 20. See [Cluster Upgrade 1.31 → 1.33](./SRV-19-Cluster-Upgrade.md)
 21. See [Gateway API with Envoy Gateway](./SRV-20-Gateway-API-Envoy-Gateway.md)
+22. See [Kafka with Strimzi and a Log Pipeline](./SRV-21-Kafka-Strimzi-Log-Pipeline.md)
 
 Troubleshooting files:
 
@@ -44,6 +45,7 @@ Troubleshooting files:
 - [SRV-16-TRBL](../troubleshooting/SRV-16-TRBL-Logging-and-Alerting.md) — log collector warnings for the offline laptop node, renamed Slack dialog, false `etcdMembersDown` from unreachable control-plane metrics
 - [SRV-17-TRBL](../troubleshooting/SRV-17-TRBL-Dedicated-GPU-Node.md) — DaemonSet alerts after tainting the laptop node
 - [SRV-19-TRBL](../troubleshooting/SRV-19-TRBL-Cluster-Upgrade.md) — `upgrade apply` on the wrong node, API server pause after the kubelet restart, temporary `down` targets
+- [SRV-21-TRBL](../troubleshooting/SRV-21-TRBL-Kafka-Log-Pipeline.md) — Alloy config field renamed, logs without labels through Loki's OTLP endpoint, Kafka not holding the backlog, a misleading per-minute count, `timestamp too old` from Loki
 
 ## Stack
 
@@ -59,7 +61,8 @@ Troubleshooting files:
 - **GitOps:** ArgoCD, syncing from a public `homelab-gitops` repository
 - **CI / registry:** GitHub Actions builds the `my-site` image on every push, publishes it to GHCR, and commits the new commit-hash tag to `homelab-gitops`; ArgoCD rolls it out. Git access from the nodes and the workflow uses per-repository SSH deploy keys
 - **Storage:** `local-path-provisioner` (default StorageClass); Grafana and Prometheus on persistent volumes
-- **Logging and alerting:** Loki (monolithic, filesystem storage) and Grafana Alloy for pod logs; Alertmanager routing `warning`/`critical` alerts to Slack, on its own persistent volume
+- **Event streaming:** Apache Kafka 4.3 (KRaft, single broker) run by the Strimzi operator, with metrics and dashboards in Prometheus/Grafana
+- **Logging and alerting:** Loki (monolithic, filesystem storage) and Grafana Alloy for pod logs, carried through a Kafka topic (Alloy producer → Kafka → Alloy consumer → Loki); Alertmanager routing `warning`/`critical` alerts to Slack, on its own persistent volume
 - **Backups:** nightly cron job on the control plane (etcd snapshot, certificates, Helm values, Grafana data), mirrored to the worker; Helm values also stored in `homelab-gitops/platform/`
 
 Layer-by-layer overview of the stack: [Guide: The Stack](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-Stack.md) (companion Guides repository).
