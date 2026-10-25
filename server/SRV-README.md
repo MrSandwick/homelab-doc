@@ -30,6 +30,7 @@ Each numbered doc records the working procedure. The problems hit along the way 
 20. See [Cluster Upgrade 1.31 → 1.33](./SRV-19-Cluster-Upgrade.md)
 21. See [Gateway API with Envoy Gateway](./SRV-20-Gateway-API-Envoy-Gateway.md)
 22. See [Kafka with Strimzi and a Log Pipeline](./SRV-21-Kafka-Strimzi-Log-Pipeline.md)
+23. See [Alerting Reliability](./SRV-22-Alerting-Reliability.md)
 
 Troubleshooting files:
 
@@ -62,8 +63,8 @@ Troubleshooting files:
 - **CI / registry:** GitHub Actions builds the `my-site` image on every push, publishes it to GHCR, and commits the new commit-hash tag to `homelab-gitops`; ArgoCD rolls it out. Git access from the nodes and the workflow uses per-repository SSH deploy keys
 - **Storage:** `local-path-provisioner` (default StorageClass); Grafana and Prometheus on persistent volumes
 - **Event streaming:** Apache Kafka 4.3 (KRaft, single broker) run by the Strimzi operator, with metrics and dashboards in Prometheus/Grafana
-- **Logging and alerting:** Loki (monolithic, filesystem storage) and Grafana Alloy for pod logs, carried through a Kafka topic (Alloy producer → Kafka → Alloy consumer → Loki); Alertmanager routing `warning`/`critical` alerts to Slack, on its own persistent volume
-- **Backups:** nightly cron job on the control plane (etcd snapshot, certificates, Helm values, Grafana data), mirrored to the worker; Helm values also stored in `homelab-gitops/platform/`
+- **Logging and alerting:** Loki (monolithic, filesystem storage) and Grafana Alloy for pod logs, carried through a Kafka topic (Alloy producer → Kafka → Alloy consumer → Loki); Alertmanager routing `warning`/`critical` alerts to Slack (messages name the cluster), on its own persistent volume; a dead man's switch on the control plane reports when the alerting pipeline, the API server or a node is down
+- **Backups:** nightly cron job on the control plane (etcd snapshot, certificates, Helm values, Grafana data), mirrored to the worker; partial or failed runs are reported to Slack; Helm values also stored in `homelab-gitops/platform/`
 
 Layer-by-layer overview of the stack: [Guide: The Stack](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-Stack.md) (companion Guides repository).
 

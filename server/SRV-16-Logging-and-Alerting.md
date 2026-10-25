@@ -8,6 +8,8 @@ tags: [homelab, project, kubernetes, logging, loki, alloy, alertmanager, slack, 
 
 > 🔁 **Later change:** Alloy no longer pushes to Loki directly. It publishes the logs to a Kafka topic, and a second Alloy (`alloy-kafka`) reads the topic and pushes to Loki; labels are unchanged — see [Kafka with Strimzi and a Log Pipeline](./SRV-21-Kafka-Strimzi-Log-Pipeline.md). The Alloy configuration below is the original one.
 
+> 🔁 **Later change:** Slack messages use a custom template with the cluster name, and the `Watchdog` alert is watched by a dead man's switch on the control plane — see [Alerting Reliability](./SRV-22-Alerting-Reliability.md).
+
 Picks up after [Persistent Storage](./SRV-15-Persistent-Storage.md). Commands run on the control-plane node (`<HOSTNAME>`) unless noted.
 
 ## Contents

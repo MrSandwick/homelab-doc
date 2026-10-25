@@ -6,6 +6,8 @@ tags: [homelab, project, kubernetes, backup, etcd, cron, gitops, alertmanager, k
 
 > Status: 🟢 **Working.** A nightly job saves the cluster state (etcd, certificates, Helm values, Grafana data) on the control-plane node and mirrors it to the worker; seven nightly runs were checked on both nodes. The Helm values live in Git, Alertmanager has a persistent volume, and the control-plane metrics settings survive `kubeadm upgrade`. 🟡 Open: no restore test, no off-site copy — see [Open items](#open-items).
 
+> 🔁 **Later change:** the backup script was rewritten: critical and optional steps, a `STATUS` file per run, failed runs excluded from rotation, Slack report on partial or failed runs — see [Alerting Reliability](./SRV-22-Alerting-Reliability.md#step-4--resilient-backup-script). The script below is the first version.
+
 Picks up after [Dedicated GPU Node](./SRV-17-Dedicated-GPU-Node.md). Commands run on the control-plane node (`<HOSTNAME>`) unless noted. The worker is `<WORKER_HOSTNAME>` (`<WORKER_IP>`), the admin user `<USER>`.
 
 ## Contents
