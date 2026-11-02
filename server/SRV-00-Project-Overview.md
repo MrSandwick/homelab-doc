@@ -66,6 +66,9 @@ See [Hardware Selection](./SRV-01-Hardware-Selection.md) for the full comparison
 - ✅ The retired ingress-nginx is replaced by Envoy Gateway (Gateway API) on the same address; routes are `HTTPRoute` objects kept in `homelab-gitops` — see [Gateway API with Envoy Gateway](./SRV-20-Gateway-API-Envoy-Gateway.md)
 - ✅ Kafka 4.3 (KRaft, one broker) runs under the Strimzi operator with metrics and dashboards; pod logs travel Alloy → Kafka → Alloy → Loki with the same labels, and a Loki outage of five minutes lost no lines — see [Kafka with Strimzi and a Log Pipeline](./SRV-21-Kafka-Strimzi-Log-Pipeline.md)
 - ✅ Alerting reliability: a dead man's switch on the control plane reports to Slack when the API server, a node or the alerting pipeline is down; Slack alerts name the cluster and the location; the nightly backup degrades instead of aborting and reports partial or failed runs — see [Alerting Reliability](./SRV-22-Alerting-Reliability.md)
-- ⬜ Next: upgrade of the laptop node and an off-site copy of the backups; stateful side projects (Nextcloud, Minecraft) last
+- ✅ A second, public Gateway with Let's Encrypt certificates (cert-manager, HTTP-01) serves the portfolio at its own domain; the LAN Gateway is never exposed — see [Public Gateway and HTTPS](./SRV-23-Public-Gateway-and-HTTPS.md)
+- ✅ The portfolio (React site, Express API, MongoDB) runs in the cluster, built by GitHub Actions and rolled out by ArgoCD; the data was imported and contact messages are stored — see [Portfolio Hosting](./SRV-24-Portfolio-Hosting.md)
+- ✅ The DNS record follows the changing public address; a probe and three alerts watch the public site; a per-visitor rate limit sits at the Gateway; the nightly backup includes the database — see [Public Site Operations](./SRV-25-Public-Site-Operations.md)
+- ⬜ Next: a restore test of the Mongo dump and the upgrade of the laptop node; no off-site copy of the backups, by decision (everything stays in the house); stateful side projects (Nextcloud, Minecraft) last
 
-Continue at [Alerting Reliability](./SRV-22-Alerting-Reliability.md) for the current state of the cluster and its open items.
+Continue at [Public Site Operations](./SRV-25-Public-Site-Operations.md) for the current state of the cluster and its open items.

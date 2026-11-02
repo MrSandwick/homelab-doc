@@ -31,6 +31,9 @@ Each numbered doc records the working procedure. The problems hit along the way 
 21. See [Gateway API with Envoy Gateway](./SRV-20-Gateway-API-Envoy-Gateway.md)
 22. See [Kafka with Strimzi and a Log Pipeline](./SRV-21-Kafka-Strimzi-Log-Pipeline.md)
 23. See [Alerting Reliability](./SRV-22-Alerting-Reliability.md)
+24. See [Public Gateway and HTTPS](./SRV-23-Public-Gateway-and-HTTPS.md)
+25. See [Portfolio Hosting](./SRV-24-Portfolio-Hosting.md)
+26. See [Public Site Operations](./SRV-25-Public-Site-Operations.md)
 
 Troubleshooting files:
 
@@ -47,6 +50,9 @@ Troubleshooting files:
 - [SRV-17-TRBL](../troubleshooting/SRV-17-TRBL-Dedicated-GPU-Node.md) — DaemonSet alerts after tainting the laptop node
 - [SRV-19-TRBL](../troubleshooting/SRV-19-TRBL-Cluster-Upgrade.md) — `upgrade apply` on the wrong node, API server pause after the kubelet restart, temporary `down` targets
 - [SRV-21-TRBL](../troubleshooting/SRV-21-TRBL-Kafka-Log-Pipeline.md) — Alloy config field renamed, logs without labels through Loki's OTLP endpoint, Kafka not holding the backlog, a misleading per-minute count, `timestamp too old` from Loki
+- [SRV-23-TRBL](../troubleshooting/SRV-23-TRBL-Public-Gateway-and-HTTPS.md) — MetalLB pool name assumed, a Gateway change that never arrived, Cloudflare error 525, personal data in a public repository
+- [SRV-24-TRBL](../troubleshooting/SRV-24-TRBL-Portfolio-Hosting.md) — garbled paste, image tag overwritten by a stale copy, ArgoCD `OutOfSync` from defaulted fields, an Atlas cluster that no longer existed
+- [SRV-25-TRBL](../troubleshooting/SRV-25-TRBL-Public-Site-Operations.md) — CronJob not yet synced, no `wget` in the Prometheus image, rules not loaded yet
 
 ## Stack
 
