@@ -34,6 +34,8 @@ ISP gateway (own NAT, own DHCP)
 
 **Trade-off accepted:** double NAT complicates inbound port-forwarding from the public internet — it would require forwarding rules on *both* the ISP gateway and the ER605 for anything to be reachable from outside. This project has no inbound-from-internet requirement (no self-hosted service needs to be reachable from outside the home network), so the trade-off costs nothing in practice. If that changes later, a VPN back into the Admin VLAN is the planned alternative to opening inbound ports at all.
 
+**Update:** the requirement did arrive: the portfolio site is now served from the cluster. TCP 80 and 443 are forwarded through both devices to a separate public Gateway, and nothing else is reachable from outside; see [Public Port Forwarding](./NET-09-Public-Port-Forwarding.md). The VPN remains the plan for administrative access.
+
 ## ER605 WAN configuration
 
 ```

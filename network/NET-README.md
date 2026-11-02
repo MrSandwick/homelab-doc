@@ -21,6 +21,7 @@ Each numbered doc records the working configuration. The problems hit along the 
 7. See [Wireless / RADIUS Integration](./NET-06-Wireless-RADIUS-Integration.md)
 8. See [Access Control and Isolation](./NET-07-Access-Control-and-Isolation.md)
 9. See [Traffic Monitoring](./NET-08-Monitoring.md)
+10. See [Public Port Forwarding](./NET-09-Public-Port-Forwarding.md)
 
 Troubleshooting files:
 
@@ -29,6 +30,7 @@ Troubleshooting files:
 - [NET-05-TRBL](../troubleshooting/NET-05-TRBL-FreeRADIUS-Installation.md) — `default_eap_type = md5`
 - [NET-07-TRBL](../troubleshooting/NET-07-TRBL-Access-Control-and-Isolation.md) — two Gateway ACL rule-authoring mistakes
 - [NET-08-TRBL](../troubleshooting/NET-08-TRBL-Monitoring.md) — image tag, NIC offloading, Ghost Networks, `NO-CARRIER`, forgotten password
+- [NET-09-TRBL](../troubleshooting/NET-09-TRBL-Public-Port-Forwarding.md) — an ER605 rule pointing at a node instead of the Gateway, unnamed clients in the ISP list, an unknown controller location
 
 ## Stack
 

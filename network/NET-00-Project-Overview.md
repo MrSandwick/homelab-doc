@@ -44,6 +44,7 @@ See [Hardware Selection](./NET-01-Hardware-Selection.md) for the full comparison
 - ✅ Fine-grained management ACLs implemented on the real hardware (Omada Gateway ACL) — only specific admin devices (by fixed IP) can reach router/switch/server management interfaces; verified working. See [Access Control and Isolation](./NET-07-Access-Control-and-Isolation.md)
 - ✅ Traffic monitoring verified working — ntopng (with Redis, via docker-compose) showing live per-device traffic across all VLANs through switch port mirroring. See [Traffic Monitoring](./NET-08-Monitoring.md)
 - 🔴 An attempt to change the Omada Controller's Management VLAN (from the default/native VLAN to the Admin VLAN, as a permanent fix for the controller-connectivity issue below) made things worse rather than better — the access point became unreachable on every VLAN and required a factory reset to recover. Reverted; not adopted as a fix. See [Router Configuration](./NET-04-Router-Configuration.md)
+- ✅ TCP 80 and 443 are forwarded through the ISP gateway and the ER605 to a separate public Gateway in the cluster; remote administration, DMZ and UPnP are off; tested from cellular data. See [Public Port Forwarding](./NET-09-Public-Port-Forwarding.md)
 - ⬜ IDS/IPS (Suricata/Zeek) and LLM-assisted alert triage — not started
 
 Continue at [Hardware Selection](./NET-01-Hardware-Selection.md) for the equipment comparison, or jump straight to [FreeRADIUS Installation](./NET-05-FreeRADIUS-Installation.md) for the authentication work.
