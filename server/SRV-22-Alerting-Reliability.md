@@ -17,10 +17,11 @@ Picks up after [Kafka with Strimzi and a Log Pipeline](./SRV-21-Kafka-Strimzi-Lo
 5. [Step 2 — Test the switch](#step-2--test-the-switch)
 6. [Step 3 — Readable Slack messages](#step-3--readable-slack-messages)
 7. [Step 4 — Resilient backup script](#step-4--resilient-backup-script)
-8. [Verification](#verification)
-9. [Limits](#limits)
-10. [Files](#files)
-11. [Related](#related)
+8. [Message types](#message-types)
+9. [Verification](#verification)
+10. [Limits](#limits)
+11. [Files](#files)
+12. [Related](#related)
 
 ## Components
 
@@ -245,6 +246,49 @@ kubectl -n monitoring get pod grafana-backup                              # NotF
 ```
 
 The first run reported `OK` with no message, the second `PARTIAL` with an orange message in Slack, at most seven folders remained, and no backup pod was left behind.
+
+## Message types
+
+Everything that reaches the Slack channel comes from one of three senders.
+
+**1. Alertmanager — alerts from Prometheus rules** (format from `slack.tmpl`):
+
+| Message | Title | Bar |
+|---|---|---|
+| Firing, `critical` | `🔴 [homelab] <AlertName> (N)` | red |
+| Firing, `warning` | `🟠 [homelab] <AlertName> (N)` | orange |
+| Resolved | `✅ [homelab] <AlertName> — resolved` | green |
+
+The body lists each alert: summary in bold, description, `Severity / Namespace / Pod / Node`, start time, and end time and runbook link when present. `(N)` appears when a group holds more than one alert.
+
+| Routing rule | Effect |
+|---|---|
+| `severity` `warning` or `critical` | Sent to Slack |
+| `severity` `info` or none | Not sent (default receiver `"null"`) |
+| `Watchdog`, `InfoInhibitor` | Never sent; `Watchdog` is watched by the dead man's switch instead |
+| Anything about `<GPU_HOSTNAME>` (by node name or address) | Never sent; the laptop is often offline by design |
+| `group_by: [alertname, namespace]` | One message per alert name and namespace |
+| `group_wait 30s`, `group_interval 5m`, `repeat_interval 12h` | First message after 30 s, updates (including resolved) at most every 5 min, reminder for an open alert every 12 h |
+| Inhibition | A `critical` alert suppresses `warning`/`info` alerts with the same name and namespace |
+
+Sources of the alerts: the default rule set of `kube-prometheus-stack` (node, pod, workload, storage, etcd, control-plane and Prometheus rules such as `KubeNodeNotReady`, `KubePodCrashLooping`, `TargetDown`, `KubeVersionMismatch`) and the rules kept in `homelab-gitops`: `MySiteDown` (`critical`) and `MySiteDegraded` for `my-site` ([SRV-16](./SRV-16-Logging-and-Alerting.md#step-9--alert-rules-for-my-site)), and the probes and alerts for the public site through the blackbox exporter.
+
+**2. Dead man's switch — sent directly from the control plane** (plain Slack text, no bar):
+
+| Message | When |
+|---|---|
+| `:red_circle: [homelab] Dead man's switch` with a list of problems | API server not answering, a node other than the laptop not `Ready`, or `Watchdog` missing from Alertmanager (alerting itself is down). Repeated every hour while it lasts |
+| `:large_green_circle: [homelab] Dead man's switch: all checks pass again` | Once, after recovery |
+
+**3. Nightly backup — sent directly from the control plane** (plain Slack text, no bar):
+
+| Message | When |
+|---|---|
+| `:large_orange_circle: [homelab] Nightly backup: PARTIAL` | An optional step failed (Grafana data, usually because the worker is unreachable); the critical parts are saved |
+| `:red_circle: [homelab] Nightly backup: FAIL` | A critical step failed (etcd, certificates, manifests); the folder is renamed `*-FAILED` |
+| Nothing | `OK` |
+
+Senders 2 and 3 do not go through Alertmanager on purpose: they have to arrive when Alertmanager itself is down.
 
 ## Verification
 
