@@ -209,7 +209,7 @@ The toleration was added with `kubectl patch`; the Device Plugin was installed f
 - ⬜ **Check the real load** of the laptop in Grafana and adjust the quota.
 - ⬜ **Network isolation** needs a policy-enforcing CNI.
 - ⬜ **Keep the Device Plugin toleration** in a manifest under `~/k8s-manifests/`, so that re-applying NVIDIA's manifest does not drop it.
-- ⬜ The laptop stays **out of the Ansible inventory** ([SRV-09](./SRV-09-Ansible-Node-Provisioning.md)) by decision.
+- 🔁 The laptop is now in the Ansible inventory, in its own group `k8s_gpu`, used only for cluster-wide plays such as upgrades; `site.yml` still does not touch it — see [Cluster Upgrade, Step 5](./SRV-19-Cluster-Upgrade.md#step-5--laptop-node-with-ansible).
 
 ## Files
 
