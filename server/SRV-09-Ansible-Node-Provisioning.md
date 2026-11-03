@@ -6,6 +6,8 @@ tags: [homelab, project, ansible, provisioning, kubernetes]
 
 > Status: 🟢 **Working.** Ansible runs from the control-plane node and provisions both cluster nodes with a trimmed `site.yml`; dry run and real run both `failed=0`, `unreachable=0`. DNS and containerd-config management intentionally excluded — see [Playbook scope](#playbook-scope-trimmed-before-running-on-live-nodes).
 
+> 🔁 **Later change:** the Ansible directory is kept in `homelab-gitops` (`ops/ansible/`), the inventory has a `k8s_gpu` group for the laptop and a `k8s_all` group, and an `upgrade-k8s.yml` playbook upgrades nodes one minor version at a time — see [Cluster Upgrade, Step 5](./SRV-19-Cluster-Upgrade.md#step-5--laptop-node-with-ansible).
+
 Picks up after [Helm, Observability, and Ingress](./SRV-08-Helm-Observability-Ingress.md). Commands run on the control-plane node (`<HOSTNAME>`) unless noted.
 
 ## Contents

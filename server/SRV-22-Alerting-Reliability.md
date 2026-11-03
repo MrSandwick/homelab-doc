@@ -186,6 +186,8 @@ alertmanager:
             text: '{{ template "slack.homelab.text" . }}'
 ```
 
+The receiver must define `title` and `text` only once. The original values already had a default pair after `send_resolved`; with both present YAML keeps the last key, so the default `[FIRING:1] …` format silently overrode the template. It showed up a week later on a real `KubeVersionMismatch` alert and was fixed by deleting the old pair. Check with `grep -n -E '^ *(title|text|color):' values.yaml` — one line each.
+
 The chart mounts `templateFiles` under `/etc/alertmanager/config/`, which the existing `templates: [/etc/alertmanager/config/*.tmpl]` line already loads. Applied with the installed chart version:
 
 ```
