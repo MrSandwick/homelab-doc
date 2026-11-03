@@ -255,9 +255,9 @@ Everything that reaches the Slack channel comes from one of three senders.
 
 | Message | Title | Bar |
 |---|---|---|
-| Firing, `critical` | `🔴 [homelab] <AlertName> (N)` | red |
-| Firing, `warning` | `🟠 [homelab] <AlertName> (N)` | orange |
-| Resolved | `✅ [homelab] <AlertName> — resolved` | green |
+| Firing, `critical` | 🔴 `[homelab] <AlertName> (N)` | red |
+| Firing, `warning` | 🟠 `[homelab] <AlertName> (N)` | orange |
+| Resolved | ✅ `[homelab] <AlertName> — resolved` | green |
 
 The body lists each alert: summary in bold, description, `Severity / Namespace / Pod / Node`, start time, and end time and runbook link when present. `(N)` appears when a group holds more than one alert.
 
@@ -273,19 +273,19 @@ The body lists each alert: summary in bold, description, `Severity / Namespace /
 
 Sources of the alerts: the default rule set of `kube-prometheus-stack` (node, pod, workload, storage, etcd, control-plane and Prometheus rules such as `KubeNodeNotReady`, `KubePodCrashLooping`, `TargetDown`, `KubeVersionMismatch`) and the rules kept in `homelab-gitops`: `MySiteDown` (`critical`) and `MySiteDegraded` for `my-site` ([SRV-16](./SRV-16-Logging-and-Alerting.md#step-9--alert-rules-for-my-site)), and the probes and alerts for the public site through the blackbox exporter.
 
-**2. Dead man's switch — sent directly from the control plane** (plain Slack text, no bar):
+**2. Dead man's switch — sent directly from the control plane** (plain Slack text, no bar; the script sends Slack shortcodes such as `:red_circle:`, which Slack shows as the emoji below):
 
 | Message | When |
 |---|---|
-| `:red_circle: [homelab] Dead man's switch` with a list of problems | API server not answering, a node other than the laptop not `Ready`, or `Watchdog` missing from Alertmanager (alerting itself is down). Repeated every hour while it lasts |
-| `:large_green_circle: [homelab] Dead man's switch: all checks pass again` | Once, after recovery |
+| 🔴 `[homelab] Dead man's switch` with a list of problems | API server not answering, a node other than the laptop not `Ready`, or `Watchdog` missing from Alertmanager (alerting itself is down). Repeated every hour while it lasts |
+| 🟢 `[homelab] Dead man's switch: all checks pass again` | Once, after recovery |
 
 **3. Nightly backup — sent directly from the control plane** (plain Slack text, no bar):
 
 | Message | When |
 |---|---|
-| `:large_orange_circle: [homelab] Nightly backup: PARTIAL` | An optional step failed (Grafana data, usually because the worker is unreachable); the critical parts are saved |
-| `:red_circle: [homelab] Nightly backup: FAIL` | A critical step failed (etcd, certificates, manifests); the folder is renamed `*-FAILED` |
+| 🟠 `[homelab] Nightly backup: PARTIAL` | An optional step failed (Grafana data, usually because the worker is unreachable); the critical parts are saved |
+| 🔴 `[homelab] Nightly backup: FAIL` | A critical step failed (etcd, certificates, manifests); the folder is renamed `*-FAILED` |
 | Nothing | `OK` |
 
 Senders 2 and 3 do not go through Alertmanager on purpose: they have to arrive when Alertmanager itself is down.
