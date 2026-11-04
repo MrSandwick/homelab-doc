@@ -245,7 +245,7 @@ The issuer line shows `O=Let's Encrypt` without `(STAGING)`, and the response is
 
 - **Cloudflare is still the DNS host.** Without the proxy it carries no traffic, but if it were unavailable, the name would stop resolving after caches expire.
 - **Port 80 must stay open** for HTTP-01 renewals. If the ISP ever blocks inbound 80, the issuers have to move to DNS-01, which needs a DNS API token in the cluster.
-- **Certificates renew automatically.** The ones issued here were valid for 64 days, with renewal planned after about two thirds of that (`Renewal Time` in `kubectl describe certificate`); an alert fires when under 14 days remain ([SRV-25](./SRV-25-Public-Site-Operations.md)).
+- **Certificates renew automatically.** The production certificates issued here are valid for 90 days and cert-manager renews them with about a third of the lifetime left, roughly 30 days before expiry (`Renewal Time` in `kubectl describe certificate`); the staging certificate of the first test was shorter (64 days). An alert fires when under 14 days remain ([SRV-25](./SRV-25-Public-Site-Operations.md)).
 - **The staging and production issuers share one Gateway annotation.** Changing the annotation only affects certificates created afterwards; an existing one has to be deleted to be reissued.
 - **Anything in a labelled namespace becomes public.** The label is the only gate.
 - **Helm release values are in Git, the release itself was installed by hand**, like the other platform releases ([SRV-18](./SRV-18-Backups-and-Platform-Config.md)).
