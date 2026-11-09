@@ -274,3 +274,4 @@ The remaining few dozen signatures were reviewed by hand; the interesting ones a
 - Guide: [Port Mirroring and Promiscuous Mode](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/network/operations/Guide-Port-Mirroring-and-Promiscuous-Mode.md)
 - Guide: [IDS vs IPS and Blind Spots](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/network/operations/Guide-IDS-vs-IPS-and-Blind-Spots.md)
 - Guide: [Reading Suricata Alerts](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/network/operations/Guide-Reading-Suricata-Alerts.md)
+- [DMZ VLAN Plan](../network/NET-10-DMZ-VLAN-Plan.md) — isolation work this sensor's findings prompted

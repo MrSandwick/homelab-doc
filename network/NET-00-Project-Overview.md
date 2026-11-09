@@ -47,7 +47,7 @@ See [Hardware Selection](./NET-01-Hardware-Selection.md) for the full comparison
 - ✅ TCP 80 and 443 are forwarded through the ISP gateway and the ER605 to a separate public Gateway in the cluster; remote administration, DMZ and UPnP are off; tested from cellular data. See [Public Port Forwarding](./NET-09-Public-Port-Forwarding.md)
 - ✅ Traffic inspection — Suricata reads the switch mirror, with the ET Open ruleset, log rotation and a verified test alert. See [Suricata IDS](../server/SRV-26-Suricata-IDS.md)
 - ✅ AI alert triage — a daily report groups the alerts, removes known noise and has a local LLM explain what is left; every number is computed in code. See [AI Alert Triage](../server/SRV-27-AI-Alert-Triage.md)
-- ⬜ Public web hosting isolation (a dedicated DMZ VLAN, so a compromise of the public site does not start inside the Admin VLAN) — planned, see the case study in [AI Alert Triage](../server/SRV-27-AI-Alert-Triage.md#case-study-a-new-public-web-server-appears)
+- ⬜ Public web hosting isolation — the public Gateway answers on an Admin-VLAN address, so a dedicated DMZ VLAN is planned; design and open decisions in [DMZ VLAN Plan](./NET-10-DMZ-VLAN-Plan.md)
 
 Continue at [Hardware Selection](./NET-01-Hardware-Selection.md) for the equipment comparison, or jump straight to [FreeRADIUS Installation](./NET-05-FreeRADIUS-Installation.md) for the authentication work.
 

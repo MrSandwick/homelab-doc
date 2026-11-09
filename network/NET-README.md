@@ -22,6 +22,7 @@ Each numbered doc records the working configuration. The problems hit along the 
 8. See [Access Control and Isolation](./NET-07-Access-Control-and-Isolation.md)
 9. See [Traffic Monitoring](./NET-08-Monitoring.md)
 10. See [Public Port Forwarding](./NET-09-Public-Port-Forwarding.md)
+11. See [DMZ VLAN Plan](./NET-10-DMZ-VLAN-Plan.md) — planned, not applied
 
 Troubleshooting files:
 

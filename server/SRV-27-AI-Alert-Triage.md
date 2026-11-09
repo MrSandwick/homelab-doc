@@ -194,7 +194,7 @@ The model's role is a short plain-language explanation per row. It is not a deci
 
 ## Case study: a new public web server appears
 
-> 🟡 This section describes a host set up for a friend's website. Whether it is the same public site documented in [Public Port Forwarding](../network/NET-09-Public-Port-Forwarding.md) and [Public Gateway and HTTPS](./SRV-23-Public-Gateway-and-HTTPS.md) — where traffic now reaches a Gateway inside the cluster rather than a separate machine — is **not yet confirmed**, so the VLAN placement and the mitigation below should be re-checked before being relied on.
+> 🟡 This section describes a host set up for a friend's website. The documented public path is now a Gateway **inside the cluster** ([Public Port Forwarding](../network/NET-09-Public-Port-Forwarding.md), [Public Gateway and HTTPS](./SRV-23-Public-Gateway-and-HTTPS.md)), not a separate machine; whether the host below is that same site is **not yet confirmed**. The isolation work it prompted is planned in [DMZ VLAN Plan](../network/NET-10-DMZ-VLAN-Plan.md).
 
 A port forward was added on the router for ports 80/443 to a host on the LAN. The same evening the IDS reported inbound alerts to that host: reputation-list sources (`ET DROP Dshield`, `ET CINS`), a GraphQL introspection probe, repeated requests for `/.env`, `phpinfo`, `wp-config` backups and a WordPress-plugin REST path, from well-known internet scanners. The previous 14 days of logs contained none of this.
 
@@ -202,7 +202,7 @@ What the pipeline established:
 
 1. Inbound scanning was collapsed into counters — hundreds of requests from a few dozen addresses in 24 h.
 2. Response codes came from Suricata `http` events: nearly all probes got `404`; the only `2xx` answers were Let's Encrypt `/.well-known/acme-challenge/` validations and the home page. **No sensitive path was answered.**
-3. 🟡 Finding to re-check: the public host appeared to sit in the **Admin VLAN**, next to the cluster and management machines. If that is still true, a compromise of that site would start inside the trusted network. Mitigation considered: a dedicated DMZ VLAN with an ACL allowing DMZ → internet and Admin → DMZ, denying DMZ → Users/Admin.
+3. Finding: the public address sits in the **Admin VLAN**, next to the cluster and management machines, so a compromise of the site would start inside the trusted network. Mitigation designed in [DMZ VLAN Plan](../network/NET-10-DMZ-VLAN-Plan.md) — a dedicated DMZ VLAN allowing DMZ → internet and Admin → DMZ, denying DMZ → Users/Admin.
 4. Limit: once the site serves HTTPS, response codes become invisible to the IDS and the web server's access log must be used instead.
 
 ## Operating cheat-sheet
@@ -224,7 +224,7 @@ Suricata and the server log in UTC; report times are in the clock of the machine
 
 - Most verdicts are generic `worth_a_look`; a `reviewed.json` memory of human decisions would let the report show only what is new or changed.
 - HTTPS on the public host will hide response codes; add web-server access-log checks.
-- 🟡 Move the public host to a DMZ VLAN — pending the check in the case study above.
+- Move the public site behind a DMZ VLAN — designed, not applied: [DMZ VLAN Plan](../network/NET-10-DMZ-VLAN-Plan.md).
 - Report delivery is a file on the laptop; push notifications or e-mail are not set up. The cluster already routes alerts to Slack ([Alerting Reliability](./SRV-22-Alerting-Reliability.md)), which is the obvious place to send this too.
 - The "priority" rule also fires for response-direction alerts from the public host; tune after more observation.
 
