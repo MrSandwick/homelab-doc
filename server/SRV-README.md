@@ -34,6 +34,8 @@ Each numbered doc records the working procedure. The problems hit along the way 
 24. See [Public Gateway and HTTPS](./SRV-23-Public-Gateway-and-HTTPS.md)
 25. See [Portfolio Hosting](./SRV-24-Portfolio-Hosting.md)
 26. See [Public Site Operations](./SRV-25-Public-Site-Operations.md)
+27. See [Suricata IDS](./SRV-26-Suricata-IDS.md)
+28. See [AI Alert Triage](./SRV-27-AI-Alert-Triage.md)
 
 Troubleshooting files:
 
@@ -53,6 +55,8 @@ Troubleshooting files:
 - [SRV-23-TRBL](../troubleshooting/SRV-23-TRBL-Public-Gateway-and-HTTPS.md) — MetalLB pool name assumed, a Gateway change that never arrived, Cloudflare error 525, personal data in a public repository
 - [SRV-24-TRBL](../troubleshooting/SRV-24-TRBL-Portfolio-Hosting.md) — garbled paste, image tag overwritten by a stale copy, ArgoCD `OutOfSync` from defaulted fields, an Atlas cluster that no longer existed
 - [SRV-25-TRBL](../troubleshooting/SRV-25-TRBL-Public-Site-Operations.md) — CronJob not yet synced, no `wget` in the Prometheus image, rules not loaded yet
+- [SRV-26-TRBL](../troubleshooting/SRV-26-TRBL-Suricata-IDS.md) — BPF filter rejecting every packet, decoder alerts from link-layer frames, logrotate permissions
+- [SRV-27-TRBL](../troubleshooting/SRV-27-TRBL-AI-Alert-Triage.md) — models corrupting numbers, missing rows, an empty report reported as success
 
 ## Stack
 
@@ -70,6 +74,8 @@ Troubleshooting files:
 - **Storage:** `local-path-provisioner` (default StorageClass); Grafana and Prometheus on persistent volumes
 - **Event streaming:** Apache Kafka 4.3 (KRaft, single broker) run by the Strimzi operator, with metrics and dashboards in Prometheus/Grafana
 - **Logging and alerting:** Loki (monolithic, filesystem storage) and Grafana Alloy for pod logs, carried through a Kafka topic (Alloy producer → Kafka → Alloy consumer → Loki); Alertmanager routing `warning`/`critical` alerts to Slack (messages name the cluster), on its own persistent volume; a dead man's switch on the control plane reports when the alerting pipeline, the API server or a node is down
+- **IDS:** Suricata 8 in Docker (AF_PACKET) on the switch mirror port, Emerging Threats Open ruleset, logs rotated daily
+- **Local LLM:** Ollama on the GPU laptop node (RTX 3050 Ti, 4 GB VRAM), model `gemma3:4b`, used only to narrate pre-computed IDS findings
 - **Backups:** nightly cron job on the control plane (etcd snapshot, certificates, Helm values, Grafana data), mirrored to the worker; partial or failed runs are reported to Slack; Helm values also stored in `homelab-gitops/platform/`
 
 Layer-by-layer overview of the stack: [Guide: The Stack](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/server/Guide-Stack.md) (companion Guides repository).
@@ -84,4 +90,4 @@ Conceptual explanations of the technologies used here (Kubernetes vs k3s, Docker
 
 ## Status
 
-🟢 The cluster is now three nodes, all `Ready` (`kubeadm`, containerd, Flannel CNI healthy on each): the GMKtec M8 control plane, the Dell OptiPlex 7050 Micro worker, and a repurposed Acer Nitro laptop worker. A test workload was deployed on a worker node and verified reachable. See [Second Node Setup](./SRV-06-Second-Node-Setup.md) for the full join process ([SRV-06-TRBL](../troubleshooting/SRV-06-TRBL-Second-Node-Setup.md) for the `kubeadm init`-vs-`join` mistake and recovery). The laptop's GPU (NVIDIA RTX 3050 Ti Mobile) is fully usable by pods — see [GPU Node Setup](./SRV-12-GPU-Node-Setup.md).
+🟢 The cluster is now three nodes, all `Ready` (`kubeadm`, containerd, Flannel CNI healthy on each): the GMKtec M8 control plane, the Dell OptiPlex 7050 Micro worker, and a repurposed Acer Nitro laptop worker. A test workload was deployed on a worker node and verified reachable. See [Second Node Setup](./SRV-06-Second-Node-Setup.md) for the full join process ([SRV-06-TRBL](../troubleshooting/SRV-06-TRBL-Second-Node-Setup.md) for the `kubeadm init`-vs-`join` mistake and recovery). The laptop's GPU (NVIDIA RTX 3050 Ti Mobile) is fully usable by pods — see [GPU Node Setup](./SRV-12-GPU-Node-Setup.md). A Suricata sensor runs continuously on the control plane's mirror NIC, and a daily triage report is generated automatically by a local LLM on the laptop — see [Suricata IDS](./SRV-26-Suricata-IDS.md) and [AI Alert Triage](./SRV-27-AI-Alert-Triage.md).

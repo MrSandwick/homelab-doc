@@ -12,6 +12,8 @@ Problems hit during this work are recorded separately in [NET-07-TRBL](../troubl
 
 Omada's built-in **Network Isolation** (a per-LAN setting under `Settings → Wired Networks → LAN → <network>`) is enabled on VLAN 10 (Users) and left disabled on VLAN 20 (Admin). This blocks client-to-client traffic *within* the Users VLAN (e.g. one guest device can't reach another), and — combined with VLAN separation itself — prevents Users-VLAN devices from reaching Admin-VLAN devices at all.
 
+> ⚠️ **Needs verification:** a scan from a Users-VLAN client received ARP replies from other Users-VLAN clients, which does not match the statement above. The claim is left as written until it is re-tested on the current configuration.
+
 Verified with a direct ping test from a device on the Users SSID toward a known Admin-VLAN host:
 
 ```
