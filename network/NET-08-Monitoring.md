@@ -10,7 +10,7 @@ Problems hit during this work are recorded separately in [NET-08-TRBL](../troubl
 
 ## Goal
 
-Basic visibility into per-device traffic on the network, as a step toward the longer-term goal of adding IDS/IPS (Suricata/Zeek) analysis with LLM-assisted alert triage — not started yet, tracked separately in [Project Overview](./NET-00-Project-Overview.md).
+Basic visibility into per-device traffic on the network. The deeper inspection this was a step toward now exists: Suricata reads the same mirrored traffic ([Suricata IDS](../server/SRV-26-Suricata-IDS.md)) and its alerts are summarised daily by a local LLM ([AI Alert Triage](../server/SRV-27-AI-Alert-Triage.md)).
 
 ## Server-local monitoring (vnstat / iftop)
 
@@ -31,7 +31,7 @@ These only see traffic that actually traverses the server's own NIC — not gene
 
 > What port mirroring and promiscuous mode actually mean, and why a network card needs to be told to stop filtering: [Guide-Port-Mirroring-and-Promiscuous-Mode](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/network/operations/Guide-Port-Mirroring-and-Promiscuous-Mode.md).
 
-The server has a second, otherwise-unused NIC (`enp2s0`) free for exactly this purpose. Configured via the switch's Easy Smart Utility (see the web-UI limitation noted in [Hardware Selection](./NET-01-Hardware-Selection.md)):
+The server has a second, otherwise-unused NIC (`enp2s0`) free for exactly this purpose. The same mirrored traffic feeds two consumers: ntopng below and the Suricata sensor in [Suricata IDS](../server/SRV-26-Suricata-IDS.md) — both capture on `enp2s0`, and the promiscuous-mode and offload settings below apply to both. Configured via the switch's Easy Smart Utility (see the web-UI limitation noted in [Hardware Selection](./NET-01-Hardware-Selection.md)):
 
 ```
 Monitoring -> Port Mirror
@@ -140,5 +140,7 @@ Checking the ID against the real MITRE ATT&CK framework showed it corresponds to
 
 - [NET-08-TRBL](../troubleshooting/NET-08-TRBL-Monitoring.md) — troubleshooting for this doc
 - [Project Overview](./NET-00-Project-Overview.md)
+- Server docs: [Suricata IDS](../server/SRV-26-Suricata-IDS.md) — the IDS reading the same mirror NIC
+- Server docs: [AI Alert Triage](../server/SRV-27-AI-Alert-Triage.md) — the daily report built from its alerts
 - Server docs: [Docker Installation](../server/SRV-04-Docker-Installation.md) — Docker installation details
 - Guide: [Port Mirroring and Promiscuous Mode](https://github.com/MrSandwick/OVault/blob/main/homelab-docs/homelab-guides/network/operations/Guide-Port-Mirroring-and-Promiscuous-Mode.md)

@@ -1,0 +1,10 @@
+[Unit]
+Description=Daily IDS report (Suricata summary + local LLM)
+After=network-online.target ollama.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=<USERNAME>
+ExecStart=/usr/bin/python3 /home/<USERNAME>/ids/analyze.py --ssh-key /home/<USERNAME>/.ssh/ids_report --model gemma3:4b --lang ru
+TimeoutStartSec=1200

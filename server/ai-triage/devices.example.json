@@ -1,0 +1,8 @@
+{
+  "<SERVER_IP>": "Control-plane node",
+  "<WORKER_IP>": "OptiPlex worker node",
+  "<GPU_IP>": "GPU laptop node",
+  "<PUBLIC_HOST_IP>": { "name": "Public web server", "role": "public" },
+  "<ADMIN_SUBNET>.0/24": "Admin VLAN device",
+  "<USERS_SUBNET>.0/24": "Users VLAN device"
+}

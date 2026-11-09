@@ -45,7 +45,9 @@ See [Hardware Selection](./NET-01-Hardware-Selection.md) for the full comparison
 - ✅ Traffic monitoring verified working — ntopng (with Redis, via docker-compose) showing live per-device traffic across all VLANs through switch port mirroring. See [Traffic Monitoring](./NET-08-Monitoring.md)
 - 🔴 An attempt to change the Omada Controller's Management VLAN (from the default/native VLAN to the Admin VLAN, as a permanent fix for the controller-connectivity issue below) made things worse rather than better — the access point became unreachable on every VLAN and required a factory reset to recover. Reverted; not adopted as a fix. See [Router Configuration](./NET-04-Router-Configuration.md)
 - ✅ TCP 80 and 443 are forwarded through the ISP gateway and the ER605 to a separate public Gateway in the cluster; remote administration, DMZ and UPnP are off; tested from cellular data. See [Public Port Forwarding](./NET-09-Public-Port-Forwarding.md)
-- ⬜ IDS/IPS (Suricata/Zeek) and LLM-assisted alert triage — not started
+- ✅ Traffic inspection — Suricata reads the switch mirror, with the ET Open ruleset, log rotation and a verified test alert. See [Suricata IDS](../server/SRV-26-Suricata-IDS.md)
+- ✅ AI alert triage — a daily report groups the alerts, removes known noise and has a local LLM explain what is left; every number is computed in code. See [AI Alert Triage](../server/SRV-27-AI-Alert-Triage.md)
+- ⬜ Public web hosting isolation — the public Gateway answers on an Admin-VLAN address, so a dedicated DMZ VLAN is planned; design and open decisions in [DMZ VLAN Plan](./NET-10-DMZ-VLAN-Plan.md)
 
 Continue at [Hardware Selection](./NET-01-Hardware-Selection.md) for the equipment comparison, or jump straight to [FreeRADIUS Installation](./NET-05-FreeRADIUS-Installation.md) for the authentication work.
 

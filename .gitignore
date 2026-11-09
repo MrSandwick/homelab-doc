@@ -10,3 +10,8 @@ Thumbs.db
 # Screenshots / photos used while drafting docs, not meant for the repo
 /drafts/
 /scratch/
+
+# IDS triage: real device inventory and generated reports hold internal addresses and names
+server/ai-triage/devices.json
+ids-reports/
+*.bak
