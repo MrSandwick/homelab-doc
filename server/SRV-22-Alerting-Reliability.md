@@ -17,11 +17,12 @@ Picks up after [Kafka with Strimzi and a Log Pipeline](./SRV-21-Kafka-Strimzi-Lo
 5. [Step 2 — Test the switch](#step-2--test-the-switch)
 6. [Step 3 — Readable Slack messages](#step-3--readable-slack-messages)
 7. [Step 4 — Resilient backup script](#step-4--resilient-backup-script)
-8. [Message types](#message-types)
-9. [Verification](#verification)
-10. [Limits](#limits)
-11. [Files](#files)
-12. [Related](#related)
+8. [Step 5 — Fewer repeats](#step-5--fewer-repeats)
+9. [Message types](#message-types)
+10. [Verification](#verification)
+11. [Limits](#limits)
+12. [Files](#files)
+13. [Related](#related)
 
 ## Components
 
@@ -247,6 +248,52 @@ kubectl -n monitoring get pod grafana-backup                              # NotF
 
 The first run reported `OK` with no message, the second `PARTIAL` with an orange message in Slack, at most seven folders remained, and no backup pod was left behind.
 
+## Step 5 — Fewer repeats
+
+Slack alerts stayed useful, but a problem that is not fixed for days produced the same messages again and again. In November one `kube-proxy` target stayed down for about two weeks (first alert 2026-11-04, the second one on 2026-11-10): two alerts about the same pod, `TargetDown` and `KubeProxyInstanceUnreachable`, each repeated every 12 hours. The cause was a stale address: the `kube-proxy` pod on the laptop node had been created while the laptop was on another network and still reported that old address, so Prometheus scraped an address that no longer existed while the node itself was `Ready`. Deleting the pod (`kubectl -n kube-system delete pod <kube-proxy pod>`) let the DaemonSet recreate it with the node's address; the next query showed all three `kube-proxy` targets `up`.
+
+The two routes that silence the laptop (by `node` and by `instance`, see [SRV-16](./SRV-16-Logging-and-Alerting.md)) did not catch these alerts: `TargetDown` is aggregated by job and namespace and carries neither label, and `KubeProxyInstanceUnreachable` carries only the pod name.
+
+Two changes in `platform/kube-prometheus-stack/values.yaml`. The single `slack` route is split by severity, with a repeat interval for each:
+
+```yaml
+      routes:
+        # ... Watchdog and laptop routes stay first ...
+        # critical: repeat often, someone should react
+        - receiver: slack
+          matchers:
+            - severity = "critical"
+          repeat_interval: 4h
+        # warning: repeat rarely, one reminder every two days
+        - receiver: slack
+          matchers:
+            - severity = "warning"
+          repeat_interval: 48h
+```
+
+And an inhibit rule, so that the generic alert is held back while the specific one for the same problem fires:
+
+```yaml
+    inhibit_rules:
+      # ... existing critical -> warning rule ...
+      # TargetDown for kube-proxy is the same problem as KubeProxyInstanceUnreachable
+      - source_matchers:
+          - alertname = "KubeProxyInstanceUnreachable"
+        target_matchers:
+          - alertname = "TargetDown"
+          - job = "kube-proxy"
+        equal: [namespace]
+```
+
+Applied with the installed chart version, as in [Step 3](#step-3--readable-slack-messages). The new configuration reaches the Alertmanager pod through a mounted Secret, which can take a few minutes; restarting the pod applies it at once (its data is on a volume). Checking:
+
+```
+kubectl -n monitoring exec alertmanager-prometheus-kube-prometheus-alertmanager-0 -c alertmanager -- \
+  amtool config routes --alertmanager.url=http://localhost:9093
+```
+
+The tree now lists two `slack` routes, one for `severity="critical"` and one for `severity="warning"`. `amtool` does not print the repeat intervals; they are visible in the generated configuration (`repeat_interval: 4h` and `48h`).
+
 ## Message types
 
 Everything that reaches the Slack channel comes from one of three senders.
@@ -298,7 +345,7 @@ sudo cat /var/lib/homelab-deadman/state                 # OK <timestamp>
 cat /var/backups/homelab/$(ls -1t /var/backups/homelab | head -1)/STATUS
 ```
 
-The timer has a next run within five minutes, the state is `OK`, the latest backup is `OK`.
+The timer has a next run within five minutes, the state is `OK`, the latest backup is `OK`. A manual run of the backup needs `sudo`: the script reads the admin kubeconfig and the private keys, which only root can read.
 
 ## Limits
 

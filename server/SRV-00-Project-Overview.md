@@ -69,6 +69,7 @@ See [Hardware Selection](./SRV-01-Hardware-Selection.md) for the full comparison
 - ✅ A second, public Gateway with Let's Encrypt certificates (cert-manager, HTTP-01) serves the portfolio at its own domain; the LAN Gateway is never exposed — see [Public Gateway and HTTPS](./SRV-23-Public-Gateway-and-HTTPS.md)
 - ✅ The portfolio (React site, Express API, MongoDB) runs in the cluster, built by GitHub Actions and rolled out by ArgoCD; the data was imported and contact messages are stored — see [Portfolio Hosting](./SRV-24-Portfolio-Hosting.md)
 - ✅ The DNS record follows the changing public address; a probe and three alerts watch the public site; a per-visitor rate limit sits at the Gateway; the nightly backup includes the database — see [Public Site Operations](./SRV-25-Public-Site-Operations.md)
+- ✅ The pod network moved from Flannel to Cilium, node by node on the live cluster; `NetworkPolicy` is now enforced (default-deny tested), Hubble shows live flows, and the public portfolio namespace allows only gateway → web → api → mongo — see [Cilium CNI Migration and NetworkPolicy](./SRV-28-Cilium-CNI-Migration-and-NetworkPolicy.md) ([SRV-28-TRBL](../troubleshooting/SRV-28-TRBL-Cilium-and-NetworkPolicy.md))
 - ⬜ Next: a restore test of the Mongo dump; no off-site copy of the backups, by decision (everything stays in the house); stateful side projects (Nextcloud, Minecraft) last
 
 Continue at [Public Site Operations](./SRV-25-Public-Site-Operations.md) for the current state of the cluster and its open items.

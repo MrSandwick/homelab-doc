@@ -198,7 +198,7 @@ The toleration was added with `kubectl patch`; the Device Plugin was installed f
 - **The quota is a first estimate.** The real load of the laptop owner is in the node-exporter graphs in Grafana, not in `kubectl describe node` (which counts only pod requests).
 - **The GPU is whole.** `nvidia.com/gpu: 1` gives the card to one pod entirely; it is not shared unless time-slicing is configured. With 4 GiB of VRAM only small models fit on it.
 - **The node is not always on.** The laptop is shut down or sleeps; a pod placed there is unavailable meanwhile, and its volume (`local-path`) lives on that machine's disk.
-- **`NetworkPolicy` would not be enforced.** Flannel does not implement it, so network isolation of the `ai` namespace needs a policy-capable CNI (for example Calico) — a separate change.
+- **`NetworkPolicy` was not enforced at the time.** Flannel did not implement it. The CNI is Cilium since [SRV-28](./SRV-28-Cilium-CNI-Migration-and-NetworkPolicy.md), so a policy for the `ai` namespace would now be enforced; none is written yet.
 - **The taint also holds back DaemonSets.** A DaemonSet that must run on the laptop needs a toleration for `dedicated=ai`; without one it simply does not run there, and a pod already running there is reported as misscheduled.
 - **Taints keep strangers out, nothing more.** They do not limit what an admitted pod does; that is what the quota, container limits and Pod Security labels are for.
 

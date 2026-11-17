@@ -36,6 +36,7 @@ Each numbered doc records the working procedure. The problems hit along the way 
 26. See [Public Site Operations](./SRV-25-Public-Site-Operations.md)
 27. See [Suricata IDS](./SRV-26-Suricata-IDS.md)
 28. See [AI Alert Triage](./SRV-27-AI-Alert-Triage.md)
+29. See [Cilium CNI Migration and NetworkPolicy](./SRV-28-Cilium-CNI-Migration-and-NetworkPolicy.md)
 
 Troubleshooting files:
 
@@ -57,6 +58,7 @@ Troubleshooting files:
 - [SRV-25-TRBL](../troubleshooting/SRV-25-TRBL-Public-Site-Operations.md) — CronJob not yet synced, no `wget` in the Prometheus image, rules not loaded yet
 - [SRV-26-TRBL](../troubleshooting/SRV-26-TRBL-Suricata-IDS.md) — BPF filter rejecting every packet, decoder alerts from link-layer frames, logrotate permissions
 - [SRV-27-TRBL](../troubleshooting/SRV-27-TRBL-AI-Alert-Triage.md) — models corrupting numbers, missing rows, an empty report reported as success
+- [SRV-28-TRBL](../troubleshooting/SRV-28-TRBL-Cilium-and-NetworkPolicy.md) — backup script run without root, broker missing after the worker drain, no output from a test pod on a fresh node, reboot blocked by a desktop session, CoreDNS on the drained node, a MetalLB pod restarting after the API reboot
 
 ## Stack
 
@@ -65,6 +67,7 @@ Troubleshooting files:
 - **GPU:** NVIDIA Container Toolkit + Device Plugin on the laptop worker, exposing `nvidia.com/gpu` to pods
 - **Container runtime:** containerd (CRI-compliant, used directly by Kubernetes)
 - **Orchestration:** Kubernetes 1.33 via `kubeadm` (not a lightweight distribution — chosen deliberately for closer-to-production setup experience)
+- **Pod network:** Cilium (migrated from Flannel, [SRV-28](./SRV-28-Cilium-CNI-Migration-and-NetworkPolicy.md)): VXLAN, `NetworkPolicy` enforced in eBPF, Hubble for live traffic flows
 - **Package management:** Helm
 - **Observability:** `kube-prometheus-stack` (Prometheus, Grafana, Alertmanager, node-exporter, kube-state-metrics)
 - **Ingress / bare-metal LoadBalancer:** Envoy Gateway (Gateway API) + MetalLB; replaced the retired ingress-nginx
@@ -90,4 +93,4 @@ Conceptual explanations of the technologies used here (Kubernetes vs k3s, Docker
 
 ## Status
 
-🟢 The cluster is now three nodes, all `Ready` (`kubeadm`, containerd, Flannel CNI healthy on each): the GMKtec M8 control plane, the Dell OptiPlex 7050 Micro worker, and a repurposed Acer Nitro laptop worker. A test workload was deployed on a worker node and verified reachable. See [Second Node Setup](./SRV-06-Second-Node-Setup.md) for the full join process ([SRV-06-TRBL](../troubleshooting/SRV-06-TRBL-Second-Node-Setup.md) for the `kubeadm init`-vs-`join` mistake and recovery). The laptop's GPU (NVIDIA RTX 3050 Ti Mobile) is fully usable by pods — see [GPU Node Setup](./SRV-12-GPU-Node-Setup.md). A Suricata sensor runs continuously on the control plane's mirror NIC, and a daily triage report is generated automatically by a local LLM on the laptop — see [Suricata IDS](./SRV-26-Suricata-IDS.md) and [AI Alert Triage](./SRV-27-AI-Alert-Triage.md).
+🟢 The cluster is now three nodes, all `Ready` (`kubeadm`, containerd, pod network healthy on each, Flannel at first and [Cilium](./SRV-28-Cilium-CNI-Migration-and-NetworkPolicy.md) since the migration): the GMKtec M8 control plane, the Dell OptiPlex 7050 Micro worker, and a repurposed Acer Nitro laptop worker. A test workload was deployed on a worker node and verified reachable. See [Second Node Setup](./SRV-06-Second-Node-Setup.md) for the full join process ([SRV-06-TRBL](../troubleshooting/SRV-06-TRBL-Second-Node-Setup.md) for the `kubeadm init`-vs-`join` mistake and recovery). The laptop's GPU (NVIDIA RTX 3050 Ti Mobile) is fully usable by pods — see [GPU Node Setup](./SRV-12-GPU-Node-Setup.md). A Suricata sensor runs continuously on the control plane's mirror NIC, and a daily triage report is generated automatically by a local LLM on the laptop — see [Suricata IDS](./SRV-26-Suricata-IDS.md) and [AI Alert Triage](./SRV-27-AI-Alert-Triage.md).
