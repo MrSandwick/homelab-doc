@@ -59,7 +59,7 @@ The site ran on Firebase Hosting and Functions with the data in Atlas. Moving it
 | `/health` | Answers before the database gate | A liveness probe that depended on Mongo would restart the API during a database outage |
 | Trusted proxies | `TRUST_PROXY=3`, sized for Cloudflare → Envoy → nginx → API | Keeps the API's per-visitor rate limits on the real address. The Cloudflare proxy is not used ([SRV-23](./SRV-23-Public-Gateway-and-HTTPS.md#design-decisions)); with only Envoy and nginx in front, the extra hop is harmless, while too few hops would put every visitor behind one address |
 | Admin writes | None exposed | The old design needed none either; content changes by re-importing the JSON exports |
-| Network policy | None | Flannel does not enforce them ([SRV-05](./SRV-05-Kubernetes-Installation.md)) |
+| Network policy | None at first; since [SRV-28](./SRV-28-Cilium-CNI-Migration-and-NetworkPolicy.md) default deny on ingress with three allow rules (gateway → web → api → mongo) | Flannel did not enforce policies; the cluster now runs Cilium, which does |
 
 ## Step 1 — Images and the build workflow
 

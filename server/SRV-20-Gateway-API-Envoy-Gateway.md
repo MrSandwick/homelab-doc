@@ -50,7 +50,7 @@ Gateway API separates the roles. The platform side owns the `Gateway` (address, 
 |---|---|---|
 | Implementation | Envoy Gateway | CNCF reference implementation built on Envoy, the proxy behind Istio and most cloud gateways; richest observability out of the box |
 | Not chosen | NGINX Gateway Fabric | Good and lighter on memory, but less transferable than the Envoy ecosystem; the difference in memory does not matter at this size |
-| Not chosen | Cilium Gateway API | Needs Cilium as the CNI; the cluster uses Flannel. Worth revisiting together with NetworkPolicy |
+| Not chosen | Cilium Gateway API | Needs Cilium as the CNI; the cluster used Flannel at the time. Cilium is the CNI since [SRV-28](./SRV-28-Cilium-CNI-Migration-and-NetworkPolicy.md), but Envoy Gateway stays: it is installed and serves both Gateways |
 | Version | 1.9.2 | Supports Kubernetes 1.33–1.36, which is why the cluster was upgraded first ([SRV-19](./SRV-19-Cluster-Upgrade.md)) |
 | CRDs | Installed separately, standard channel | The chart installs the experimental channel by default; applying the CRDs from the standard channel with `--server-side` keeps unstable resources out and makes CRD upgrades an explicit step |
 | Rollout | Parallel on a second address, then switch | The old entry point kept working the whole time; the switch took about a minute |
