@@ -46,7 +46,7 @@ The cluster ran Flannel, which carries pod traffic but **does not implement `Net
 - The portfolio site, its API and its MongoDB are reachable from the internet through the public Gateway ([SRV-23](./SRV-23-Public-Gateway-and-HTTPS.md), [SRV-24](./SRV-24-Portfolio-Hosting.md)). Any pod in any namespace could still talk to the database directly.
 - Network isolation is a standard Kubernetes security control and was the open item in [SRV-17](./SRV-17-Dedicated-GPU-Node.md) and [SRV-24](./SRV-24-Portfolio-Hosting.md).
 
-A game server on the home network, planned next, is the third reason: it needs its own namespace with strict rules before it is opened to the internet.
+A game server on the home network ([SRV-29](./SRV-29-Minecraft-Server.md)) is the third reason: it needs its own namespace with strict rules before it is opened to the internet.
 
 ## Design decisions
 

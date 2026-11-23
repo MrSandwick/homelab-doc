@@ -69,6 +69,9 @@ The address is **dynamic**; keeping the DNS record current is handled in [SRV-25
 |---|---|---|---|---|
 | web-http | TCP | 80 | `<ER605_WAN_IP>` | 80 |
 | web-https | TCP | 443 | `<ER605_WAN_IP>` | 443 |
+| minecraft | TCP | 25565 | `<ER605_WAN_IP>` | 25565 |
+
+The `minecraft` rule was added later for the game server ([SRV-29](../server/SRV-29-Minecraft-Server.md)); its schedule is *Always*, like the others, and the page needs **Apply Changes** after **Add to list**.
 
 ## Step 3 — ER605: forward to the Gateway
 
@@ -78,6 +81,9 @@ In the Omada controller (the Omada app or the web page; the ER605 is controller-
 |---|---|---|---|---|---|
 | public-http | WAN | 80 | 80 | `<PUBLIC_GW_IP>` | TCP |
 | public-https | WAN | 443 | 443 | `<PUBLIC_GW_IP>` | TCP |
+| minecraft | WAN | 25565 | 25565 | `<MINECRAFT_IP>` | TCP |
+
+The `minecraft` rule points at the Minecraft Service's own MetalLB address, not at a Gateway ([SRV-29](../server/SRV-29-Minecraft-Server.md)).
 
 The internal IP is the **Gateway's** address (`kubectl get gateway -n envoy-gateway-system`), not a node address.
 
@@ -126,9 +132,9 @@ From a phone on cellular data: `https://<DOMAIN>/` shows the site with a valid c
 
 | Item | Location | Contents |
 |---|---|---|
-| Port Forwarding rules | ISP gateway | TCP 80, 443 → `<ER605_WAN_IP>` |
+| Port Forwarding rules | ISP gateway | TCP 80, 443, 25565 → `<ER605_WAN_IP>` |
 | DHCP reservation | ISP gateway | ER605 → `<ER605_WAN_IP>` |
-| Virtual Servers | ER605 / Omada controller | TCP 80, 443 → `<PUBLIC_GW_IP>` |
+| Virtual Servers | ER605 / Omada controller | TCP 80, 443 → `<PUBLIC_GW_IP>`; TCP 25565 → `<MINECRAFT_IP>` |
 
 ## Related
 
