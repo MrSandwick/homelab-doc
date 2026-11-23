@@ -37,6 +37,7 @@ Each numbered doc records the working procedure. The problems hit along the way 
 27. See [Suricata IDS](./SRV-26-Suricata-IDS.md)
 28. See [AI Alert Triage](./SRV-27-AI-Alert-Triage.md)
 29. See [Cilium CNI Migration and NetworkPolicy](./SRV-28-Cilium-CNI-Migration-and-NetworkPolicy.md)
+30. See [Minecraft Server](./SRV-29-Minecraft-Server.md)
 
 Troubleshooting files:
 
@@ -59,6 +60,7 @@ Troubleshooting files:
 - [SRV-26-TRBL](../troubleshooting/SRV-26-TRBL-Suricata-IDS.md) — BPF filter rejecting every packet, decoder alerts from link-layer frames, logrotate permissions
 - [SRV-27-TRBL](../troubleshooting/SRV-27-TRBL-AI-Alert-Triage.md) — models corrupting numbers, missing rows, an empty report reported as success
 - [SRV-28-TRBL](../troubleshooting/SRV-28-TRBL-Cilium-and-NetworkPolicy.md) — backup script run without root, broker missing after the worker drain, no output from a test pod on a fresh node, reboot blocked by a desktop session, CoreDNS on the drained node, a MetalLB pod restarting after the API reboot
+- [SRV-29-TRBL](../troubleshooting/SRV-29-TRBL-Minecraft-Server.md) — comma in a `--set` list, schema wanting a boolean, the image stopping on whitelist names without a paid account, `rcon-cli` before the server is ready
 
 ## Stack
 
